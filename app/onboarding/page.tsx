@@ -13,6 +13,9 @@ import {
   Briefcase,
   Target,
   Users,
+  AlertCircle,
+  RefreshCw,
+  X,
 } from 'lucide-react'
 
 import { API_URL } from '@/components/Serverurl'
@@ -30,10 +33,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+
   // const [formData, setFormData] = useState({
   //   goal: '',
   //   name: '',
@@ -55,7 +64,7 @@ export default function OnboardingPage() {
       specificGoals: '',
     },
   })
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   // const updateFormData = (Step: string, field: string, value: any) => {
   //   setFormData((prev) => ({ ...prev, Step, [field]: value }))
@@ -118,6 +127,21 @@ export default function OnboardingPage() {
     window.scrollTo(0, 0)
   }
 
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1)
+    setShowError(false)
+    setError('')
+    // Retry the registration
+    setTimeout(() => {
+      handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+    }, 1000) // Small delay for better UX
+  }
+
+  const dismissError = () => {
+    setShowError(false)
+    setError('')
+  }
+
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault()
   //   // In a real app, you would submit the data to your backend
@@ -126,26 +150,97 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
+    setShowError(false)
+    setError('')
 
-    const transformedData = {}
-    Object.keys(formData).forEach((step: string) => {
-      Object.keys(formData[step]).forEach((field: string) => {
-        transformedData[field] = formData[step][field]
+    try {
+      const transformedData: Record<string, any> = {}
+      Object.keys(formData).forEach((step: string) => {
+        const stepData = (formData as any)[step]
+        Object.keys(stepData).forEach((field: string) => {
+          transformedData[field] = stepData[field]
+        })
       })
-    })
-    console.log(transformedData)
-    const response = await fetch(API_URL + '/mentees/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(transformedData),
-    })
-    const data = await response.json()
-    if (data.success) {
-      router.push('/login')
-    } else {
-      console.error(data.error)
+
+      console.log('Submitting mentee data:', transformedData) // Debug log
+
+      const response = await fetch(API_URL + '/mentees/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transformedData),
+      })
+
+      console.log('Response status:', response.status) // Debug log
+      console.log('Response ok:', response.ok) // Debug log
+
+      let data
+      try {
+        data = await response.json()
+        console.log('Response data:', data) // Debug log
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        throw new Error('Server returned invalid response format')
+      }
+
+      if (!response.ok) {
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          `Server error (${response.status}). Please try again.`
+        setError(errorMessage)
+        setShowError(true)
+        console.error('HTTP error:', response.status, data)
+        return
+      }
+
+      if (data.success) {
+        router.push('/login')
+      } else {
+        // Handle application errors (success: false)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          'Registration failed. Please check your information and try again.'
+        setError(errorMessage)
+        setShowError(true)
+        console.error('Application error:', data)
+      }
+    } catch (error) {
+      console.error('Network/API error:', error)
+
+      let errorMessage =
+        'Unable to connect to the server. Please check your internet connection and try again.'
+
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage =
+            'Network connection failed. Please check your internet connection.'
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage =
+            'Server error occurred. Please try again in a few moments.'
+        } else if (error.message.includes('400')) {
+          errorMessage =
+            'Invalid information provided. Please check your details.'
+        } else if (error.message.includes('409')) {
+          errorMessage =
+            'An account with this email already exists. Please use a different email.'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error occurred. Please try again later.'
+        } else if (error.message.includes('invalid response format')) {
+          errorMessage =
+            'Server returned an invalid response. Please try again.'
+        }
+      }
+
+      setError(errorMessage)
+      setShowError(true)
+      console.error('Final error state:', { errorMessage, showError: true })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -169,6 +264,76 @@ export default function OnboardingPage() {
             </h1>
             <div className='text-sm font-medium'>Step {step} of 3</div>
           </div>
+
+          {/* Error Display */}
+          {showError && error && (
+            <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4'>
+              <Alert className='border-red-200 bg-red-50 shadow-lg'>
+                <AlertCircle className='h-4 w-4 text-red-600' />
+                <AlertDescription className='flex items-center justify-between'>
+                  <span className='text-red-800 text-sm'>{error}</span>
+                  <div className='flex items-center space-x-2 ml-4'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={handleRetry}
+                      disabled={isLoading}
+                      className='border-red-300 text-red-700 hover:bg-red-100 h-8 px-3'
+                    >
+                      <RefreshCw
+                        className={`h-3 w-3 mr-1 ${
+                          isLoading ? 'animate-spin' : ''
+                        }`}
+                      />
+                      Retry
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={dismissError}
+                      className='text-red-700 hover:bg-red-100 h-8 w-8 p-0'
+                    >
+                      <X className='h-3 w-3' />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {/* Fallback inline error display */}
+          {showError && error && (
+            <Alert className='border-red-200 bg-red-50 mb-6'>
+              <AlertCircle className='h-4 w-4 text-red-600' />
+              <AlertDescription className='flex items-center justify-between'>
+                <span className='text-red-800'>{error}</span>
+                <div className='flex items-center space-x-2 ml-4'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handleRetry}
+                    disabled={isLoading}
+                    className='border-red-300 text-red-700 hover:bg-red-100'
+                  >
+                    <RefreshCw
+                      className={`h-3 w-3 mr-1 ${
+                        isLoading ? 'animate-spin' : ''
+                      }`}
+                    />
+                    Retry
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={dismissError}
+                    className='text-red-700 hover:bg-red-100'
+                  >
+                    <X className='h-3 w-3' />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className='w-full bg-gray-200 h-2 rounded-full mb-8'>
             <div
@@ -490,9 +655,19 @@ export default function OnboardingPage() {
                 <Button
                   type='button'
                   onClick={handleSubmit}
+                  disabled={isLoading}
                   className='bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2'
                 >
-                  Find My Mentors <CheckCircle2 className='h-4 w-4 ml-2' />
+                  {isLoading ? (
+                    <>
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2' />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Find My Mentors <CheckCircle2 className='h-4 w-4 ml-2' />
+                    </>
+                  )}
                 </Button>
               )}
             </div>

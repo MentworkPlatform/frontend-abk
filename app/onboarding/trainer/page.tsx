@@ -15,6 +15,9 @@ import {
   Award,
   Lightbulb,
   GraduationCap,
+  AlertCircle,
+  RefreshCw,
+  X,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -39,6 +42,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { API_URL } from '@/components/Serverurl'
 import { profile } from 'console'
 
@@ -47,6 +51,8 @@ export default function TrainerOnboardingPage() {
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Step 1: Profile Setup
   const [profileData, setProfileData] = useState({
@@ -114,12 +120,16 @@ export default function TrainerOnboardingPage() {
 
   const handleComplete = async () => {
     setIsLoading(true)
+    setShowError(false)
+    setError('')
 
     let dataObject = profileData
     dataObject.expertises = profileData.expertise.join(', ')
     dataObject.roleName = 'Trainer'
 
     try {
+      console.log('Submitting trainer data:', dataObject) // Debug log
+
       const response = await fetch(API_URL + '/mentors/register', {
         method: 'POST',
         headers: {
@@ -127,25 +137,91 @@ export default function TrainerOnboardingPage() {
         },
         body: JSON.stringify(dataObject),
       })
-      const data = await response.json()
-      setIsLoading(false)
+
+      console.log('Response status:', response.status) // Debug log
+      console.log('Response ok:', response.ok) // Debug log
+
+      let data
+      try {
+        data = await response.json()
+        console.log('Response data:', data) // Debug log
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        throw new Error('Server returned invalid response format')
+      }
+
+      if (!response.ok) {
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          `Server error (${response.status}). Please try again.`
+        setError(errorMessage)
+        setShowError(true)
+        console.error('HTTP error:', response.status, data)
+        return
+      }
+
       if (data.success) {
         router.push('/login')
       } else {
-        setError(data?.error)
-        console.error(data.error)
+        // Handle application errors (success: false)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          'Registration failed. Please check your information and try again.'
+        setError(errorMessage)
+        setShowError(true)
+        console.error('Application error:', data)
       }
     } catch (error) {
-      setIsLoading(false)
-      console.error(error)
-      setError('Something went wrong..pls try again')
-    }
+      console.error('Network/API error:', error)
 
-    // Simulate API calls to create trainer profile and program
-    // setTimeout(() => {
-    //   setIsLoading(false)
-    //   router.push('/trainer/dashboard')
-    // }, 3000)
+      let errorMessage =
+        'Unable to connect to the server. Please check your internet connection and try again.'
+
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage =
+            'Network connection failed. Please check your internet connection.'
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage =
+            'Server error occurred. Please try again in a few moments.'
+        } else if (error.message.includes('400')) {
+          errorMessage =
+            'Invalid information provided. Please check your details.'
+        } else if (error.message.includes('409')) {
+          errorMessage =
+            'An account with this email already exists. Please use a different email.'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error occurred. Please try again later.'
+        } else if (error.message.includes('invalid response format')) {
+          errorMessage =
+            'Server returned an invalid response. Please try again.'
+        }
+      }
+
+      setError(errorMessage)
+      setShowError(true)
+      console.error('Final error state:', { errorMessage, showError: true })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1)
+    setShowError(false)
+    setError('')
+    // Retry the registration
+    setTimeout(() => {
+      handleComplete()
+    }, 1000) // Small delay for better UX
+  }
+
+  const dismissError = () => {
+    setShowError(false)
+    setError('')
   }
 
   const updateExpertise = (skill: string) => {
@@ -254,6 +330,76 @@ export default function TrainerOnboardingPage() {
             </p>
           </div>
 
+          {/* Error Display */}
+          {showError && error && (
+            <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4'>
+              <Alert className='border-red-200 bg-red-50 shadow-lg'>
+                <AlertCircle className='h-4 w-4 text-red-600' />
+                <AlertDescription className='flex items-center justify-between'>
+                  <span className='text-red-800 text-sm'>{error}</span>
+                  <div className='flex items-center space-x-2 ml-4'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={handleRetry}
+                      disabled={isLoading}
+                      className='border-red-300 text-red-700 hover:bg-red-100 h-8 px-3'
+                    >
+                      <RefreshCw
+                        className={`h-3 w-3 mr-1 ${
+                          isLoading ? 'animate-spin' : ''
+                        }`}
+                      />
+                      Retry
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={dismissError}
+                      className='text-red-700 hover:bg-red-100 h-8 w-8 p-0'
+                    >
+                      <X className='h-3 w-3' />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {/* Fallback inline error display */}
+          {showError && error && (
+            <Alert className='border-red-200 bg-red-50 mb-6'>
+              <AlertCircle className='h-4 w-4 text-red-600' />
+              <AlertDescription className='flex items-center justify-between'>
+                <span className='text-red-800'>{error}</span>
+                <div className='flex items-center space-x-2 ml-4'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handleRetry}
+                    disabled={isLoading}
+                    className='border-red-300 text-red-700 hover:bg-red-100'
+                  >
+                    <RefreshCw
+                      className={`h-3 w-3 mr-1 ${
+                        isLoading ? 'animate-spin' : ''
+                      }`}
+                    />
+                    Retry
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={dismissError}
+                    className='text-red-700 hover:bg-red-100'
+                  >
+                    <X className='h-3 w-3' />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Progress Bar */}
           {/* <div className='mb-8'>
             <div className='flex justify-between items-center mb-2'>
@@ -322,6 +468,7 @@ export default function TrainerOnboardingPage() {
                 updateExpertise={updateExpertise}
                 updateLanguages={updateLanguages}
                 onComplete={handleComplete}
+                isLoading={isLoading}
                 // onNext={nextStep}
               />
             )}
@@ -373,6 +520,7 @@ function ProfileSetupStep({
   updateExpertise,
   updateLanguages,
   onComplete,
+  isLoading,
 }: any) {
   const isValid =
     profileData.name &&
@@ -575,10 +723,17 @@ function ProfileSetupStep({
       <div className='flex justify-end pt-6'>
         <Button
           onClick={onComplete}
-          disabled={!isValid}
+          disabled={!isValid || isLoading}
           className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
         >
-          Create Profile
+          {isLoading ? (
+            <>
+              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2' />
+              Creating Profile...
+            </>
+          ) : (
+            'Create Profile'
+          )}
         </Button>
       </div>
     </div>

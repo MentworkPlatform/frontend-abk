@@ -12,6 +12,9 @@ import {
   Upload,
   Calendar,
   DollarSign,
+  AlertCircle,
+  RefreshCw,
+  X,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -28,6 +31,7 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { API_URL } from '@/components/Serverurl'
 
 export default function MentorOnboardingPage() {
@@ -64,7 +68,11 @@ export default function MentorOnboardingPage() {
       roleName: '',
     },
   })
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState('')
+  const [showApiError, setShowApiError] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   // const updateFormData = (field: string, value: any) => {
   //   setFormData((prev) => ({ ...prev, [field]: value }))
@@ -194,43 +202,129 @@ export default function MentorOnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setShowApiError(false)
+    setApiError('')
 
-    const transformedData = {}
-    Object.keys(formData).forEach((step: string) => {
-      Object.keys(formData[step]).forEach((field: string) => {
-        transformedData[field] = formData[step][field]
+    try {
+      const transformedData: Record<string, any> = {}
+      Object.keys(formData).forEach((step: string) => {
+        const stepData = (formData as any)[step]
+        Object.keys(stepData).forEach((field: string) => {
+          transformedData[field] = stepData[field]
+        })
       })
-    })
 
-    let modify = transformedData as {
-      name: string
-      email: string
-      password: string
-      industry: string
-      experience: string
-      expertise: string[]
-      mentorshipStyle: string[]
-      roleName: string
-      mentorshipStyles: string
-      expertises: string
-    }
-    modify.roleName = 'Trainer'
-    modify.mentorshipStyles = modify.mentorshipStyle.join(',')
-    modify.expertises = modify.expertise.join(',')
+      let modify = transformedData as {
+        name: string
+        email: string
+        password: string
+        industry: string
+        experience: string
+        expertise: string[]
+        mentorshipStyle: string[]
+        roleName: string
+        mentorshipStyles: string
+        expertises: string
+      }
+      modify.roleName = 'Mentor'
+      modify.mentorshipStyles = modify.mentorshipStyle.join(',')
+      modify.expertises = modify.expertise.join(',')
 
-    const response = await fetch(API_URL + '/mentors/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(modify),
-    })
-    const data = await response.json()
-    if (data.success) {
-      router.push('/login')
-    } else {
-      console.error(data.error)
+      console.log('Submitting data:', modify) // Debug log
+
+      const response = await fetch(API_URL + '/mentors/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(modify),
+      })
+
+      console.log('Response status:', response.status) // Debug log
+      console.log('Response ok:', response.ok) // Debug log
+
+      let data
+      try {
+        data = await response.json()
+        console.log('Response data:', data) // Debug log
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        throw new Error('Server returned invalid response format')
+      }
+
+      if (!response.ok) {
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          `Server error (${response.status}). Please try again.`
+        setApiError(errorMessage)
+        setShowApiError(true)
+        console.error('HTTP error:', response.status, data)
+        return
+      }
+
+      if (data.success) {
+        router.push('/login')
+      } else {
+        // Handle application errors (success: false)
+        const errorMessage =
+          data?.error ||
+          data?.message ||
+          'Registration failed. Please check your information and try again.'
+        setApiError(errorMessage)
+        setShowApiError(true)
+        console.error('Application error:', data)
+      }
+    } catch (error) {
+      console.error('Network/API error:', error)
+
+      let errorMessage =
+        'Unable to connect to the server. Please check your internet connection and try again.'
+
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage =
+            'Network connection failed. Please check your internet connection.'
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage =
+            'Server error occurred. Please try again in a few moments.'
+        } else if (error.message.includes('400')) {
+          errorMessage =
+            'Invalid information provided. Please check your details.'
+        } else if (error.message.includes('409')) {
+          errorMessage =
+            'An account with this email already exists. Please use a different email.'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error occurred. Please try again later.'
+        } else if (error.message.includes('invalid response format')) {
+          errorMessage =
+            'Server returned an invalid response. Please try again.'
+        }
+      }
+
+      setApiError(errorMessage)
+      setShowApiError(true)
+      console.error('Final error state:', { errorMessage, showApiError: true })
+    } finally {
+      setIsSubmitting(false)
     }
+  }
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1)
+    setShowApiError(false)
+    setApiError('')
+    // Retry the submission
+    setTimeout(() => {
+      handleSubmit(new Event('submit') as any)
+    }, 1000) // Small delay for better UX
+  }
+
+  const dismissApiError = () => {
+    setShowApiError(false)
+    setApiError('')
   }
 
   return (
@@ -258,6 +352,76 @@ export default function MentorOnboardingPage() {
               style={{ width: `${(step / 3) * 100}%` }}
             ></div>
           </div>
+
+          {/* API Error Display */}
+          {showApiError && apiError && (
+            <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4'>
+              <Alert className='border-red-200 bg-red-50 shadow-lg'>
+                <AlertCircle className='h-4 w-4 text-red-600' />
+                <AlertDescription className='flex items-center justify-between'>
+                  <span className='text-red-800 text-sm'>{apiError}</span>
+                  <div className='flex items-center space-x-2 ml-4'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={handleRetry}
+                      disabled={isSubmitting}
+                      className='border-red-300 text-red-700 hover:bg-red-100 h-8 px-3'
+                    >
+                      <RefreshCw
+                        className={`h-3 w-3 mr-1 ${
+                          isSubmitting ? 'animate-spin' : ''
+                        }`}
+                      />
+                      Retry
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={dismissApiError}
+                      className='text-red-700 hover:bg-red-100 h-8 w-8 p-0'
+                    >
+                      <X className='h-3 w-3' />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {/* Fallback inline error display */}
+          {showApiError && apiError && (
+            <Alert className='border-red-200 bg-red-50 mb-6'>
+              <AlertCircle className='h-4 w-4 text-red-600' />
+              <AlertDescription className='flex items-center justify-between'>
+                <span className='text-red-800'>{apiError}</span>
+                <div className='flex items-center space-x-2 ml-4'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handleRetry}
+                    disabled={isSubmitting}
+                    className='border-red-300 text-red-700 hover:bg-red-100'
+                  >
+                    <RefreshCw
+                      className={`h-3 w-3 mr-1 ${
+                        isSubmitting ? 'animate-spin' : ''
+                      }`}
+                    />
+                    Retry
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={dismissApiError}
+                    className='text-red-700 hover:bg-red-100'
+                  >
+                    <X className='h-3 w-3' />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         <Card className='border-none shadow-lg rounded-xl'>
@@ -1011,10 +1175,20 @@ export default function MentorOnboardingPage() {
                 <Button
                   type='button'
                   onClick={handleSubmit}
+                  disabled={isSubmitting}
                   className='bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2'
                 >
-                  Complete Registration{' '}
-                  <CheckCircle2 className='h-4 w-4 ml-2' />
+                  {isSubmitting ? (
+                    <>
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2' />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Complete Registration{' '}
+                      <CheckCircle2 className='h-4 w-4 ml-2' />
+                    </>
+                  )}
                 </Button>
               )}
             </div>

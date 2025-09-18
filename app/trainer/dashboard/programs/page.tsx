@@ -43,11 +43,35 @@ export default function TrainerPrograms() {
   const [programs, setPrograms] = useState<TrainerProgram[]>([])
 
   useEffect(() => {
-    getDraftPrograms()
-    getAllPrograms()
+    const fetchPrograms = async () => {
+      try {
+        const [drafts, programs] = await Promise.all([
+          getDraftPrograms(),
+          getAllPrograms(),
+        ])
+
+        console.log(drafts, 'drafts')
+        console.log(programs, 'programs')
+
+        // Combine drafts first, then programs, and dedupe by id
+        const combined = [...drafts, ...programs]
+        const uniquePrograms = Array.from(
+          combined
+            .reduce((map, program) => {
+              map.set(program.id, program)
+              return map
+            }, new Map())
+            .values()
+        )
+        setPrograms(uniquePrograms)
+      } catch (error) {
+        console.error('Error fetching programs:', error)
+      }
+    }
+    fetchPrograms()
   }, [])
 
-  const getDraftPrograms = async () => {
+  const getDraftPrograms = async (): Promise<TrainerProgram[]> => {
     try {
       const response = await fetch(API_URL + '/programs/drafts', {
         method: 'GET',
@@ -91,15 +115,17 @@ export default function TrainerPrograms() {
             data: item.data,
           },
         }))
-        setPrograms((prevPrograms) => [...prevPrograms, ...transformedDrafts])
-        //setPrograms(data.draft)
+        console.log(transformedDrafts + 'drafts')
+        return transformedDrafts
       }
+      return []
     } catch (error) {
       console.log(error)
+      return []
     }
   }
 
-  const getAllPrograms = async () => {
+  const getAllPrograms = async (): Promise<TrainerProgram[]> => {
     try {
       const response = await fetch(API_URL + '/programs/details', {
         method: 'GET',
@@ -111,10 +137,12 @@ export default function TrainerPrograms() {
       const data = await response.json()
       if (data.success) {
         console.log(data.programs)
-        setPrograms((prev) => [...prev, ...data.programs])
+        return data.programs
       }
+      return []
     } catch (error) {
       console.log(error)
+      return []
     }
   }
 
@@ -362,20 +390,13 @@ function ProgramList({ programs, getStatusColor }: ProgramListProps) {
               </div>
               <div className='mt-auto flex justify-between items-center'>
                 {isActive ? (
-                  <Link
-                    href={`/trainer/dashboard/programs/${program.id}`}
-                    passHref
-                  >
-                    <Button variant='outline' size='sm'>
-                      View Details
-                    </Button>
-                  </Link>
+                  <Button variant='outline' size='sm'>
+                    View Details
+                  </Button>
                 ) : isDraft ? (
-                  <Link href={navigationUrl || '#'} passHref>
-                    <Button variant='outline' size='sm'>
-                      Continue Editing
-                    </Button>
-                  </Link>
+                  <Button variant='outline' size='sm'>
+                    Continue Editing
+                  </Button>
                 ) : (
                   <Button variant='outline' size='sm' disabled>
                     View Details

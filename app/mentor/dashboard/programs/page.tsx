@@ -33,7 +33,6 @@ const mentorPrograms = [
   {
     id: 1,
     title: "Startup Funding Masterclass",
-    type: "Group Program",
     status: "Active",
     mentees: 12,
     sessions: 8,
@@ -46,7 +45,6 @@ const mentorPrograms = [
   {
     id: 2,
     title: "Business Growth Strategy",
-    type: "1:1 Program",
     status: "Active",
     mentees: 8,
     sessions: 6,
@@ -59,7 +57,6 @@ const mentorPrograms = [
   {
     id: 3,
     title: "Digital Marketing Essentials",
-    type: "Group Program",
     status: "Upcoming",
     mentees: 15,
     sessions: 10,
@@ -72,7 +69,6 @@ const mentorPrograms = [
   {
     id: 4,
     title: "Leadership Development",
-    type: "1:1 Program",
     status: "Completed",
     mentees: 5,
     sessions: 8,
@@ -220,7 +216,7 @@ const MentorProgramsPage = () => {
                   <p className="text-xs text-gray-500">Business Mentor</p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full bg-transparent">
                 View Public Profile
               </Button>
             </div>
@@ -329,7 +325,7 @@ const MentorProgramsPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
                 <h1 className="text-2xl font-bold">My Programs</h1>
-                <p className="text-gray-500">Manage your mentorship programs</p>
+                <p className="text-gray-500">Manage your teaching programs</p>
               </div>
               <div className="flex gap-2 w-full md:w-auto">
                 <Button asChild className="flex-1 md:flex-none bg-[#FFD500] text-black hover:bg-[#e6c000]">
@@ -364,7 +360,7 @@ const MentorProgramsPage = () => {
               <TabsContent value="all" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPrograms.map((program) => (
-                    <Link href={`/mentor/dashboard/programs/${program.id}`} key={program.id}>
+                    <Link href={`/mentor/dashboard/programs/${program.id}/lms`} key={program.id}>
                       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                         <div className="relative h-40">
                           <img
@@ -373,7 +369,7 @@ const MentorProgramsPage = () => {
                             className="w-full h-full object-cover rounded-t-lg"
                           />
                           <div className="absolute top-2 left-2 flex gap-2">
-                            <Badge className="bg-[#FFD500] text-black">{program.type}</Badge>
+                            <Badge className="bg-[#FFD500] text-black">Group Program</Badge>
                             <Badge
                               className={
                                 program.status === "Active"
@@ -446,7 +442,7 @@ const MentorProgramsPage = () => {
                   {filteredPrograms
                     .filter((program) => program.status === "Active")
                     .map((program) => (
-                      <Link href={`/mentor/dashboard/programs/${program.id}`} key={program.id}>
+                      <Link href={`/mentor/dashboard/programs/${program.id}/lms`} key={program.id}>
                         <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                           <div className="relative h-40">
                             <img
@@ -455,7 +451,7 @@ const MentorProgramsPage = () => {
                               className="w-full h-full object-cover rounded-t-lg"
                             />
                             <div className="absolute top-2 left-2 flex gap-2">
-                              <Badge className="bg-[#FFD500] text-black">{program.type}</Badge>
+                              <Badge className="bg-[#FFD500] text-black">Group Program</Badge>
                               <Badge className="bg-green-500 text-white">{program.status}</Badge>
                             </div>
                           </div>
@@ -518,7 +514,7 @@ const MentorProgramsPage = () => {
                   {filteredPrograms
                     .filter((program) => program.status === "Upcoming")
                     .map((program) => (
-                      <Link href={`/mentor/dashboard/programs/${program.id}`} key={program.id}>
+                      <Link href={`/mentor/dashboard/programs/${program.id}/lms`} key={program.id}>
                         <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                           <div className="relative h-40">
                             <img
@@ -527,7 +523,7 @@ const MentorProgramsPage = () => {
                               className="w-full h-full object-cover rounded-t-lg"
                             />
                             <div className="absolute top-2 left-2 flex gap-2">
-                              <Badge className="bg-[#FFD500] text-black">{program.type}</Badge>
+                              <Badge className="bg-[#FFD500] text-black">Group Program</Badge>
                               <Badge className="bg-blue-500 text-white">{program.status}</Badge>
                             </div>
                           </div>
@@ -565,7 +561,7 @@ const MentorProgramsPage = () => {
                   {filteredPrograms
                     .filter((program) => program.status === "Completed")
                     .map((program) => (
-                      <Link href={`/mentor/dashboard/programs/${program.id}`} key={program.id}>
+                      <Link href={`/mentor/dashboard/programs/${program.id}/lms`} key={program.id}>
                         <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                           <div className="relative h-40">
                             <img
@@ -574,7 +570,7 @@ const MentorProgramsPage = () => {
                               className="w-full h-full object-cover rounded-t-lg"
                             />
                             <div className="absolute top-2 left-2 flex gap-2">
-                              <Badge className="bg-[#FFD500] text-black">{program.type}</Badge>
+                              <Badge className="bg-[#FFD500] text-black">Group Program</Badge>
                               <Badge className="bg-gray-500 text-white">{program.status}</Badge>
                             </div>
                           </div>

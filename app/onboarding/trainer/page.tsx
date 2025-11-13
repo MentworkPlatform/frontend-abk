@@ -1,1440 +1,442 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  User,
-  BookOpen,
-  Settings,
-  Play,
-  Target,
-  Award,
-  Lightbulb,
-  GraduationCap,
-  AlertCircle,
-  RefreshCw,
-  X,
-} from 'lucide-react'
+import type React from "react";
 
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Checkbox } from '@/components/ui/checkbox'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { API_URL } from '@/components/Serverurl'
-import { profile } from 'console'
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  SECTORS,
+  SKILLS_CAPABILITIES,
+  getSkillsForSectors,
+  getSkillsGroupedBySector,
+} from "@/lib/constants/onboarding";
+import { useMemo } from "react";
 
 export default function TrainerOnboardingPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [showError, setShowError] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
-
-  // Step 1: Profile Setup
-  const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    title: '',
-    password: '',
-    bio: '',
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    title: "",
+    industry: "",
+    experience: "",
     expertise: [] as string[],
-    experience: '',
-    education: '',
-    certifications: '',
-    linkedinUrl: '',
-    websiteUrl: '',
-    timezone: '',
-    languages: [] as string[],
-    expertises: '',
-    roleName: '',
-  })
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
+    bio: "",
+    achievements: "",
+    linkedinUrl: "",
+    websiteUrl: "",
+  });
 
-  // Step 2: Program Creation
-  const [programData, setProgramData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    level: '',
-    format: '',
-    type: '',
-    price: '',
-    duration: '',
-    maxParticipants: '',
-    learningOutcomes: ['', '', ''],
-    prerequisites: [''],
-    targetAudience: '',
-  })
+  const updateFormData = (field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  // Step 3: LMS Setup
-  const [lmsSettings, setLmsSettings] = useState({
-    enableCertificates: true,
-    enableDiscussions: true,
-    enableAssignments: true,
-    enableQuizzes: true,
-    allowDownloads: true,
-    requireApproval: false,
-    sendNotifications: true,
-    trackProgress: true,
-  })
+  const toggleExpertise = (area: string) => {
+    setFormData((prev) => {
+      const currentAreas = [...prev.expertise];
+      if (currentAreas.includes(area)) {
+        return { ...prev, expertise: currentAreas.filter((a) => a !== area) };
+      } else {
+        return { ...prev, expertise: [...currentAreas, area] };
+      }
+    });
+  };
 
-  const totalSteps = 4
-  const currentProgress = (step / totalSteps) * 100
+  const subSectorSkillsOptions = useMemo(() => {
+    const sectorSkills = getSkillsForSectors(formData.selectedSectors);
+    return sectorSkills.map((skill) => ({ value: skill, label: skill }));
+  }, [formData.selectedSectors]);
+
+  const subSectorSkillsGrouped = useMemo(() => {
+    if (formData.selectedSectors.length === 0) return [];
+
+    const grouped = getSkillsGroupedBySector(formData.selectedSectors);
+    return grouped.map((group) => ({
+      groupLabel: group.sectorName,
+      options: group.skills.map((skill) => ({ value: skill, label: skill })),
+    }));
+  }, [formData.selectedSectors]);
+
+  const skillsCapabilitiesOptions = useMemo(() => {
+    return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }));
+  }, []);
+
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
+  }, []);
 
   const nextStep = () => {
-    if (step < totalSteps) {
-      setStep(step + 1)
-      window.scrollTo(0, 0)
-    }
-  }
+    setStep((prev) => prev + 1);
+    window.scrollTo(0, 0);
+  };
 
   const prevStep = () => {
-    if (step > 1) {
-      setStep(step - 1)
-      window.scrollTo(0, 0)
-    }
-  }
+    setStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
+  };
 
-  const handleComplete = async () => {
-    setIsLoading(true)
-    setShowError(false)
-    setError('')
-
-    let dataObject = profileData
-    dataObject.expertises = profileData.expertise.join(', ')
-    dataObject.roleName = 'Trainer'
-
-    try {
-      console.log('Submitting trainer data:', dataObject) // Debug log
-
-      const response = await fetch(API_URL + '/mentors/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataObject),
-      })
-
-      console.log('Response status:', response.status) // Debug log
-      console.log('Response ok:', response.ok) // Debug log
-
-      let data
-      try {
-        data = await response.json()
-        console.log('Response data:', data) // Debug log
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError)
-        throw new Error('Server returned invalid response format')
-      }
-
-      if (!response.ok) {
-        // Handle HTTP errors (4xx, 5xx)
-        const errorMessage =
-          data?.error ||
-          data?.message ||
-          `Server error (${response.status}). Please try again.`
-        setError(errorMessage)
-        setShowError(true)
-        console.error('HTTP error:', response.status, data)
-        return
-      }
-
-      if (data.success) {
-        router.push('/login')
-      } else {
-        // Handle application errors (success: false)
-        const errorMessage =
-          data?.error ||
-          data?.message ||
-          'Registration failed. Please check your information and try again.'
-        setError(errorMessage)
-        setShowError(true)
-        console.error('Application error:', data)
-      }
-    } catch (error) {
-      console.error('Network/API error:', error)
-
-      let errorMessage =
-        'Unable to connect to the server. Please check your internet connection and try again.'
-
-      if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch')) {
-          errorMessage =
-            'Network connection failed. Please check your internet connection.'
-        } else if (error.message.includes('HTTP error')) {
-          errorMessage =
-            'Server error occurred. Please try again in a few moments.'
-        } else if (error.message.includes('400')) {
-          errorMessage =
-            'Invalid information provided. Please check your details.'
-        } else if (error.message.includes('409')) {
-          errorMessage =
-            'An account with this email already exists. Please use a different email.'
-        } else if (error.message.includes('500')) {
-          errorMessage = 'Server error occurred. Please try again later.'
-        } else if (error.message.includes('invalid response format')) {
-          errorMessage =
-            'Server returned an invalid response. Please try again.'
-        }
-      }
-
-      setError(errorMessage)
-      setShowError(true)
-      console.error('Final error state:', { errorMessage, showError: true })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleRetry = () => {
-    setRetryCount((prev) => prev + 1)
-    setShowError(false)
-    setError('')
-    // Retry the registration
-    setTimeout(() => {
-      handleComplete()
-    }, 1000) // Small delay for better UX
-  }
-
-  const dismissError = () => {
-    setShowError(false)
-    setError('')
-  }
-
-  const updateExpertise = (skill: string) => {
-    setProfileData((prev) => ({
-      ...prev,
-      expertise: prev.expertise.includes(skill)
-        ? prev.expertise.filter((s) => s !== skill)
-        : [...prev.expertise, skill],
-    }))
-  }
-
-  const updateLanguages = (language: string) => {
-    setProfileData((prev) => ({
-      ...prev,
-      languages: prev.languages.includes(language)
-        ? prev.languages.filter((l) => l !== language)
-        : [...prev.languages, language],
-    }))
-  }
-
-  const updateLearningOutcome = (index: number, value: string) => {
-    const updated = [...programData.learningOutcomes]
-    updated[index] = value
-    setProgramData({ ...programData, learningOutcomes: updated })
-  }
-
-  const addLearningOutcome = () => {
-    setProgramData({
-      ...programData,
-      learningOutcomes: [...programData.learningOutcomes, ''],
-    })
-  }
-
-  const removeLearningOutcome = (index: number) => {
-    if (programData.learningOutcomes.length > 1) {
-      const updated = programData.learningOutcomes.filter((_, i) => i !== index)
-      setProgramData({ ...programData, learningOutcomes: updated })
-    }
-  }
-
-  const expertiseOptions = [
-    'Digital Marketing',
-    'Business Strategy',
-    'Leadership',
-    'Product Management',
-    'Data Science',
-    'Software Development',
-    'UX/UI Design',
-    'Sales',
-    'Finance',
-    'Operations',
-    'HR',
-    'Project Management',
-    'Entrepreneurship',
-    'E-commerce',
-    'Content Marketing',
-    'SEO',
-  ]
-
-  const languageOptions = [
-    'English',
-    'Spanish',
-    'French',
-    'German',
-    'Italian',
-    'Portuguese',
-    'Mandarin',
-    'Japanese',
-    'Korean',
-    'Arabic',
-    'Hindi',
-    'Russian',
-  ]
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, you would submit the data to your backend
+    router.push("/trainer/dashboard");
+  };
 
   return (
-    <div className='min-h-screen bg-[#F5F5F5] py-8'>
-      <div className='container max-w-4xl'>
-        {/* Header */}
-        <div className='mb-8'>
-          <div className='flex items-center gap-2 mb-6'>
-            <Link href='/get-started'>
-              <Button variant='ghost' size='sm'>
-                <ArrowLeft className='h-4 w-4 mr-2' />
-                Back
-              </Button>
-            </Link>
-            <Link href='/'>
+    <div className="min-h-screen bg-[#F5F5F5] py-12">
+      <div className="container max-w-3xl">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-8">
+            <Link href="/">
               <img
-                src='/images/mentwork-logo.png'
-                alt='Mentwork'
-                className='h-8'
+                src="/images/mentwork-logo.png"
+                alt="Mentwork"
+                className="h-8"
               />
             </Link>
           </div>
 
-          <div className='text-center mb-8'>
-            <div className='flex items-center justify-center gap-2 mb-4'>
-              <GraduationCap className='h-8 w-8 text-[#FFD500]' />
-              <h1 className='text-3xl font-bold'>
-                Welcome to Mentwork Training
-              </h1>
-            </div>
-            <p className='text-gray-600 max-w-2xl mx-auto'>
-              Let's set up your trainer profile and create your first training
-              program. This process will take about 10 minutes.
-            </p>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">Become a Trainer</h1>
+            <div className="text-sm font-medium">Step {step} of 3</div>
           </div>
 
-          {/* Error Display */}
-          {showError && error && (
-            <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4'>
-              <Alert className='border-red-200 bg-red-50 shadow-lg'>
-                <AlertCircle className='h-4 w-4 text-red-600' />
-                <AlertDescription className='flex items-center justify-between'>
-                  <span className='text-red-800 text-sm'>{error}</span>
-                  <div className='flex items-center space-x-2 ml-4'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={handleRetry}
-                      disabled={isLoading}
-                      className='border-red-300 text-red-700 hover:bg-red-100 h-8 px-3'
-                    >
-                      <RefreshCw
-                        className={`h-3 w-3 mr-1 ${
-                          isLoading ? 'animate-spin' : ''
-                        }`}
-                      />
-                      Retry
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={dismissError}
-                      className='text-red-700 hover:bg-red-100 h-8 w-8 p-0'
-                    >
-                      <X className='h-3 w-3' />
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          {/* Fallback inline error display */}
-          {showError && error && (
-            <Alert className='border-red-200 bg-red-50 mb-6'>
-              <AlertCircle className='h-4 w-4 text-red-600' />
-              <AlertDescription className='flex items-center justify-between'>
-                <span className='text-red-800'>{error}</span>
-                <div className='flex items-center space-x-2 ml-4'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={handleRetry}
-                    disabled={isLoading}
-                    className='border-red-300 text-red-700 hover:bg-red-100'
-                  >
-                    <RefreshCw
-                      className={`h-3 w-3 mr-1 ${
-                        isLoading ? 'animate-spin' : ''
-                      }`}
-                    />
-                    Retry
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={dismissError}
-                    className='text-red-700 hover:bg-red-100'
-                  >
-                    <X className='h-3 w-3' />
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Progress Bar */}
-          {/* <div className='mb-8'>
-            <div className='flex justify-between items-center mb-2'>
-              <span className='text-sm font-medium'>
-                Step {step} of {totalSteps}
-              </span>
-              <span className='text-sm text-gray-500'>
-                {Math.round(currentProgress)}% Complete
-              </span>
-            </div>
-            <Progress value={currentProgress} className='h-2' />
-          </div> */}
-
-          {/* Step Indicators */}
-          {/* <div className='flex items-center justify-between mb-8'>
-            {[
-              { number: 1, title: 'Profile Setup', icon: User },
-              { number: 2, title: 'Create Program', icon: BookOpen },
-              { number: 3, title: 'LMS Setup', icon: Settings },
-              { number: 4, title: 'Launch', icon: Play },
-            ].map((stepItem, index) => (
-              <div key={stepItem.number} className='flex items-center'>
-                <div className='flex flex-col items-center'>
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step >= stepItem.number
-                        ? 'bg-[#FFD500] text-black'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {step > stepItem.number ? (
-                      <CheckCircle2 className='h-5 w-5' />
-                    ) : (
-                      <stepItem.icon className='h-5 w-5' />
-                    )}
-                  </div>
-                  <span
-                    className={`text-xs mt-2 text-center ${
-                      step >= stepItem.number ? 'font-medium' : 'text-gray-500'
-                    }`}
-                  >
-                    {stepItem.title}
-                  </span>
-                </div>
-                {index < 3 && (
-                  <div
-                    className={`flex-1 h-px mx-4 ${
-                      step > stepItem.number ? 'bg-[#FFD500]' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div> */}
+          <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+            <div
+              className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(step / 3) * 100}%` }}
+            ></div>
+          </div>
         </div>
 
-        {/* Step Content */}
-        <Card className='border-none shadow-lg'>
-          <CardContent className='p-8'>
+        <Card className="border-none shadow-lg rounded-xl">
+          <CardContent className="p-6 md:p-8">
             {step === 1 && (
-              <ProfileSetupStep
-                profileData={profileData}
-                setProfileData={setProfileData}
-                expertiseOptions={expertiseOptions}
-                languageOptions={languageOptions}
-                updateExpertise={updateExpertise}
-                updateLanguages={updateLanguages}
-                onComplete={handleComplete}
-                isLoading={isLoading}
-                // onNext={nextStep}
-              />
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold mb-2">
+                    Personal Information
+                  </h2>
+                  <p className="text-gray-600">Tell us about yourself</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => updateFormData("name", e.target.value)}
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          updateFormData("email", e.target.value)
+                        }
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Professional Title *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) =>
+                          updateFormData("title", e.target.value)
+                        }
+                        placeholder="e.g., Senior Digital Marketing Manager"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="industry">Primary Industry *</Label>
+                      <Select
+                        value={formData.industry}
+                        onValueChange={(value) =>
+                          updateFormData("industry", value)
+                        }
+                      >
+                        <SelectTrigger id="industry">
+                          <SelectValue placeholder="Select your industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="technology">Technology</SelectItem>
+                          <SelectItem value="finance">Finance</SelectItem>
+                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="education">Education</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="business">Business</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="experience">Years of Experience *</Label>
+                      <Select
+                        value={formData.experience}
+                        onValueChange={(value) =>
+                          updateFormData("experience", value)
+                        }
+                      >
+                        <SelectTrigger id="experience">
+                          <SelectValue placeholder="Select your experience level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1-3">1-3 years</SelectItem>
+                          <SelectItem value="4-7">4-7 years</SelectItem>
+                          <SelectItem value="8-12">8-12 years</SelectItem>
+                          <SelectItem value="13-20">13-20 years</SelectItem>
+                          <SelectItem value="20+">20+ years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {/* {step === 2 && (
-              <ProgramCreationStep
-                programData={programData}
-                setProgramData={setProgramData}
-                updateLearningOutcome={updateLearningOutcome}
-                addLearningOutcome={addLearningOutcome}
-                removeLearningOutcome={removeLearningOutcome}
-                onNext={nextStep}
-                onPrev={prevStep}
-              />
+            {step === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Your Expertise</h2>
+                  <p className="text-gray-600">What areas do you train in?</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Sector</Label>
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.selectedSectors}
+                      onSelectionChange={(selected) => {
+                        updateFormData("selectedSectors", selected);
+                        // Clear sub-sector skills when sectors change
+                        const newSubSectorSkills =
+                          getSkillsForSectors(selected);
+                        updateFormData(
+                          "selectedSubSectorSkills",
+                          formData.selectedSubSectorSkills.filter((skill) =>
+                            newSubSectorSkills.includes(skill)
+                          )
+                        );
+                      }}
+                      placeholder="Select sector"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Sub-Sector (Skill)</Label>
+                    <MultiSelect
+                      options={subSectorSkillsOptions}
+                      selected={formData.selectedSubSectorSkills}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSubSectorSkills", selected)
+                      }
+                      placeholder="Select skill"
+                      disabled={formData.selectedSectors.length === 0}
+                      groupedOptions={subSectorSkillsGrouped}
+                    />
+                    {formData.selectedSectors.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Please select a sector first
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Skills & Capabilities</Label>
+                    <MultiSelect
+                      options={skillsCapabilitiesOptions}
+                      selected={formData.selectedSkillsCapabilities}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSkillsCapabilities", selected)
+                      }
+                      placeholder="Select skills & capabilities"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Professional Bio *</Label>
+                    <Textarea
+                      id="bio"
+                      value={formData.bio}
+                      onChange={(e) => updateFormData("bio", e.target.value)}
+                      placeholder="Tell us about your background, experience, and what makes you a great trainer..."
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="achievements">Key Achievements</Label>
+                    <Textarea
+                      id="achievements"
+                      value={formData.achievements}
+                      onChange={(e) =>
+                        updateFormData("achievements", e.target.value)
+                      }
+                      placeholder="Share your biggest professional achievements (e.g., 'Trained 500+ professionals', 'Built 3 successful programs')"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
 
             {step === 3 && (
-              <LMSSetupStep
-                lmsSettings={lmsSettings}
-                setLmsSettings={setLmsSettings}
-                onNext={nextStep}
-                onPrev={prevStep}
-              />
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold mb-2">
+                    Complete Your Profile
+                  </h2>
+                  <p className="text-gray-600">
+                    Add your social links and confirm
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedinUrl">LinkedIn Profile</Label>
+                    <Input
+                      id="linkedinUrl"
+                      value={formData.linkedinUrl}
+                      onChange={(e) =>
+                        updateFormData("linkedinUrl", e.target.value)
+                      }
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="websiteUrl">Website (Optional)</Label>
+                    <Input
+                      id="websiteUrl"
+                      value={formData.websiteUrl}
+                      onChange={(e) =>
+                        updateFormData("websiteUrl", e.target.value)
+                      }
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
+                    <h3 className="font-semibold text-blue-900 mb-2">
+                      What's Next?
+                    </h3>
+                    <ul className="space-y-2 text-sm text-blue-800">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Your trainer profile will be created and visible to
+                          learners
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Access your trainer dashboard to create your first
+                          program
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span>Set up your LMS and start teaching</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="terms" />
+                    <Label htmlFor="terms" className="text-sm">
+                      I agree to Mentwork's{" "}
+                      <Link
+                        href="/terms"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link
+                        href="/privacy"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Privacy Policy
+                      </Link>
+                    </Label>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {step === 4 && (
-              <LaunchStep
-                profileData={profileData}
-                programData={programData}
-                lmsSettings={lmsSettings}
-                onComplete={handleComplete}
-                onPrev={prevStep}
-                isLoading={isLoading}
-              />
-            )} */}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
+            <div className="flex justify-between mt-8">
+              {step > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex items-center gap-2 bg-transparent"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+              ) : (
+                <div></div>
+              )}
 
-// Step 1: Profile Setup
-function ProfileSetupStep({
-  profileData,
-  setProfileData,
-  expertiseOptions,
-  languageOptions,
-  updateExpertise,
-  updateLanguages,
-  onComplete,
-  isLoading,
-}: any) {
-  const isValid =
-    profileData.name &&
-    profileData.email &&
-    profileData.title &&
-    profileData.bio &&
-    profileData.password &&
-    profileData.expertise.length > 0
-
-  return (
-    <div className='space-y-6'>
-      <div className='text-center mb-6'>
-        <h2 className='text-2xl font-bold mb-2'>Set Up Your Trainer Profile</h2>
-        <p className='text-gray-600'>
-          Tell us about yourself and your expertise
-        </p>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div className='space-y-2'>
-          <Label htmlFor='name'>Full Name *</Label>
-          <Input
-            id='name'
-            value={profileData.name}
-            onChange={(e) =>
-              setProfileData({ ...profileData, name: e.target.value })
-            }
-            placeholder='Enter your full name'
-          />
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='email'>Email Address *</Label>
-          <Input
-            id='email'
-            type='email'
-            value={profileData.email}
-            onChange={(e) =>
-              setProfileData({ ...profileData, email: e.target.value })
-            }
-            placeholder='Enter your email'
-          />
-        </div>
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='title'>Password *</Label>
-        <Input
-          id='title'
-          type='password'
-          value={profileData.password}
-          onChange={(e) =>
-            setProfileData({ ...profileData, password: e.target.value })
-          }
-          placeholder='e.g., *****'
-        />
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='title'>Professional Title *</Label>
-        <Input
-          id='title'
-          value={profileData.title}
-          onChange={(e) =>
-            setProfileData({ ...profileData, title: e.target.value })
-          }
-          placeholder='e.g., Senior Digital Marketing Manager, Business Strategy Consultant'
-        />
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='bio'>Professional Bio *</Label>
-        <Textarea
-          id='bio'
-          value={profileData.bio}
-          onChange={(e) =>
-            setProfileData({ ...profileData, bio: e.target.value })
-          }
-          placeholder='Tell potential students about your background, experience, and what makes you a great trainer...'
-          rows={4}
-        />
-      </div>
-
-      <div className='space-y-3'>
-        <Label>Areas of Expertise * (Select all that apply)</Label>
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
-          {expertiseOptions.map((skill: any) => (
-            <Button
-              key={skill}
-              type='button'
-              variant={
-                profileData.expertise.includes(skill) ? 'default' : 'outline'
-              }
-              size='sm'
-              className={
-                profileData.expertise.includes(skill)
-                  ? 'bg-[#FFD500] text-black'
-                  : ''
-              }
-              onClick={() => updateExpertise(skill)}
-            >
-              {skill}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div className='space-y-2'>
-          <Label htmlFor='experience'>Years of Experience</Label>
-          <Select
-            value={profileData.experience}
-            onValueChange={(value) =>
-              setProfileData({ ...profileData, experience: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select experience level' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='1-3'>1-3 years</SelectItem>
-              <SelectItem value='4-7'>4-7 years</SelectItem>
-              <SelectItem value='8-12'>8-12 years</SelectItem>
-              <SelectItem value='13-20'>13-20 years</SelectItem>
-              <SelectItem value='20+'>20+ years</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='timezone'>Timezone</Label>
-          <Select
-            value={profileData.timezone}
-            onValueChange={(value) =>
-              setProfileData({ ...profileData, timezone: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select your timezone' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='PST'>Pacific Time (PST)</SelectItem>
-              <SelectItem value='MST'>Mountain Time (MST)</SelectItem>
-              <SelectItem value='CST'>Central Time (CST)</SelectItem>
-              <SelectItem value='EST'>Eastern Time (EST)</SelectItem>
-              <SelectItem value='GMT'>Greenwich Mean Time (GMT)</SelectItem>
-              <SelectItem value='CET'>Central European Time (CET)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className='space-y-3'>
-        <Label>Languages (Select all that apply)</Label>
-        <div className='grid grid-cols-3 md:grid-cols-6 gap-2'>
-          {languageOptions.map((language: any) => (
-            <Button
-              key={language}
-              type='button'
-              variant={
-                profileData.languages.includes(language) ? 'default' : 'outline'
-              }
-              size='sm'
-              className={
-                profileData.languages.includes(language)
-                  ? 'bg-[#FFD500] text-black'
-                  : ''
-              }
-              onClick={() => updateLanguages(language)}
-            >
-              {language}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div className='space-y-2'>
-          <Label htmlFor='linkedinUrl'>LinkedIn Profile (Optional)</Label>
-          <Input
-            id='linkedinUrl'
-            value={profileData.linkedinUrl}
-            onChange={(e) =>
-              setProfileData({ ...profileData, linkedinUrl: e.target.value })
-            }
-            placeholder='https://linkedin.com/in/yourprofile'
-          />
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='websiteUrl'>Website (Optional)</Label>
-          <Input
-            id='websiteUrl'
-            value={profileData.websiteUrl}
-            onChange={(e) =>
-              setProfileData({ ...profileData, websiteUrl: e.target.value })
-            }
-            placeholder='https://yourwebsite.com'
-          />
-        </div>
-      </div>
-
-      <div className='flex justify-end pt-6'>
-        <Button
-          onClick={onComplete}
-          disabled={!isValid || isLoading}
-          className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
-        >
-          {isLoading ? (
-            <>
-              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2' />
-              Creating Profile...
-            </>
-          ) : (
-            'Create Profile'
-          )}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-// Step 2: Program Creation
-function ProgramCreationStep({
-  programData,
-  setProgramData,
-  updateLearningOutcome,
-  addLearningOutcome,
-  removeLearningOutcome,
-  onNext,
-  onPrev,
-}: any) {
-  const isValid =
-    programData.title &&
-    programData.description &&
-    programData.category &&
-    programData.level &&
-    programData.format &&
-    programData.price &&
-    programData.duration
-
-  return (
-    <div className='space-y-6'>
-      <div className='text-center mb-6'>
-        <h2 className='text-2xl font-bold mb-2'>
-          Create Your First Training Program
-        </h2>
-        <p className='text-gray-600'>
-          Design a comprehensive learning experience for your students
-        </p>
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='title'>Program Title *</Label>
-        <Input
-          id='title'
-          value={programData.title}
-          onChange={(e) =>
-            setProgramData({ ...programData, title: e.target.value })
-          }
-          placeholder='e.g., Complete Digital Marketing Bootcamp'
-        />
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='description'>Program Description *</Label>
-        <Textarea
-          id='description'
-          value={programData.description}
-          onChange={(e) =>
-            setProgramData({ ...programData, description: e.target.value })
-          }
-          placeholder='Describe what students will learn and achieve in this program...'
-          rows={4}
-        />
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='category'>Category *</Label>
-          <Select
-            value={programData.category}
-            onValueChange={(value) =>
-              setProgramData({ ...programData, category: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select category' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='business'>Business</SelectItem>
-              <SelectItem value='marketing'>Marketing</SelectItem>
-              <SelectItem value='technology'>Technology</SelectItem>
-              <SelectItem value='design'>Design</SelectItem>
-              <SelectItem value='leadership'>Leadership</SelectItem>
-              <SelectItem value='finance'>Finance</SelectItem>
-              <SelectItem value='operations'>Operations</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='level'>Experience Level *</Label>
-          <Select
-            value={programData.level}
-            onValueChange={(value) =>
-              setProgramData({ ...programData, level: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select level' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='beginner'>Beginner</SelectItem>
-              <SelectItem value='intermediate'>Intermediate</SelectItem>
-              <SelectItem value='advanced'>Advanced</SelectItem>
-              <SelectItem value='all-levels'>All Levels</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='format'>Format *</Label>
-          <Select
-            value={programData.format}
-            onValueChange={(value) =>
-              setProgramData({ ...programData, format: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select format' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='virtual'>Virtual</SelectItem>
-              <SelectItem value='in-person'>In-Person</SelectItem>
-              <SelectItem value='hybrid'>Hybrid</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className='space-y-3'>
-        <Label>Program Type *</Label>
-        <RadioGroup
-          value={programData.type}
-          onValueChange={(value) =>
-            setProgramData({ ...programData, type: value })
-          }
-        >
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='self-paced' id='self-paced' />
-            <Label htmlFor='self-paced'>
-              Self-Paced (Students learn at their own speed)
-            </Label>
-          </div>
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='live' id='live' />
-            <Label htmlFor='live'>
-              Live Sessions (Scheduled classes with real-time interaction)
-            </Label>
-          </div>
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='blended' id='blended' />
-            <Label htmlFor='blended'>
-              Blended (Mix of self-paced content and live sessions)
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='price'>Price (USD) *</Label>
-          <Input
-            id='price'
-            type='number'
-            value={programData.price}
-            onChange={(e) =>
-              setProgramData({ ...programData, price: e.target.value })
-            }
-            placeholder='299'
-          />
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='duration'>Duration (weeks) *</Label>
-          <Input
-            id='duration'
-            type='number'
-            value={programData.duration}
-            onChange={(e) =>
-              setProgramData({ ...programData, duration: e.target.value })
-            }
-            placeholder='8'
-          />
-        </div>
-        <div className='space-y-2'>
-          <Label htmlFor='maxParticipants'>Max Students</Label>
-          <Input
-            id='maxParticipants'
-            type='number'
-            value={programData.maxParticipants}
-            onChange={(e) =>
-              setProgramData({
-                ...programData,
-                maxParticipants: e.target.value,
-              })
-            }
-            placeholder='50'
-          />
-        </div>
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='targetAudience'>Target Audience</Label>
-        <Textarea
-          id='targetAudience'
-          value={programData.targetAudience}
-          onChange={(e) =>
-            setProgramData({ ...programData, targetAudience: e.target.value })
-          }
-          placeholder='Who is this program designed for? e.g., Marketing professionals, Small business owners, Career changers...'
-          rows={2}
-        />
-      </div>
-
-      <div className='space-y-4'>
-        <Label>Learning Outcomes (What will students achieve?)</Label>
-        {programData.learningOutcomes.map((outcome: string, index: number) => (
-          <div key={index} className='flex items-center space-x-2'>
-            <Input
-              placeholder={`Learning outcome ${index + 1}`}
-              value={outcome}
-              onChange={(e) => updateLearningOutcome(index, e.target.value)}
-            />
-            {programData.learningOutcomes.length > 1 && (
-              <Button
-                type='button'
-                variant='outline'
-                size='icon'
-                onClick={() => removeLearningOutcome(index)}
-              >
-                ×
-              </Button>
-            )}
-          </div>
-        ))}
-        <Button
-          type='button'
-          variant='outline'
-          onClick={addLearningOutcome}
-          className='w-full bg-transparent'
-        >
-          + Add Learning Outcome
-        </Button>
-      </div>
-
-      <div className='flex justify-between pt-6'>
-        <Button variant='outline' onClick={onPrev}>
-          <ArrowLeft className='h-4 w-4 mr-2' />
-          Back
-        </Button>
-        <Button
-          onClick={onNext}
-          disabled={!isValid}
-          className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
-        >
-          Next: Configure LMS
-          <ArrowRight className='h-4 w-4 ml-2' />
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-// Step 3: LMS Setup
-function LMSSetupStep({ lmsSettings, setLmsSettings, onNext, onPrev }: any) {
-  return (
-    <div className='space-y-6'>
-      <div className='text-center mb-6'>
-        <h2 className='text-2xl font-bold mb-2'>
-          Configure Your Learning Management System
-        </h2>
-        <p className='text-gray-600'>
-          Set up features and controls for your training program
-        </p>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Award className='h-5 w-5 text-[#FFD500]' />
-              Student Features
-            </CardTitle>
-            <CardDescription>
-              Configure what students can access and do
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Issue Certificates</Label>
-                <p className='text-sm text-gray-500'>
-                  Automatically issue completion certificates
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.enableCertificates}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({
-                    ...lmsSettings,
-                    enableCertificates: checked,
-                  })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Discussion Forums</Label>
-                <p className='text-sm text-gray-500'>
-                  Allow students to discuss and ask questions
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.enableDiscussions}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, enableDiscussions: checked })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Download Materials</Label>
-                <p className='text-sm text-gray-500'>
-                  Let students download course materials
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.allowDownloads}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, allowDownloads: checked })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Progress Tracking</Label>
-                <p className='text-sm text-gray-500'>
-                  Track and display student progress
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.trackProgress}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, trackProgress: checked })
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Target className='h-5 w-5 text-[#FFD500]' />
-              Assessment Tools
-            </CardTitle>
-            <CardDescription>
-              Enable different types of assessments
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Quizzes & Tests</Label>
-                <p className='text-sm text-gray-500'>
-                  Create interactive quizzes and tests
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.enableQuizzes}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, enableQuizzes: checked })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Assignments</Label>
-                <p className='text-sm text-gray-500'>
-                  Assign projects and homework
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.enableAssignments}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, enableAssignments: checked })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Manual Approval</Label>
-                <p className='text-sm text-gray-500'>
-                  Manually approve student enrollments
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.requireApproval}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, requireApproval: checked })
-                }
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <div>
-                <Label>Email Notifications</Label>
-                <p className='text-sm text-gray-500'>
-                  Send progress and announcement emails
-                </p>
-              </div>
-              <Checkbox
-                checked={lmsSettings.sendNotifications}
-                onCheckedChange={(checked) =>
-                  setLmsSettings({ ...lmsSettings, sendNotifications: checked })
-                }
-              />
+              {step < 3 ? (
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
+                >
+                  Complete Registration{" "}
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card className='bg-blue-50 border-blue-200'>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <Lightbulb className='h-5 w-5 text-blue-600' />
-            LMS Features Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-            <div>
-              <h4 className='font-medium mb-2'>Content Management</h4>
-              <ul className='space-y-1 text-gray-600'>
-                <li>• Upload videos, documents, and presentations</li>
-                <li>• Create interactive lessons and modules</li>
-                <li>• Schedule content release dates</li>
-                <li>• Organize content in logical sequences</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className='font-medium mb-2'>Student Management</h4>
-              <ul className='space-y-1 text-gray-600'>
-                <li>• Track individual student progress</li>
-                <li>• Send personalized messages</li>
-                <li>• Generate progress reports</li>
-                <li>• Manage enrollments and access</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className='font-medium mb-2'>Analytics & Insights</h4>
-              <ul className='space-y-1 text-gray-600'>
-                <li>• View engagement metrics</li>
-                <li>• Track completion rates</li>
-                <li>• Monitor student activity</li>
-                <li>• Export detailed reports</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className='font-medium mb-2'>Communication Tools</h4>
-              <ul className='space-y-1 text-gray-600'>
-                <li>• Send announcements to all students</li>
-                <li>• Moderate discussion forums</li>
-                <li>• Provide feedback on assignments</li>
-                <li>• Schedule live Q&A sessions</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className='flex justify-between pt-6'>
-        <Button variant='outline' onClick={onPrev}>
-          <ArrowLeft className='h-4 w-4 mr-2' />
-          Back
-        </Button>
-        <Button
-          onClick={onNext}
-          className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
-        >
-          Next: Review & Launch
-          <ArrowRight className='h-4 w-4 ml-2' />
-        </Button>
-      </div>
     </div>
-  )
-}
-
-// Step 4: Launch
-function LaunchStep({
-  profileData,
-  programData,
-  lmsSettings,
-  onComplete,
-  onPrev,
-  isLoading,
-}: any) {
-  return (
-    <div className='space-y-6'>
-      <div className='text-center mb-6'>
-        <h2 className='text-2xl font-bold mb-2'>Ready to Launch!</h2>
-        <p className='text-gray-600'>
-          Review your setup and launch your training program
-        </p>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <User className='h-5 w-5 text-[#FFD500]' />
-              Trainer Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <div>
-              <Label className='text-sm font-medium'>Name</Label>
-              <p className='text-sm text-gray-600'>{profileData.name}</p>
-            </div>
-            <div>
-              <Label className='text-sm font-medium'>Title</Label>
-              <p className='text-sm text-gray-600'>{profileData.title}</p>
-            </div>
-            <div>
-              <Label className='text-sm font-medium'>Expertise</Label>
-              <div className='flex flex-wrap gap-1 mt-1'>
-                {profileData.expertise.slice(0, 3).map((skill: string) => (
-                  <Badge key={skill} variant='secondary' className='text-xs'>
-                    {skill}
-                  </Badge>
-                ))}
-                {profileData.expertise.length > 3 && (
-                  <Badge variant='secondary' className='text-xs'>
-                    +{profileData.expertise.length - 3} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div>
-              <Label className='text-sm font-medium'>Languages</Label>
-              <p className='text-sm text-gray-600'>
-                {profileData.languages.join(', ') || 'Not specified'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <BookOpen className='h-5 w-5 text-[#FFD500]' />
-              Training Program
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <div>
-              <Label className='text-sm font-medium'>Title</Label>
-              <p className='text-sm text-gray-600'>{programData.title}</p>
-            </div>
-            <div>
-              <Label className='text-sm font-medium'>Category & Level</Label>
-              <p className='text-sm text-gray-600'>
-                {programData.category} • {programData.level}
-              </p>
-            </div>
-            <div>
-              <Label className='text-sm font-medium'>Format & Type</Label>
-              <p className='text-sm text-gray-600'>
-                {programData.format} • {programData.type}
-              </p>
-            </div>
-            <div className='grid grid-cols-3 gap-2'>
-              <div>
-                <Label className='text-sm font-medium'>Price</Label>
-                <p className='text-sm text-gray-600'>${programData.price}</p>
-              </div>
-              <div>
-                <Label className='text-sm font-medium'>Duration</Label>
-                <p className='text-sm text-gray-600'>
-                  {programData.duration} weeks
-                </p>
-              </div>
-              <div>
-                <Label className='text-sm font-medium'>Max Students</Label>
-                <p className='text-sm text-gray-600'>
-                  {programData.maxParticipants || 'Unlimited'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <Settings className='h-5 w-5 text-[#FFD500]' />
-            LMS Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-            {[
-              { key: 'enableCertificates', label: 'Certificates' },
-              { key: 'enableDiscussions', label: 'Discussions' },
-              { key: 'enableQuizzes', label: 'Quizzes' },
-              { key: 'enableAssignments', label: 'Assignments' },
-              { key: 'allowDownloads', label: 'Downloads' },
-              { key: 'trackProgress', label: 'Progress Tracking' },
-              { key: 'requireApproval', label: 'Manual Approval' },
-              { key: 'sendNotifications', label: 'Notifications' },
-            ].map((setting) => (
-              <div key={setting.key} className='flex items-center gap-2'>
-                <div
-                  className={`w-3 h-3 rounded-full ${
-                    lmsSettings[setting.key] ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                />
-                <span className='text-sm'>{setting.label}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className='bg-green-50 border-green-200'>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <CheckCircle2 className='h-5 w-5 text-green-600' />
-            What Happens Next?
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='space-y-3 text-sm'>
-            <div className='flex items-start gap-3'>
-              <div className='w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5'>
-                <span className='text-xs font-medium text-green-600'>1</span>
-              </div>
-              <div>
-                <p className='font-medium'>
-                  Your trainer profile will be created
-                </p>
-                <p className='text-gray-600'>
-                  Students can discover you and your expertise
-                </p>
-              </div>
-            </div>
-            <div className='flex items-start gap-3'>
-              <div className='w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5'>
-                <span className='text-xs font-medium text-green-600'>2</span>
-              </div>
-              <div>
-                <p className='font-medium'>
-                  Your program will be set up in the LMS
-                </p>
-                <p className='text-gray-600'>
-                  You can start adding content, modules, and lessons
-                </p>
-              </div>
-            </div>
-            <div className='flex items-start gap-3'>
-              <div className='w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5'>
-                <span className='text-xs font-medium text-green-600'>3</span>
-              </div>
-              <div>
-                <p className='font-medium'>Access your trainer dashboard</p>
-                <p className='text-gray-600'>
-                  Manage programs, track students, and view analytics
-                </p>
-              </div>
-            </div>
-            <div className='flex items-start gap-3'>
-              <div className='w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5'>
-                <span className='text-xs font-medium text-green-600'>4</span>
-              </div>
-              <div>
-                <p className='font-medium'>Start accepting students</p>
-                <p className='text-gray-600'>
-                  Your program will be listed and ready for enrollment
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className='flex justify-between pt-6'>
-        <Button variant='outline' onClick={onPrev} disabled={isLoading}>
-          <ArrowLeft className='h-4 w-4 mr-2' />
-          Back
-        </Button>
-        <Button
-          onClick={onComplete}
-          disabled={isLoading}
-          className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
-        >
-          {isLoading ? (
-            <>
-              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2' />
-              Setting up your account...
-            </>
-          ) : (
-            <>
-              Launch My Training Program
-              <Play className='h-4 w-4 ml-2' />
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
-  )
+  );
 }

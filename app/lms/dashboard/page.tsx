@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   BarChart3,
   Users,
@@ -14,13 +14,20 @@ import {
   Plus,
   MessageSquare,
   Award,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DashboardHeader } from "@/components/dashboard-header";
 
 export default function LMSDashboard() {
   const [stats, setStats] = useState({
@@ -30,7 +37,7 @@ export default function LMSDashboard() {
     averageRating: 0,
     completionRate: 0,
     monthlyGrowth: 0,
-  })
+  });
 
   const [programs, setPrograms] = useState([
     {
@@ -66,7 +73,7 @@ export default function LMSDashboard() {
       lastUpdated: "3 days ago",
       thumbnail: "/placeholder.svg?height=100&width=150",
     },
-  ])
+  ]);
 
   const [recentActivity, setRecentActivity] = useState([
     {
@@ -97,7 +104,7 @@ export default function LMSDashboard() {
       time: "1 day ago",
       avatar: "/placeholder.svg?height=32&width=32",
     },
-  ])
+  ]);
 
   // Simulate real-time updates
   useEffect(() => {
@@ -110,8 +117,8 @@ export default function LMSDashboard() {
         averageRating: 4.8,
         completionRate: 81 + Math.floor(Math.random() * 5),
         monthlyGrowth: 23 + Math.floor(Math.random() * 5),
-      }))
-    }, 30000) // Update every 30 seconds
+      }));
+    }, 30000); // Update every 30 seconds
 
     // Initial load
     setStats({
@@ -121,52 +128,33 @@ export default function LMSDashboard() {
       averageRating: 4.8,
       completionRate: 81,
       monthlyGrowth: 23,
-    })
+    });
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold">LMS Dashboard</h1>
-                <p className="text-gray-500">Manage your training programs and students</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" asChild>
-                <Link href="/programs">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Public Programs
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link href="/trainer/dashboard/programs/create">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Program
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="w-full space-y-6">
+      <DashboardHeader
+        title="LMS Dashboard"
+        description="Manage your training programs and students"
+        actionButton={{
+          label: "Create Program",
+          href: "/trainer/dashboard/programs/create",
+          icon: Plus,
+        }}
+      />
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="w-full space-y-6 p-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Programs</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Programs
+                  </p>
                   <p className="text-2xl font-bold">{stats.totalPrograms}</p>
                 </div>
                 <BookOpen className="h-8 w-8 text-blue-500" />
@@ -178,8 +166,12 @@ export default function LMSDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Active Students</p>
-                  <p className="text-2xl font-bold">{stats.activeStudents.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Active Students
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {stats.activeStudents.toLocaleString()}
+                  </p>
                 </div>
                 <Users className="h-8 w-8 text-green-500" />
               </div>
@@ -190,8 +182,12 @@ export default function LMSDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                  <p className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Revenue
+                  </p>
+                  <p className="text-2xl font-bold">
+                    ${stats.totalRevenue.toLocaleString()}
+                  </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-yellow-500" />
               </div>
@@ -202,7 +198,9 @@ export default function LMSDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Avg. Rating</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Avg. Rating
+                  </p>
                   <p className="text-2xl font-bold">{stats.averageRating}</p>
                 </div>
                 <Star className="h-8 w-8 text-orange-500" />
@@ -214,7 +212,9 @@ export default function LMSDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Completion Rate</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Completion Rate
+                  </p>
                   <p className="text-2xl font-bold">{stats.completionRate}%</p>
                 </div>
                 <Award className="h-8 w-8 text-purple-500" />
@@ -226,7 +226,9 @@ export default function LMSDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Monthly Growth</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Monthly Growth
+                  </p>
                   <p className="text-2xl font-bold">+{stats.monthlyGrowth}%</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-red-500" />
@@ -244,7 +246,9 @@ export default function LMSDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Your Programs</CardTitle>
-                    <CardDescription>Manage and monitor your training programs</CardDescription>
+                    <CardDescription>
+                      Manage and monitor your training programs
+                    </CardDescription>
                   </div>
                   <Button asChild>
                     <Link href="/trainer/dashboard/programs/create">
@@ -257,7 +261,10 @@ export default function LMSDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {programs.map((program) => (
-                    <div key={program.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div
+                      key={program.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex items-start gap-4">
                         <img
                           src={program.thumbnail || "/placeholder.svg"}
@@ -280,12 +287,19 @@ export default function LMSDashboard() {
                                   </span>
                                 )}
                                 <span className="flex items-center gap-1">
-                                  <DollarSign className="h-4 w-4" />${program.revenue.toLocaleString()}
+                                  <DollarSign className="h-4 w-4" />$
+                                  {program.revenue.toLocaleString()}
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant={program.status === "active" ? "default" : "secondary"}>
+                              <Badge
+                                variant={
+                                  program.status === "active"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
                                 {program.status}
                               </Badge>
                               <Button variant="outline" size="sm" asChild>
@@ -294,7 +308,9 @@ export default function LMSDashboard() {
                                 </Link>
                               </Button>
                               <Button variant="outline" size="sm" asChild>
-                                <Link href={`/lms/programs/${program.id}/manage`}>
+                                <Link
+                                  href={`/lms/programs/${program.id}/manage`}
+                                >
                                   <Settings className="h-4 w-4" />
                                 </Link>
                               </Button>
@@ -306,10 +322,15 @@ export default function LMSDashboard() {
                                 <span>Completion Rate</span>
                                 <span>{program.completionRate}%</span>
                               </div>
-                              <Progress value={program.completionRate} className="h-2" />
+                              <Progress
+                                value={program.completionRate}
+                                className="h-2"
+                              />
                             </div>
                           )}
-                          <p className="text-xs text-gray-500 mt-2">Updated {program.lastUpdated}</p>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Updated {program.lastUpdated}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -333,19 +354,31 @@ export default function LMSDashboard() {
                     Create New Program
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <Link href="/lms/analytics">
                     <BarChart3 className="h-4 w-4 mr-2" />
                     View Analytics
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <Link href="/lms/students">
                     <Users className="h-4 w-4 mr-2" />
                     Manage Students
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <Link href="/lms/messages">
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Messages
@@ -358,14 +391,18 @@ export default function LMSDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest updates from your programs</CardDescription>
+                <CardDescription>
+                  Latest updates from your programs
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {recentActivity.map((activity) => (
                     <div key={activity.id} className="flex items-start gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={activity.avatar || "/placeholder.svg"} />
+                        <AvatarImage
+                          src={activity.avatar || "/placeholder.svg"}
+                        />
                         <AvatarFallback>U</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -406,5 +443,5 @@ export default function LMSDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

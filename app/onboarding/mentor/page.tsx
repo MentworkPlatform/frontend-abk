@@ -1,28 +1,52 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, ArrowRight, CheckCircle2, Upload, Calendar, DollarSign } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Upload,
+  Calendar,
+  DollarSign,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  SECTORS,
+  SKILLS_CAPABILITIES,
+  getSkillsForSectors,
+  getSkillsGroupedBySector,
+} from "@/lib/constants/onboarding";
+import { useMemo } from "react";
 
 export default function MentorOnboardingPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1)
+  const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     expertise: [] as string[],
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
     industry: "",
     experience: "",
     mentorshipStyle: [] as string[],
@@ -33,60 +57,86 @@ export default function MentorOnboardingPage() {
     twitterUrl: "",
     instagramUrl: "",
     websiteUrl: "",
-  })
+  });
 
   const updateFormData = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const toggleExpertise = (area: string) => {
     setFormData((prev) => {
-      const currentAreas = [...prev.expertise]
+      const currentAreas = [...prev.expertise];
       if (currentAreas.includes(area)) {
-        return { ...prev, expertise: currentAreas.filter((a) => a !== area) }
+        return { ...prev, expertise: currentAreas.filter((a) => a !== area) };
       } else {
-        return { ...prev, expertise: [...currentAreas, area] }
+        return { ...prev, expertise: [...currentAreas, area] };
       }
-    })
-  }
+    });
+  };
+
+  const subSectorSkillsOptions = useMemo(() => {
+    const sectorSkills = getSkillsForSectors(formData.selectedSectors);
+    return sectorSkills.map((skill) => ({ value: skill, label: skill }));
+  }, [formData.selectedSectors]);
+
+  const subSectorSkillsGrouped = useMemo(() => {
+    if (formData.selectedSectors.length === 0) return [];
+
+    const grouped = getSkillsGroupedBySector(formData.selectedSectors);
+    return grouped.map((group) => ({
+      groupLabel: group.sectorName,
+      options: group.skills.map((skill) => ({ value: skill, label: skill })),
+    }));
+  }, [formData.selectedSectors]);
+
+  const skillsCapabilitiesOptions = useMemo(() => {
+    return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }));
+  }, []);
+
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
+  }, []);
 
   const toggleMentorshipStyle = (style: string) => {
     setFormData((prev) => {
-      const currentStyles = [...prev.mentorshipStyle]
+      const currentStyles = [...prev.mentorshipStyle];
       if (currentStyles.includes(style)) {
-        return { ...prev, mentorshipStyle: currentStyles.filter((s) => s !== style) }
+        return {
+          ...prev,
+          mentorshipStyle: currentStyles.filter((s) => s !== style),
+        };
       } else {
-        return { ...prev, mentorshipStyle: [...currentStyles, style] }
+        return { ...prev, mentorshipStyle: [...currentStyles, style] };
       }
-    })
-  }
+    });
+  };
 
   const toggleAvailability = (day: string) => {
     setFormData((prev) => {
-      const currentDays = [...prev.availability]
+      const currentDays = [...prev.availability];
       if (currentDays.includes(day)) {
-        return { ...prev, availability: currentDays.filter((d) => d !== day) }
+        return { ...prev, availability: currentDays.filter((d) => d !== day) };
       } else {
-        return { ...prev, availability: [...currentDays, day] }
+        return { ...prev, availability: [...currentDays, day] };
       }
-    })
-  }
+    });
+  };
 
   const nextStep = () => {
-    setStep((prev) => prev + 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev + 1);
+    window.scrollTo(0, 0);
+  };
 
   const prevStep = () => {
-    setStep((prev) => prev - 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // In a real app, you would submit the data to your backend
-    router.push("/mentor/dashboard")
-  }
+    router.push("/mentor/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12">
@@ -94,7 +144,11 @@ export default function MentorOnboardingPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-8">
             <Link href="/">
-              <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
+              <img
+                src="/images/mentwork-logo.png"
+                alt="Mentwork"
+                className="h-8"
+              />
             </Link>
           </div>
 
@@ -136,7 +190,9 @@ export default function MentorOnboardingPage() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("email", e.target.value)
+                        }
                         placeholder="Enter your email address"
                         required
                       />
@@ -144,7 +200,12 @@ export default function MentorOnboardingPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="industry">Primary Industry</Label>
-                      <Select value={formData.industry} onValueChange={(value) => updateFormData("industry", value)}>
+                      <Select
+                        value={formData.industry}
+                        onValueChange={(value) =>
+                          updateFormData("industry", value)
+                        }
+                      >
                         <SelectTrigger id="industry">
                           <SelectValue placeholder="Select your industry" />
                         </SelectTrigger>
@@ -154,8 +215,12 @@ export default function MentorOnboardingPage() {
                           <SelectItem value="healthcare">Healthcare</SelectItem>
                           <SelectItem value="education">Education</SelectItem>
                           <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                          <SelectItem value="agriculture">Agriculture</SelectItem>
+                          <SelectItem value="manufacturing">
+                            Manufacturing
+                          </SelectItem>
+                          <SelectItem value="agriculture">
+                            Agriculture
+                          </SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -165,7 +230,9 @@ export default function MentorOnboardingPage() {
                       <Label htmlFor="experience">Years of Experience</Label>
                       <Select
                         value={formData.experience}
-                        onValueChange={(value) => updateFormData("experience", value)}
+                        onValueChange={(value) =>
+                          updateFormData("experience", value)
+                        }
                       >
                         <SelectTrigger id="experience">
                           <SelectValue placeholder="Select your experience level" />
@@ -187,106 +254,124 @@ export default function MentorOnboardingPage() {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Your Expertise</h2>
 
-                <div className="space-y-4">
-                  <Label>Areas of Expertise (Select all that apply)</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("business-strategy") ? "default" : "outline"}
-                      className={formData.expertise.includes("business-strategy") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("business-strategy")}
-                    >
-                      Business Strategy
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("fundraising") ? "default" : "outline"}
-                      className={formData.expertise.includes("fundraising") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("fundraising")}
-                    >
-                      Fundraising
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("marketing") ? "default" : "outline"}
-                      className={formData.expertise.includes("marketing") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("marketing")}
-                    >
-                      Marketing
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("product-development") ? "default" : "outline"}
-                      className={formData.expertise.includes("product-development") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("product-development")}
-                    >
-                      Product Development
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("operations") ? "default" : "outline"}
-                      className={formData.expertise.includes("operations") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("operations")}
-                    >
-                      Operations
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("leadership") ? "default" : "outline"}
-                      className={formData.expertise.includes("leadership") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("leadership")}
-                    >
-                      Leadership
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("sales") ? "default" : "outline"}
-                      className={formData.expertise.includes("sales") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("sales")}
-                    >
-                      Sales
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.expertise.includes("finance") ? "default" : "outline"}
-                      className={formData.expertise.includes("finance") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleExpertise("finance")}
-                    >
-                      Finance
-                    </Button>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Sector</Label>
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.selectedSectors}
+                      onSelectionChange={(selected) => {
+                        updateFormData("selectedSectors", selected);
+                        // Clear sub-sector skills when sectors change
+                        const newSubSectorSkills =
+                          getSkillsForSectors(selected);
+                        updateFormData(
+                          "selectedSubSectorSkills",
+                          formData.selectedSubSectorSkills.filter((skill) =>
+                            newSubSectorSkills.includes(skill)
+                          )
+                        );
+                      }}
+                      placeholder="Select sector"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Sub-Sector (Skill)</Label>
+                    <MultiSelect
+                      options={subSectorSkillsOptions}
+                      selected={formData.selectedSubSectorSkills}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSubSectorSkills", selected)
+                      }
+                      placeholder="Select skill"
+                      disabled={formData.selectedSectors.length === 0}
+                      groupedOptions={subSectorSkillsGrouped}
+                    />
+                    {formData.selectedSectors.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Please select a sector first
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Skills & Capabilities</Label>
+                    <MultiSelect
+                      options={skillsCapabilitiesOptions}
+                      selected={formData.selectedSkillsCapabilities}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSkillsCapabilities", selected)
+                      }
+                      placeholder="Select skills & capabilities"
+                    />
                   </div>
 
                   <div className="space-y-2 mt-6">
-                    <Label>Preferred Mentorship Style (Select all that apply)</Label>
+                    <Label>
+                      Preferred Mentorship Style (Select all that apply)
+                    </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                       <Button
                         type="button"
-                        variant={formData.mentorshipStyle.includes("one-on-one") ? "default" : "outline"}
-                        className={formData.mentorshipStyle.includes("one-on-one") ? "bg-[#FFD500] text-black" : ""}
+                        variant={
+                          formData.mentorshipStyle.includes("one-on-one")
+                            ? "default"
+                            : "outline"
+                        }
+                        className={
+                          formData.mentorshipStyle.includes("one-on-one")
+                            ? "bg-[#FFD500] text-black"
+                            : ""
+                        }
                         onClick={() => toggleMentorshipStyle("one-on-one")}
                       >
                         1:1 Sessions
                       </Button>
                       <Button
                         type="button"
-                        variant={formData.mentorshipStyle.includes("group") ? "default" : "outline"}
-                        className={formData.mentorshipStyle.includes("group") ? "bg-[#FFD500] text-black" : ""}
+                        variant={
+                          formData.mentorshipStyle.includes("group")
+                            ? "default"
+                            : "outline"
+                        }
+                        className={
+                          formData.mentorshipStyle.includes("group")
+                            ? "bg-[#FFD500] text-black"
+                            : ""
+                        }
                         onClick={() => toggleMentorshipStyle("group")}
                       >
                         Group Sessions
                       </Button>
                       <Button
                         type="button"
-                        variant={formData.mentorshipStyle.includes("workshop") ? "default" : "outline"}
-                        className={formData.mentorshipStyle.includes("workshop") ? "bg-[#FFD500] text-black" : ""}
+                        variant={
+                          formData.mentorshipStyle.includes("workshop")
+                            ? "default"
+                            : "outline"
+                        }
+                        className={
+                          formData.mentorshipStyle.includes("workshop")
+                            ? "bg-[#FFD500] text-black"
+                            : ""
+                        }
                         onClick={() => toggleMentorshipStyle("workshop")}
                       >
                         Workshops
                       </Button>
                       <Button
                         type="button"
-                        variant={formData.mentorshipStyle.includes("course") ? "default" : "outline"}
-                        className={formData.mentorshipStyle.includes("course") ? "bg-[#FFD500] text-black" : ""}
+                        variant={
+                          formData.mentorshipStyle.includes("course")
+                            ? "default"
+                            : "outline"
+                        }
+                        className={
+                          formData.mentorshipStyle.includes("course")
+                            ? "bg-[#FFD500] text-black"
+                            : ""
+                        }
                         onClick={() => toggleMentorshipStyle("course")}
                       >
                         Courses
@@ -319,7 +404,9 @@ export default function MentorOnboardingPage() {
                     <Textarea
                       id="achievements"
                       value={formData.achievements}
-                      onChange={(e) => updateFormData("achievements", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("achievements", e.target.value)
+                      }
                       placeholder="Share your biggest professional achievements (e.g., 'Scaled 3 businesses to 7-figures', 'Raised $10M for startups')"
                       rows={3}
                       required
@@ -331,7 +418,9 @@ export default function MentorOnboardingPage() {
                       <Upload className="h-5 w-5 text-gray-500" />
                       <div>
                         <p className="font-medium">Upload Profile Photo</p>
-                        <p className="text-sm text-gray-500">Professional headshot recommended (JPG, PNG)</p>
+                        <p className="text-sm text-gray-500">
+                          Professional headshot recommended (JPG, PNG)
+                        </p>
                       </div>
                     </div>
                     <Button variant="outline" className="w-full">
@@ -343,26 +432,38 @@ export default function MentorOnboardingPage() {
                     <Label>Social Media & Website</Label>
                     <div className="grid grid-cols-1 gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium w-24">LinkedIn:</span>
+                        <span className="text-sm font-medium w-24">
+                          LinkedIn:
+                        </span>
                         <Input
                           value={formData.linkedinUrl}
-                          onChange={(e) => updateFormData("linkedinUrl", e.target.value)}
+                          onChange={(e) =>
+                            updateFormData("linkedinUrl", e.target.value)
+                          }
                           placeholder="https://linkedin.com/in/yourprofile"
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium w-24">Twitter:</span>
+                        <span className="text-sm font-medium w-24">
+                          Twitter:
+                        </span>
                         <Input
                           value={formData.twitterUrl}
-                          onChange={(e) => updateFormData("twitterUrl", e.target.value)}
+                          onChange={(e) =>
+                            updateFormData("twitterUrl", e.target.value)
+                          }
                           placeholder="https://twitter.com/yourhandle"
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium w-24">Website:</span>
+                        <span className="text-sm font-medium w-24">
+                          Website:
+                        </span>
                         <Input
                           value={formData.websiteUrl}
-                          onChange={(e) => updateFormData("websiteUrl", e.target.value)}
+                          onChange={(e) =>
+                            updateFormData("websiteUrl", e.target.value)
+                          }
                           placeholder="https://yourwebsite.com"
                         />
                       </div>
@@ -374,63 +475,121 @@ export default function MentorOnboardingPage() {
 
             {step === 4 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold mb-4">Availability & Scheduling</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  Availability & Scheduling
+                </h2>
 
                 <div className="space-y-4">
                   <Label>Available Days (Select all that apply)</Label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
                     <Button
                       type="button"
-                      variant={formData.availability.includes("monday") ? "default" : "outline"}
-                      className={formData.availability.includes("monday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("monday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("monday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("monday")}
                     >
                       Monday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("tuesday") ? "default" : "outline"}
-                      className={formData.availability.includes("tuesday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("tuesday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("tuesday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("tuesday")}
                     >
                       Tuesday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("wednesday") ? "default" : "outline"}
-                      className={formData.availability.includes("wednesday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("wednesday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("wednesday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("wednesday")}
                     >
                       Wednesday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("thursday") ? "default" : "outline"}
-                      className={formData.availability.includes("thursday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("thursday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("thursday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("thursday")}
                     >
                       Thursday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("friday") ? "default" : "outline"}
-                      className={formData.availability.includes("friday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("friday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("friday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("friday")}
                     >
                       Friday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("saturday") ? "default" : "outline"}
-                      className={formData.availability.includes("saturday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("saturday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("saturday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("saturday")}
                     >
                       Saturday
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.availability.includes("sunday") ? "default" : "outline"}
-                      className={formData.availability.includes("sunday") ? "bg-[#FFD500] text-black" : ""}
+                      variant={
+                        formData.availability.includes("sunday")
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        formData.availability.includes("sunday")
+                          ? "bg-[#FFD500] text-black"
+                          : ""
+                      }
                       onClick={() => toggleAvailability("sunday")}
                     >
                       Sunday
@@ -442,11 +601,16 @@ export default function MentorOnboardingPage() {
                       <Calendar className="h-5 w-5 text-gray-500" />
                       <div>
                         <p className="font-medium">Calendar Integration</p>
-                        <p className="text-sm text-gray-500">Connect your calendar to manage availability</p>
+                        <p className="text-sm text-gray-500">
+                          Connect your calendar to manage availability
+                        </p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <Button variant="outline" className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
                         <svg viewBox="0 0 24 24" className="h-5 w-5">
                           <path
                             d="M20.64 12.2c0-.63-.06-1.25-.16-1.84H12v3.49h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z"
@@ -467,8 +631,14 @@ export default function MentorOnboardingPage() {
                         </svg>
                         Google Calendar
                       </Button>
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-500">
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-5 w-5 text-blue-500"
+                        >
                           <path
                             d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"
                             fill="currentColor"
@@ -484,13 +654,16 @@ export default function MentorOnboardingPage() {
 
             {step === 5 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold mb-4">Commission Structure & Programs</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  Commission Structure & Programs
+                </h2>
 
                 <div className="space-y-6">
                   <div className="bg-[#f8f8f8] p-6 rounded-lg border border-gray-200">
                     <h3 className="font-bold mb-4">Commission Tiers</h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      The more sessions you conduct, the lower our commission rates. Here's how it works:
+                      The more sessions you conduct, the lower our commission
+                      rates. Here's how it works:
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="p-3 bg-white rounded-lg border border-gray-200 text-center">
@@ -522,19 +695,26 @@ export default function MentorOnboardingPage() {
                       <div>
                         <h3 className="font-bold">Program Creation</h3>
                         <p className="text-sm text-gray-500">
-                          After approval, you'll be able to create your own mentorship programs
+                          After approval, you'll be able to create your own
+                          mentorship programs
                         </p>
                       </div>
                     </div>
 
                     <Tabs defaultValue="one-on-one" className="mt-4">
                       <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="one-on-one">1:1 Programs</TabsTrigger>
+                        <TabsTrigger value="one-on-one">
+                          1:1 Programs
+                        </TabsTrigger>
                         <TabsTrigger value="group">Group Programs</TabsTrigger>
                       </TabsList>
-                      <TabsContent value="one-on-one" className="p-4 bg-white rounded-lg mt-2">
+                      <TabsContent
+                        value="one-on-one"
+                        className="p-4 bg-white rounded-lg mt-2"
+                      >
                         <p className="text-sm text-gray-600 mb-4">
-                          Create personalized 1:1 mentorship programs with the following recommendations:
+                          Create personalized 1:1 mentorship programs with the
+                          following recommendations:
                         </p>
                         <ul className="space-y-2 text-sm">
                           <li className="flex items-center gap-2">
@@ -543,7 +723,8 @@ export default function MentorOnboardingPage() {
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            Set your own pricing (recommended: $100-$300 per session)
+                            Set your own pricing (recommended: $100-$300 per
+                            session)
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -551,9 +732,13 @@ export default function MentorOnboardingPage() {
                           </li>
                         </ul>
                       </TabsContent>
-                      <TabsContent value="group" className="p-4 bg-white rounded-lg mt-2">
+                      <TabsContent
+                        value="group"
+                        className="p-4 bg-white rounded-lg mt-2"
+                      >
                         <p className="text-sm text-gray-600 mb-4">
-                          Create group mentorship programs with the following recommendations:
+                          Create group mentorship programs with the following
+                          recommendations:
                         </p>
                         <ul className="space-y-2 text-sm">
                           <li className="flex items-center gap-2">
@@ -562,11 +747,13 @@ export default function MentorOnboardingPage() {
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            Set group size limits (recommended: 5-15 participants)
+                            Set group size limits (recommended: 5-15
+                            participants)
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            Price competitively (recommended: $50-$150 per participant per session)
+                            Price competitively (recommended: $50-$150 per
+                            participant per session)
                           </li>
                         </ul>
                       </TabsContent>
@@ -577,11 +764,17 @@ export default function MentorOnboardingPage() {
                     <Checkbox id="terms" />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to Mentwork's{" "}
-                      <Link href="/terms" className="text-blue-600 hover:underline">
+                      <Link
+                        href="/terms"
+                        className="text-blue-600 hover:underline"
+                      >
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="text-blue-600 hover:underline">
+                      <Link
+                        href="/privacy"
+                        className="text-blue-600 hover:underline"
+                      >
                         Privacy Policy
                       </Link>
                     </Label>
@@ -592,7 +785,12 @@ export default function MentorOnboardingPage() {
 
             <div className="flex justify-between mt-8">
               {step > 1 ? (
-                <Button type="button" variant="outline" onClick={prevStep} className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex items-center gap-2"
+                >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
               ) : (
@@ -613,7 +811,8 @@ export default function MentorOnboardingPage() {
                   onClick={handleSubmit}
                   className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
                 >
-                  Complete Registration <CheckCircle2 className="h-4 w-4 ml-2" />
+                  Complete Registration{" "}
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
                 </Button>
               )}
             </div>
@@ -621,5 +820,5 @@ export default function MentorOnboardingPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

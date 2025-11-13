@@ -1,23 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, ArrowRight, CheckCircle2, Building, Briefcase, Target, Users } from "lucide-react"
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  SECTORS,
+  SKILLS_CAPABILITIES,
+  getSkillsForSectors,
+  getSkillsGroupedBySector,
+} from "@/lib/constants/onboarding";
 
 export default function OnboardingPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1)
+  const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     goal: "",
     name: "",
@@ -25,40 +38,69 @@ export default function OnboardingPage() {
     industry: "",
     businessStage: "",
     supportAreas: [] as string[],
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
     specificGoals: "",
     timeframe: "",
-  })
+  });
 
   const updateFormData = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const toggleSupportArea = (area: string) => {
     setFormData((prev) => {
-      const currentAreas = [...prev.supportAreas]
+      const currentAreas = [...prev.supportAreas];
       if (currentAreas.includes(area)) {
-        return { ...prev, supportAreas: currentAreas.filter((a) => a !== area) }
+        return {
+          ...prev,
+          supportAreas: currentAreas.filter((a) => a !== area),
+        };
       } else {
-        return { ...prev, supportAreas: [...currentAreas, area] }
+        return { ...prev, supportAreas: [...currentAreas, area] };
       }
-    })
-  }
+    });
+  };
+
+  const subSectorSkillsOptions = useMemo(() => {
+    const sectorSkills = getSkillsForSectors(formData.selectedSectors);
+    return sectorSkills.map((skill) => ({ value: skill, label: skill }));
+  }, [formData.selectedSectors]);
+
+  const subSectorSkillsGrouped = useMemo(() => {
+    if (formData.selectedSectors.length === 0) return [];
+
+    const grouped = getSkillsGroupedBySector(formData.selectedSectors);
+    return grouped.map((group) => ({
+      groupLabel: group.sectorName,
+      options: group.skills.map((skill) => ({ value: skill, label: skill })),
+    }));
+  }, [formData.selectedSectors]);
+
+  const skillsCapabilitiesOptions = useMemo(() => {
+    return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }));
+  }, []);
+
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
+  }, []);
 
   const nextStep = () => {
-    setStep((prev) => prev + 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev + 1);
+    window.scrollTo(0, 0);
+  };
 
   const prevStep = () => {
-    setStep((prev) => prev - 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // In a real app, you would submit the data to your backend
-    router.push("/dashboard")
-  }
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12">
@@ -66,12 +108,18 @@ export default function OnboardingPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-8">
             <Link href="/">
-              <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
+              <img
+                src="/images/mentwork-logo.png"
+                alt="Mentwork"
+                className="h-8"
+              />
             </Link>
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold">Let's Personalize Your Journey</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Let's Personalize Your Journey
+            </h1>
             <div className="text-sm font-medium">Step {step} of 4</div>
           </div>
 
@@ -91,7 +139,9 @@ export default function OnboardingPage() {
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="goal">Share your main professional goal</Label>
+                    <Label htmlFor="goal">
+                      Share your main professional goal
+                    </Label>
                     <Textarea
                       id="goal"
                       value={formData.goal}
@@ -103,8 +153,15 @@ export default function OnboardingPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="timeframe">When do you want to achieve this?</Label>
-                    <Select value={formData.timeframe} onValueChange={(value) => updateFormData("timeframe", value)}>
+                    <Label htmlFor="timeframe">
+                      When do you want to achieve this?
+                    </Label>
+                    <Select
+                      value={formData.timeframe}
+                      onValueChange={(value) =>
+                        updateFormData("timeframe", value)
+                      }
+                    >
                       <SelectTrigger id="timeframe">
                         <SelectValue placeholder="Select a timeframe" />
                       </SelectTrigger>
@@ -123,7 +180,9 @@ export default function OnboardingPage() {
 
             {step === 2 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold mb-4">Tell us about yourself</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  Tell us about yourself
+                </h2>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
@@ -144,7 +203,9 @@ export default function OnboardingPage() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("email", e.target.value)
+                        }
                         placeholder="Enter your email address"
                         required
                       />
@@ -152,7 +213,12 @@ export default function OnboardingPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="industry">Industry</Label>
-                      <Select value={formData.industry} onValueChange={(value) => updateFormData("industry", value)}>
+                      <Select
+                        value={formData.industry}
+                        onValueChange={(value) =>
+                          updateFormData("industry", value)
+                        }
+                      >
                         <SelectTrigger id="industry">
                           <SelectValue placeholder="Select your industry" />
                         </SelectTrigger>
@@ -162,8 +228,12 @@ export default function OnboardingPage() {
                           <SelectItem value="healthcare">Healthcare</SelectItem>
                           <SelectItem value="education">Education</SelectItem>
                           <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                          <SelectItem value="agriculture">Agriculture</SelectItem>
+                          <SelectItem value="manufacturing">
+                            Manufacturing
+                          </SelectItem>
+                          <SelectItem value="agriculture">
+                            Agriculture
+                          </SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -181,7 +251,9 @@ export default function OnboardingPage() {
                   <Label>What stage is your business at?</Label>
                   <RadioGroup
                     value={formData.businessStage}
-                    onValueChange={(value) => updateFormData("businessStage", value)}
+                    onValueChange={(value) =>
+                      updateFormData("businessStage", value)
+                    }
                     className="space-y-3"
                   >
                     <div className="flex items-center space-x-2">
@@ -191,7 +263,10 @@ export default function OnboardingPage() {
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="early-startup" id="early-startup" />
+                      <RadioGroupItem
+                        value="early-startup"
+                        id="early-startup"
+                      />
                       <Label htmlFor="early-startup" className="font-normal">
                         Early Startup (Pre-revenue)
                       </Label>
@@ -223,41 +298,57 @@ export default function OnboardingPage() {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Areas of Support</h2>
 
-                <div className="space-y-4">
-                  <Label>What areas do you need support with? (Select all that apply)</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                    <Button
-                      type="button"
-                      variant={formData.supportAreas.includes("funding") ? "default" : "outline"}
-                      className={formData.supportAreas.includes("funding") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleSupportArea("funding")}
-                    >
-                      <Building className="mr-2 h-4 w-4" /> Funding & Investment
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.supportAreas.includes("marketing") ? "default" : "outline"}
-                      className={formData.supportAreas.includes("marketing") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleSupportArea("marketing")}
-                    >
-                      <Target className="mr-2 h-4 w-4" /> Marketing & Visibility
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.supportAreas.includes("operations") ? "default" : "outline"}
-                      className={formData.supportAreas.includes("operations") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleSupportArea("operations")}
-                    >
-                      <Briefcase className="mr-2 h-4 w-4" /> Operations & Processes
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={formData.supportAreas.includes("team") ? "default" : "outline"}
-                      className={formData.supportAreas.includes("team") ? "bg-[#FFD500] text-black" : ""}
-                      onClick={() => toggleSupportArea("team")}
-                    >
-                      <Users className="mr-2 h-4 w-4" /> Team & Leadership
-                    </Button>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Sector</Label>
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.selectedSectors}
+                      onSelectionChange={(selected) => {
+                        updateFormData("selectedSectors", selected);
+                        // Clear sub-sector skills when sectors change
+                        const newSubSectorSkills =
+                          getSkillsForSectors(selected);
+                        updateFormData(
+                          "selectedSubSectorSkills",
+                          formData.selectedSubSectorSkills.filter((skill) =>
+                            newSubSectorSkills.includes(skill)
+                          )
+                        );
+                      }}
+                      placeholder="Select sector"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Sub-Sector (Skill)</Label>
+                    <MultiSelect
+                      options={subSectorSkillsOptions}
+                      selected={formData.selectedSubSectorSkills}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSubSectorSkills", selected)
+                      }
+                      placeholder="Select skill"
+                      disabled={formData.selectedSectors.length === 0}
+                      groupedOptions={subSectorSkillsGrouped}
+                    />
+                    {formData.selectedSectors.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Please select a sector first
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Skills & Capabilities</Label>
+                    <MultiSelect
+                      options={skillsCapabilitiesOptions}
+                      selected={formData.selectedSkillsCapabilities}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSkillsCapabilities", selected)
+                      }
+                      placeholder="Select skills & capabilities"
+                    />
                   </div>
 
                   <div className="space-y-2 mt-6">
@@ -265,7 +356,9 @@ export default function OnboardingPage() {
                     <Textarea
                       id="specificGoals"
                       value={formData.specificGoals}
-                      onChange={(e) => updateFormData("specificGoals", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("specificGoals", e.target.value)
+                      }
                       placeholder="What specific objectives do you want to achieve through mentorship?"
                       rows={4}
                     />
@@ -276,7 +369,12 @@ export default function OnboardingPage() {
 
             <div className="flex justify-between mt-8">
               {step > 1 ? (
-                <Button type="button" variant="outline" onClick={prevStep} className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex items-center gap-2"
+                >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
               ) : (
@@ -297,7 +395,7 @@ export default function OnboardingPage() {
                   onClick={handleSubmit}
                   className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
                 >
-                  Find My Mentors <CheckCircle2 className="h-4 w-4 ml-2" />
+                  Find My Programs <CheckCircle2 className="h-4 w-4 ml-2" />
                 </Button>
               )}
             </div>
@@ -305,5 +403,5 @@ export default function OnboardingPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

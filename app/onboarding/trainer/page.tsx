@@ -1,23 +1,37 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  SECTORS,
+  SKILLS_CAPABILITIES,
+  getSkillsForSectors,
+  getSkillsGroupedBySector,
+} from "@/lib/constants/onboarding";
+import { useMemo } from "react";
 
 export default function TrainerOnboardingPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1)
+  const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,61 +39,68 @@ export default function TrainerOnboardingPage() {
     industry: "",
     experience: "",
     expertise: [] as string[],
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
     bio: "",
     achievements: "",
     linkedinUrl: "",
     websiteUrl: "",
-  })
+  });
 
   const updateFormData = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const toggleExpertise = (area: string) => {
     setFormData((prev) => {
-      const currentAreas = [...prev.expertise]
+      const currentAreas = [...prev.expertise];
       if (currentAreas.includes(area)) {
-        return { ...prev, expertise: currentAreas.filter((a) => a !== area) }
+        return { ...prev, expertise: currentAreas.filter((a) => a !== area) };
       } else {
-        return { ...prev, expertise: [...currentAreas, area] }
+        return { ...prev, expertise: [...currentAreas, area] };
       }
-    })
-  }
+    });
+  };
+
+  const subSectorSkillsOptions = useMemo(() => {
+    const sectorSkills = getSkillsForSectors(formData.selectedSectors);
+    return sectorSkills.map((skill) => ({ value: skill, label: skill }));
+  }, [formData.selectedSectors]);
+
+  const subSectorSkillsGrouped = useMemo(() => {
+    if (formData.selectedSectors.length === 0) return [];
+
+    const grouped = getSkillsGroupedBySector(formData.selectedSectors);
+    return grouped.map((group) => ({
+      groupLabel: group.sectorName,
+      options: group.skills.map((skill) => ({ value: skill, label: skill })),
+    }));
+  }, [formData.selectedSectors]);
+
+  const skillsCapabilitiesOptions = useMemo(() => {
+    return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }));
+  }, []);
+
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
+  }, []);
 
   const nextStep = () => {
-    setStep((prev) => prev + 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev + 1);
+    window.scrollTo(0, 0);
+  };
 
   const prevStep = () => {
-    setStep((prev) => prev - 1)
-    window.scrollTo(0, 0)
-  }
+    setStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // In a real app, you would submit the data to your backend
-    router.push("/trainer/dashboard")
-  }
-
-  const expertiseOptions = [
-    "Digital Marketing",
-    "Business Strategy",
-    "Leadership",
-    "Product Management",
-    "Data Science",
-    "Software Development",
-    "UX/UI Design",
-    "Sales",
-    "Finance",
-    "Operations",
-    "HR",
-    "Project Management",
-    "Entrepreneurship",
-    "E-commerce",
-    "Content Marketing",
-    "SEO",
-  ]
+    router.push("/trainer/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12">
@@ -87,7 +108,11 @@ export default function TrainerOnboardingPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-8">
             <Link href="/">
-              <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
+              <img
+                src="/images/mentwork-logo.png"
+                alt="Mentwork"
+                className="h-8"
+              />
             </Link>
           </div>
 
@@ -109,7 +134,9 @@ export default function TrainerOnboardingPage() {
             {step === 1 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Personal Information</h2>
+                  <h2 className="text-xl font-bold mb-2">
+                    Personal Information
+                  </h2>
                   <p className="text-gray-600">Tell us about yourself</p>
                 </div>
 
@@ -132,7 +159,9 @@ export default function TrainerOnboardingPage() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("email", e.target.value)
+                        }
                         placeholder="Enter your email address"
                         required
                       />
@@ -143,7 +172,9 @@ export default function TrainerOnboardingPage() {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => updateFormData("title", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("title", e.target.value)
+                        }
                         placeholder="e.g., Senior Digital Marketing Manager"
                         required
                       />
@@ -151,7 +182,12 @@ export default function TrainerOnboardingPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="industry">Primary Industry *</Label>
-                      <Select value={formData.industry} onValueChange={(value) => updateFormData("industry", value)}>
+                      <Select
+                        value={formData.industry}
+                        onValueChange={(value) =>
+                          updateFormData("industry", value)
+                        }
+                      >
                         <SelectTrigger id="industry">
                           <SelectValue placeholder="Select your industry" />
                         </SelectTrigger>
@@ -171,7 +207,9 @@ export default function TrainerOnboardingPage() {
                       <Label htmlFor="experience">Years of Experience *</Label>
                       <Select
                         value={formData.experience}
-                        onValueChange={(value) => updateFormData("experience", value)}
+                        onValueChange={(value) =>
+                          updateFormData("experience", value)
+                        }
                       >
                         <SelectTrigger id="experience">
                           <SelectValue placeholder="Select your experience level" />
@@ -197,23 +235,57 @@ export default function TrainerOnboardingPage() {
                   <p className="text-gray-600">What areas do you train in?</p>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label>Areas of Expertise * (Select all that apply)</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-                      {expertiseOptions.map((skill) => (
-                        <Button
-                          key={skill}
-                          type="button"
-                          variant={formData.expertise.includes(skill) ? "default" : "outline"}
-                          size="sm"
-                          className={formData.expertise.includes(skill) ? "bg-[#FFD500] text-black" : ""}
-                          onClick={() => toggleExpertise(skill)}
-                        >
-                          {skill}
-                        </Button>
-                      ))}
-                    </div>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Sector</Label>
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.selectedSectors}
+                      onSelectionChange={(selected) => {
+                        updateFormData("selectedSectors", selected);
+                        // Clear sub-sector skills when sectors change
+                        const newSubSectorSkills =
+                          getSkillsForSectors(selected);
+                        updateFormData(
+                          "selectedSubSectorSkills",
+                          formData.selectedSubSectorSkills.filter((skill) =>
+                            newSubSectorSkills.includes(skill)
+                          )
+                        );
+                      }}
+                      placeholder="Select sector"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Sub-Sector (Skill)</Label>
+                    <MultiSelect
+                      options={subSectorSkillsOptions}
+                      selected={formData.selectedSubSectorSkills}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSubSectorSkills", selected)
+                      }
+                      placeholder="Select skill"
+                      disabled={formData.selectedSectors.length === 0}
+                      groupedOptions={subSectorSkillsGrouped}
+                    />
+                    {formData.selectedSectors.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Please select a sector first
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Skills & Capabilities</Label>
+                    <MultiSelect
+                      options={skillsCapabilitiesOptions}
+                      selected={formData.selectedSkillsCapabilities}
+                      onSelectionChange={(selected) =>
+                        updateFormData("selectedSkillsCapabilities", selected)
+                      }
+                      placeholder="Select skills & capabilities"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -233,7 +305,9 @@ export default function TrainerOnboardingPage() {
                     <Textarea
                       id="achievements"
                       value={formData.achievements}
-                      onChange={(e) => updateFormData("achievements", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("achievements", e.target.value)
+                      }
                       placeholder="Share your biggest professional achievements (e.g., 'Trained 500+ professionals', 'Built 3 successful programs')"
                       rows={3}
                     />
@@ -245,8 +319,12 @@ export default function TrainerOnboardingPage() {
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Complete Your Profile</h2>
-                  <p className="text-gray-600">Add your social links and confirm</p>
+                  <h2 className="text-xl font-bold mb-2">
+                    Complete Your Profile
+                  </h2>
+                  <p className="text-gray-600">
+                    Add your social links and confirm
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -255,7 +333,9 @@ export default function TrainerOnboardingPage() {
                     <Input
                       id="linkedinUrl"
                       value={formData.linkedinUrl}
-                      onChange={(e) => updateFormData("linkedinUrl", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("linkedinUrl", e.target.value)
+                      }
                       placeholder="https://linkedin.com/in/yourprofile"
                     />
                   </div>
@@ -265,21 +345,31 @@ export default function TrainerOnboardingPage() {
                     <Input
                       id="websiteUrl"
                       value={formData.websiteUrl}
-                      onChange={(e) => updateFormData("websiteUrl", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("websiteUrl", e.target.value)
+                      }
                       placeholder="https://yourwebsite.com"
                     />
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
-                    <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
+                    <h3 className="font-semibold text-blue-900 mb-2">
+                      What's Next?
+                    </h3>
                     <ul className="space-y-2 text-sm text-blue-800">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span>Your trainer profile will be created and visible to learners</span>
+                        <span>
+                          Your trainer profile will be created and visible to
+                          learners
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span>Access your trainer dashboard to create your first program</span>
+                        <span>
+                          Access your trainer dashboard to create your first
+                          program
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -292,11 +382,17 @@ export default function TrainerOnboardingPage() {
                     <Checkbox id="terms" />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to Mentwork's{" "}
-                      <Link href="/terms" className="text-blue-600 hover:underline">
+                      <Link
+                        href="/terms"
+                        className="text-blue-600 hover:underline"
+                      >
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="text-blue-600 hover:underline">
+                      <Link
+                        href="/privacy"
+                        className="text-blue-600 hover:underline"
+                      >
                         Privacy Policy
                       </Link>
                     </Label>
@@ -333,7 +429,8 @@ export default function TrainerOnboardingPage() {
                   onClick={handleSubmit}
                   className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
                 >
-                  Complete Registration <CheckCircle2 className="h-4 w-4 ml-2" />
+                  Complete Registration{" "}
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
                 </Button>
               )}
             </div>
@@ -341,5 +438,5 @@ export default function TrainerOnboardingPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

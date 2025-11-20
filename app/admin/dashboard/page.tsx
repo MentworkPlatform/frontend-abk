@@ -260,6 +260,18 @@ export default function AdminDashboardPage() {
         
         <Card className="overflow-hidden border-none shadow-md">
           <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-white">
-            <CardTitle className="text-sm font-medium text-gray-500 flex items-center"/>
-
-\
+            <CardTitle className="text-sm font-medium text-gray-500 flex items-center">
+              Total Revenue
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="text-2xl font-bold">$24,230</div>
+            <div className="text-xs text-gray-500 mt-1">
+              From {schoolPrograms.length} programs
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

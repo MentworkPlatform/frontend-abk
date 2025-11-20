@@ -570,13 +570,87 @@ export default function MentorIntegrationsPage() {
                             <svg viewBox="0 0 24 24" className="h-8 w-8 text-purple-600">
                               <path
                                 fill="currentColor"
-                                d="M12.5,1.5c-7.18,0-13,5.82-13,13s5.82,13,13,13s13-5.82,13-13S19.68,1.5,12.5,1.5z M21.18,14.18h-3.04 c-0.26,1.52-0.9,2.93-1.88,4.07c1.66-0.79,3.06-2.07,3.92-3.66C20.51,14.47,20.87,14.34,21.18,14.18z M19.36,8.82 c-0.85-1.59-2.26-2.88-3.92-3.66c0.97,1.14,1.62,2.54,1.88,4.07h3.04C20.04,9.06,19.68,8.93,19.36,8.82z M8.68,12.5 c0-1.35,0.45-2.6,1.21-3.61c-0.71-0.33-1.5-0.52-2.33-0.52c-3.08,0-5.58,2.49-5.58,5.58c0,3.08,2.49,5.58,5.58,5.58 c0.83,0,1.62-0.19,2.33-0.52C9.13,15.1,8.68,13.85,8.68,12.5z M12.5,8.68c-2.21,0-4,1.79-4,4s1.79,4,4,4s4-
-### Mentor Goals, Subscriptions, and Enhanced Program Management
+                                d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252 1.19 15.697.5 13.221.5c-3.077 0-5.19 1.714-5.19 4.1 0 2.05 1.58 3.095 4.819 4.243 2.172.806 3.356 1.426 3.356 2.409 0 .98-.84 1.545-2.354 1.545-1.875 0-4.549-.794-6.381-1.737L2.5 20.978c1.872.936 4.58 1.522 7.221 1.522 3.181 0 5.19-1.714 5.19-4.1 0-2.05-1.58-3.095-4.935-4.25z"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Stripe</h3>
+                            <p className="text-sm text-gray-500">
+                              {stripeConnected ? "Connected" : "Connect to receive payments via Stripe"}
+                            </p>
+                          </div>
+                        </div>
+                        {stripeConnected ? (
+                          <Button variant="outline" onClick={() => disconnectService('stripe')}>
+                            Disconnect
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => connectService('stripe')}
+                            disabled={connectingService === 'stripe'}
+                            className="bg-[#635BFF] hover:bg-[#5548ff]"
+                          >
+                            {connectingService === 'stripe' ? (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Connecting...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="mr-2 h-4 w-4" /> Connect
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
 
-I'll implement a comprehensive system for mentors to set goals, manage subscriptions, and get enhanced program management and meeting integration. Here's how we'll approach this:
-
-## Mentor Goals and Smart Recommendations
-
-First, let's create a mentor goals page where mentors can define their objectives, which will then power automated program recommendations:
-
-\
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <svg viewBox="0 0 24 24" className="h-8 w-8 text-blue-600">
+                              <path
+                                fill="currentColor"
+                                d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.203zm14.146-14.42a.805.805 0 0 0-.796.96c.01.06.01.12.02.18.14 1.28.18 2.38.1 3.23-.08.85-.24 1.45-.48 1.81-.25.36-.6.55-1.05.55h-4.75c-.52 0-.97.38-1.05.9l-1.12 7.2c-.08.52.11.96.51 1.18.4.22.9.2 1.35-.05l12.7-7.27c.4-.23.66-.68.66-1.18 0-.5-.26-.95-.66-1.18l-12.7-7.27c-.45-.26-1-.27-1.4-.05-.4.22-.6.66-.52 1.18l1.12 7.2c.08.52.53.9 1.05.9h4.75c.45 0 .8.19 1.05.55.24.36.4.96.48 1.81.08.85.04 1.95-.1 3.23a.805.805 0 0 0 .796.96h.02c.4 0 .75-.3.82-.7l1.12-7.2c.08-.52-.11-.96-.51-1.18z"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="font-medium">PayPal</h3>
+                            <p className="text-sm text-gray-500">
+                              {paypalConnected ? "Connected" : "Connect to receive payments via PayPal"}
+                            </p>
+                          </div>
+                        </div>
+                        {paypalConnected ? (
+                          <Button variant="outline" onClick={() => disconnectService('paypal')}>
+                            Disconnect
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => connectService('paypal')}
+                            disabled={connectingService === 'paypal'}
+                            className="bg-[#0070BA] hover:bg-[#005ea6]"
+                          >
+                            {connectingService === 'paypal' ? (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Connecting...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="mr-2 h-4 w-4" /> Connect
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  )
+}

@@ -1061,4 +1061,9 @@ export default function EditProgramPage() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent\
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}

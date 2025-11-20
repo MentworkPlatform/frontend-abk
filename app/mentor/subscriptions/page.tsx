@@ -140,7 +140,8 @@ export default function MentorSubscriptionsPage() {
 
   // Get price based on billing cycle
   const getPlanPrice = (plan: any) => {
-    return plan.price[selectedBillingCycle]
+    if (!plan || !plan.price) return 0
+    return plan.price[selectedBillingCycle] || 0
   }
 
   // Get billing cycle discount info
@@ -654,29 +655,30 @@ export default function MentorSubscriptionsPage() {
       </div>
 
       {/* Checkout Dialog */}
-      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+      <Dialog open={checkoutOpen && selectedPlan !== null} onOpenChange={setCheckoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Subscribe to {getSelectedPlan()?.name} Plan</DialogTitle>
+            <DialogTitle>Subscribe to {getSelectedPlan()?.name || "Plan"} Plan</DialogTitle>
             <DialogDescription>
               Upgrade your mentor account to eliminate commissions and unlock premium features
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handlePaymentSubmit}>
-            <div className="space-y-4 py-4">
-              <div className="border-b pb-4">
-                <div className="flex justify-between mb-2">
-                  <span>
-                    {getSelectedPlan()?.name} Plan ({getBillingCycleInfo().label})
-                  </span>
-                  <span>
-                    ${getPlanPrice(getSelectedPlan())}/{getBillingCycleInfo().period}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Commission Rate</span>
-                  <span>{getSelectedPlan()?.commissionStructure}</span>
-                </div>
+          {getSelectedPlan() && (
+            <form onSubmit={handlePaymentSubmit}>
+              <div className="space-y-4 py-4">
+                <div className="border-b pb-4">
+                  <div className="flex justify-between mb-2">
+                    <span>
+                      {getSelectedPlan()?.name} Plan ({getBillingCycleInfo().label})
+                    </span>
+                    <span>
+                      ${getPlanPrice(getSelectedPlan())}/{getBillingCycleInfo().period}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Commission Rate</span>
+                    <span>{getSelectedPlan()?.commissionStructure}</span>
+                  </div>
                 {getBillingCycleInfo().discount && (
                   <div className="flex justify-between text-sm text-green-600 mt-1">
                     <span>Discount</span>
@@ -755,6 +757,7 @@ export default function MentorSubscriptionsPage() {
               </Button>
             </DialogFooter>
           </form>
+          )}
         </DialogContent>
       </Dialog>
 

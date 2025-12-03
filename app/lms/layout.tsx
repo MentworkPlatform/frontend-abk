@@ -8,10 +8,8 @@ import {
   BarChart3,
   BookOpen,
   Users,
-  MessageSquare,
   Settings,
   Bell,
-  Search,
   User,
   GraduationCap,
   Rocket,
@@ -19,7 +17,6 @@ import {
 import { Suspense } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -36,7 +33,6 @@ const navigation = [
   // Changed the href for Pre-Launch to point to a new overview page
   { name: "Pre-Launch", href: "/lms/programs/pre-launch-overview", icon: Rocket },
   { name: "Students", href: "/lms/students", icon: Users },
-  { name: "Messages", href: "/lms/messages", icon: MessageSquare },
   { name: "Analytics", href: "/lms/analytics", icon: BarChart3 },
   { name: "Settings", href: "/lms/settings", icon: Settings },
 ]
@@ -84,11 +80,6 @@ export default function LMSLayout({
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input placeholder="Search programs, students..." className="pl-10 w-64" />
-                </div>
-
                 <Button variant="ghost" size="icon">
                   <Bell className="h-5 w-5" />
                 </Button>

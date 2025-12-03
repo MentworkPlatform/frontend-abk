@@ -6,26 +6,20 @@ import { useParams } from "next/navigation"
 import {
   ArrowLeft,
   Users,
-  Star,
   BookOpen,
   Play,
   Settings,
-  MessageSquare,
-  Download,
   Eye,
   BarChart3,
   CalendarIcon,
   Award,
-  TrendingUp,
   Rocket,
-  DollarSign,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function LMSProgramDetail() {
@@ -120,40 +114,12 @@ export default function LMSProgramDetail() {
                   Public View
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href={`/lms/programs/${programId}/manage`}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-6 py-8">
-        {/* Pre-Launch Notice */}
-        {program.status === "pre-launch" && (
-          <Card className="mb-8 border-yellow-200 bg-yellow-50">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <Rocket className="h-8 w-8 text-yellow-600" />
-                <div className="flex-1">
-                  <h3 className="font-medium text-yellow-800">Program in Pre-Launch Phase</h3>
-                  <p className="text-sm text-yellow-700">
-                    This program is scheduled to launch on {new Date(program.launchDate).toLocaleDateString()}(
-                    {program.daysUntilLaunch} days remaining). Use the pre-launch management tools to prepare for
-                    launch.
-                  </p>
-                </div>
-                <Button asChild>
-                  <Link href={`/lms/programs/${programId}/pre-launch`}>Manage Pre-Launch</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card>
@@ -185,49 +151,6 @@ export default function LMSProgramDetail() {
               <Progress value={program.completionRate} className="mt-2 h-2" />
             </CardContent>
           </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Average Rating</p>
-                  <p className="text-2xl font-bold">{program.rating || "N/A"}</p>
-                </div>
-                <Star className="h-8 w-8 text-yellow-500" />
-              </div>
-              <p className="text-xs text-gray-500 mt-2">{program.reviews} reviews</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Revenue</p>
-                  <p className="text-2xl font-bold">${program.revenue.toLocaleString()}</p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
-              </div>
-              {program.status === "pre-launch" ? (
-                <p className="text-xs text-gray-500 mt-2">Launch to start earning</p>
-              ) : (
-                <p className="text-xs text-green-600 mt-2">+12% vs last month</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Engagement</p>
-                  <p className="text-2xl font-bold">{program.analytics.engagementRate}%</p>
-                </div>
-                <BarChart3 className="h-8 w-8 text-orange-500" />
-              </div>
-              <p className="text-xs text-gray-500 mt-2">{program.analytics.averageSessionTime} min avg</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Main Content */}
@@ -235,8 +158,6 @@ export default function LMSProgramDetail() {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -359,57 +280,12 @@ export default function LMSProgramDetail() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {program.status === "pre-launch" ? (
-                      <>
-                        <Button className="w-full justify-start" asChild>
-                          <Link href={`/lms/programs/${programId}/pre-launch`}>
-                            <Rocket className="h-4 w-4 mr-2" />
-                            Pre-Launch Management
-                          </Link>
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-                          <Link href={`/lms/programs/${programId}/manage`}>
-                            <Settings className="h-4 w-4 mr-2" />
-                            Edit Program
-                          </Link>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button className="w-full justify-start" asChild>
-                          <Link href={`/lms/programs/${programId}/manage`}>
-                            <Settings className="h-4 w-4 mr-2" />
-                            Edit Program
-                          </Link>
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start bg-transparent">
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Message Students
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start bg-transparent">
-                          <Download className="h-4 w-4 mr-2" />
-                          Export Data
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start bg-transparent">
-                          <CalendarIcon className="h-4 w-4 mr-2" />
-                          Schedule Session
-                        </Button>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
                     <CardTitle>Program Info</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Status</span>
+                        <span className="text-gray-500"></span>
                         <Badge variant={program.status === "pre-launch" ? "secondary" : "default"}>
                           {program.status}
                         </Badge>
@@ -496,11 +372,11 @@ export default function LMSProgramDetail() {
                               </div>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-gray-500">
-                              {topic.views !== undefined && <span>{topic.views} views</span>}
-                              {topic.downloads !== undefined && <span>{topic.downloads} downloads</span>}
-                              {topic.submissions !== undefined && <span>{topic.submissions} submissions</span>}
-                              {topic.attendees !== undefined && <span>{topic.attendees} attendees</span>}
-                              {topic.attempts !== undefined && <span>{topic.attempts} attempts</span>}
+                              {"views" in topic && topic.views !== undefined && <span>{topic.views} views</span>}
+                              {"downloads" in topic && topic.downloads !== undefined && <span>{topic.downloads} downloads</span>}
+                              {"submissions" in topic && topic.submissions !== undefined && <span>{topic.submissions} submissions</span>}
+                              {"attendees" in topic && topic.attendees !== undefined && <span>{topic.attendees} attendees</span>}
+                              {"attempts" in topic && topic.attempts !== undefined && <span>{topic.attempts} attempts</span>}
                               <Badge variant={topic.isPublished ? "default" : "secondary"} className="text-xs">
                                 {topic.isPublished ? "Live" : "Draft"}
                               </Badge>
@@ -513,132 +389,6 @@ export default function LMSProgramDetail() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="students">
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Management</CardTitle>
-                <CardDescription>Monitor student progress and engagement</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {program.status === "pre-launch" ? (
-                  <div className="text-center py-12">
-                    <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Yet</h3>
-                    <p className="text-gray-600">
-                      Students will appear here after program launch and enrollment begins.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {program.recentStudents.map((student) => (
-                      <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={student.avatar || "/placeholder.svg"} alt={student.name} />
-                            <AvatarFallback>
-                              {student.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-medium">{student.name}</h3>
-                            <p className="text-sm text-gray-500">{student.email}</p>
-                            <p className="text-xs text-gray-400">Last active: {student.lastActive}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-sm font-medium">{student.progress}% Complete</p>
-                            <Progress value={student.progress} className="w-24 h-2 mt-1" />
-                          </div>
-                          <Badge variant={student.status === "active" ? "default" : "secondary"}>
-                            {student.status}
-                          </Badge>
-                          <Button variant="outline" size="sm">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance Metrics</CardTitle>
-                  <CardDescription>Key performance indicators for your program</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {program.status === "pre-launch" ? (
-                    <div className="text-center py-8">
-                      <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600">Analytics will be available after program launch</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span>Engagement Rate</span>
-                        <span className="font-medium">{program.analytics.engagementRate}%</span>
-                      </div>
-                      <Progress value={program.analytics.engagementRate} />
-
-                      <div className="flex items-center justify-between">
-                        <span>Average Session Time</span>
-                        <span className="font-medium">{program.analytics.averageSessionTime} minutes</span>
-                      </div>
-                      <Progress value={(program.analytics.averageSessionTime / 60) * 100} />
-
-                      <div className="flex items-center justify-between">
-                        <span>Dropout Rate</span>
-                        <span className="font-medium">{program.analytics.dropoutRate}%</span>
-                      </div>
-                      <Progress value={program.analytics.dropoutRate} className="[&>div]:bg-red-500" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue Analytics</CardTitle>
-                  <CardDescription>Financial performance and trends</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {program.status === "pre-launch" ? (
-                    <div className="text-center py-8">
-                      <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600">Revenue tracking will begin after launch</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <p className="text-3xl font-bold">${program.revenue.toLocaleString()}</p>
-                        <p className="text-sm text-gray-500">Total Revenue</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <p className="text-xl font-bold">${Math.round(program.revenue / (program.students || 1))}</p>
-                          <p className="text-xs text-gray-500">Revenue per Student</p>
-                        </div>
-                        <div>
-                          <p className="text-xl font-bold">{program.enrollmentRate}%</p>
-                          <p className="text-xs text-gray-500">Monthly Growth</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </div>

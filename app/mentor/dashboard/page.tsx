@@ -225,357 +225,78 @@ export default function MentorDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Teaching Expertise Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Your Teaching Expertise
-          </CardTitle>
-          <CardDescription>Track your experience across all 6 entrepreneurial focus areas</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            {/* Progress Circle */}
-            <div className="relative w-32 h-32 flex-shrink-0">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="50" stroke="#f3f4f6" strokeWidth="8" fill="none" />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="50"
-                  stroke="#3b82f6"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${progressPercentage * 3.14} 314`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{taughtAreas}/6</div>
-                  <div className="text-xs text-muted-foreground">Areas</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Focus Areas Grid */}
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
-              {focusAreas.map((area, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    area.taught ? "border-green-200 bg-green-50" : "border-gray-200 bg-gray-50 hover:border-blue-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={`w-3 h-3 rounded-full ${area.color} ${!area.taught && "opacity-30"}`} />
-                    {area.taught && <CheckCircle className="h-4 w-4 text-green-600" />}
-                  </div>
-                  <p className={`text-sm font-medium ${area.taught ? "text-green-900" : "text-gray-600"}`}>
-                    {area.name}
-                  </p>
-                  {!area.taught && <p className="text-xs text-blue-600 mt-1">Growth opportunity</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">18</p>
-                <p className="text-sm text-muted-foreground">Active Mentees</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold">5</p>
-                <p className="text-sm text-muted-foreground">Sessions This Week</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-2xl font-bold">4.9</p>
-                <p className="text-sm text-muted-foreground">Avg Rating</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Active Programs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Active Programs</CardTitle>
-          <CardDescription>Programs you're currently teaching</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {activePrograms.map((program) => (
-            <div
-              key={program.id}
-              className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4"
-            >
-              <div className="flex-1">
-                <h3 className="font-semibold mb-2">{program.title}</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                  <div>
-                    <span className="text-xs">Mentees</span>
-                    <p className="font-medium text-foreground">{program.mentees}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs">Sessions</span>
-                    <p className="font-medium text-foreground">
-                      {program.completedSessions}/{program.totalSessions}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-xs">Next Session</span>
-                    <p className="font-medium text-foreground">{program.nextSession}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs">Expected Payout</span>
-                    <p className="font-medium text-foreground">${program.expectedPayout.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-              <Link href={`/mentor/dashboard/programs/${program.id}/lms`}>
-                <Button className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">Manage Program</Button>
-              </Link>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
       {/* Teaching Opportunities Tab */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="opportunities">Teaching Opportunities</TabsTrigger>
-          <TabsTrigger value="active">Active Engagements</TabsTrigger>
-          <TabsTrigger value="suggested">Suggested for You</TabsTrigger>
-        </TabsList>
-
-        {/* Teaching Opportunities Tab */}
-        <TabsContent value="opportunities" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-semibold">Browse Teaching Opportunities</h3>
-              <p className="text-sm text-muted-foreground">
-                Programs created by trainers and organizations looking for mentors
-              </p>
-            </div>
-            <Button variant="outline" size="sm">
-              <Target className="h-4 w-4 mr-2" />
-              Filter by Focus Area
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {teachingOpportunities.map((opportunity) => (
-              <Card key={opportunity.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                      <CardDescription>by {opportunity.creator}</CardDescription>
-                    </div>
-                    <Badge variant="outline">{opportunity.focusArea}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">{opportunity.description}</p>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Duration</p>
-                      <p className="font-medium">{opportunity.duration}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Type</p>
-                      <p className="font-medium">{opportunity.type}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-green-900">Total Compensation</p>
-                      <p className="text-lg font-bold text-green-700">
-                        ${opportunity.totalCompensation.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-green-700">{opportunity.compensation}</p>
-                      <p className="text-xs text-green-600">{opportunity.estimatedMentees} mentees</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Requirements:</p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      {opportunity.requirements.map((req, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <div className="w-1 h-1 bg-muted-foreground rounded-full" />
-                          {req}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex gap-2">
-                  <Button variant="outline" className="flex-1 bg-transparent">
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Request to Join</Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Active Engagements Tab */}
-        <TabsContent value="active" className="space-y-4">
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-lg font-semibold">Your Active Programs</h3>
-            <p className="text-sm text-muted-foreground">Programs you're currently teaching with upcoming sessions</p>
+            <h3 className="text-lg font-semibold">Browse Teaching Opportunities</h3>
+            <p className="text-sm text-muted-foreground">
+              Programs created by trainers and organizations looking for mentors
+            </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            {activePrograms.map((program) => (
-              <Card key={program.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {program.title}
-                        <Badge className="bg-green-100 text-green-800">Active</Badge>
-                      </CardTitle>
-                      <CardDescription>
-                        {program.type} • {program.focusArea}
-                      </CardDescription>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold">${program.expectedPayout.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Expected payout</p>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {teachingOpportunities.map((opportunity) => (
+            <Card key={opportunity.id} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">{opportunity.title}</CardTitle>
+                    <CardDescription>by {opportunity.creator}</CardDescription>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{program.mentees} mentees enrolled</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Next: {program.nextSession}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {program.completedSessions}/{program.totalSessions} sessions
-                      </span>
-                    </div>
+                  <Badge variant="outline">{opportunity.focusArea}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">{opportunity.description}</p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Duration</p>
+                    <p className="font-medium">{opportunity.duration}</p>
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{Math.round((program.completedSessions / program.totalSessions) * 100)}%</span>
-                    </div>
-                    <Progress value={(program.completedSessions / program.totalSessions) * 100} className="h-2" />
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Type</p>
+                    <p className="font-medium">{opportunity.type}</p>
                   </div>
-                </CardContent>
-                <CardFooter className="flex gap-2">
-                  <Button variant="outline" className="flex-1 bg-transparent">
-                    View Program
-                  </Button>
-                  <Button
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
-                    onClick={() => (window.location.href = `/mentor/dashboard/programs/${program.id}`)}
-                  >
-                    Manage Program
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+                </div>
 
-        {/* Suggested Opportunities Tab */}
-        <TabsContent value="suggested" className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold">Recommended for Your Growth</h3>
-            <p className="text-sm text-muted-foreground">Opportunities in focus areas you haven't taught yet</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {suggestedOpportunities.map((opportunity) => (
-              <Card key={opportunity.id} className="overflow-hidden border-blue-200">
-                <div className="h-1 bg-blue-500" />
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                      <CardDescription>by {opportunity.creator}</CardDescription>
-                    </div>
-                    <Badge className="bg-blue-100 text-blue-800">{opportunity.matchScore}% Match</Badge>
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-green-900">Total Compensation</p>
+                    <p className="text-lg font-bold text-green-700">
+                      ${opportunity.totalCompensation.toLocaleString()}
+                    </p>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm font-medium text-blue-900">Why recommended:</p>
-                    <p className="text-sm text-blue-700">{opportunity.whyRecommended}</p>
+                  <div className="text-right">
+                    <p className="text-sm text-green-700">{opportunity.compensation}</p>
+                    <p className="text-xs text-green-600">{opportunity.estimatedMentees} mentees</p>
                   </div>
+                </div>
 
-                  <p className="text-sm text-muted-foreground">{opportunity.description}</p>
-
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-green-900">Total Compensation</p>
-                      <p className="text-lg font-bold text-green-700">
-                        ${opportunity.totalCompensation.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-green-700">{opportunity.compensation}</p>
-                      <p className="text-xs text-green-600">{opportunity.estimatedMentees} mentees</p>
-                    </div>
-                  </div>
-
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                    {opportunity.focusArea} - New area for you!
-                  </Badge>
-                </CardContent>
-                <CardFooter className="flex gap-2">
-                  <Button variant="outline" className="flex-1 bg-transparent">
-                    Learn More
-                  </Button>
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Request to Join
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Requirements:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {opportunity.requirements.map((req, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+              <CardFooter className="flex gap-2">
+                <Button variant="outline" className="flex-1 bg-transparent">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Request to Join</Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </Tabs>
     </div>
   )

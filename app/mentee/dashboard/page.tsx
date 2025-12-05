@@ -136,7 +136,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <Link
-                        href={`/lms/programs/${program.id}`}
+                        href={`/mentee/dashboard/programs/${program.id}`}
                         className="flex items-center text-sm text-gray-600 hover:text-[#FFD500] transition-colors cursor-pointer"
                       >
                         <Clock className="mr-1 h-4 w-4" />
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                         className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
                         asChild
                       >
-                        <Link href={`/lms/programs/${program.id}`}>
+                        <Link href={`/mentee/dashboard/programs/${program.id}`}>
                           Continue
                         </Link>
                       </Button>
@@ -159,43 +159,48 @@ export default function DashboardPage() {
           </div>
 
           {/* Suggested Programs */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Recommended for You</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-4 pt-4 border-t">
+            <h3 className="text-sm font-medium text-gray-500 mb-3">Recommended for You</h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {suggestedPrograms.map((program) => (
                 <Card
                   key={program.id}
-                  className="hover:shadow-md transition-shadow border-[#FFD500]/20"
+                  className="hover:shadow-sm transition-shadow border-gray-200 bg-gray-50/50"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-sm font-semibold leading-tight mb-1">
                           {program.title}
                         </CardTitle>
-                        <CardDescription>with {program.mentor}</CardDescription>
+                        <CardDescription className="text-xs">
+                          with {program.mentor}
+                        </CardDescription>
                       </div>
-                      <Badge className="bg-[#FFD500] text-black text-nowrap">
+                      <Badge className="bg-gray-200 text-gray-700 text-xs shrink-0">
                         {program.focusArea}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm text-gray-600">{program.reason}</p>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-4">
-                        <span className="text-gray-600">
-                          {program.duration}
-                        </span>
+                  <CardContent className="space-y-2 px-4 pb-3">
+                    <p className="text-xs text-gray-500 line-clamp-2">{program.reason}</p>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3 text-gray-500">
+                        <span>{program.duration}</span>
                         <div className="flex items-center">
-                          <Award className="mr-1 h-4 w-4 text-yellow-500" />
+                          <Award className="mr-1 h-3 w-3 text-yellow-500" />
                           <span>{program.rating}</span>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        asChild
+                      >
                         <Link href={`/programs/${program.id}`}>
-                          Learn More
-                          <ChevronRight className="ml-1 h-4 w-4" />
+                          View
+                          <ChevronRight className="ml-1 h-3 w-3" />
                         </Link>
                       </Button>
                     </div>
@@ -206,58 +211,60 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Recommended for Growth
-              </h2>
-              <p className="text-gray-600">
-                Opportunities to strengthen your entrepreneurial toolkit
-              </p>
-            </div>
+        <div className="space-y-4 pt-4 border-t">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2 mb-3">
+              <TrendingUp className="h-4 w-4 text-gray-400" />
+              Recommended for Growth
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              Opportunities to strengthen your entrepreneurial toolkit
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {growthPrograms.map((program) => (
               <Card
                 key={program.id}
-                className="hover:shadow-md transition-shadow border-green-200"
+                className="hover:shadow-sm transition-shadow border-gray-200 bg-gray-50/50"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{program.title}</CardTitle>
-                      <CardDescription>with {program.mentor}</CardDescription>
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm font-semibold leading-tight mb-1">
+                        {program.title}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        with {program.mentor}
+                      </CardDescription>
                     </div>
                     <Badge
                       variant="outline"
-                      className="border-green-500 text-green-700"
+                      className="border-gray-300 text-gray-600 text-xs shrink-0"
                     >
                       {program.focusArea}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-gray-600">{program.reason}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-600">{program.duration}</span>
+                <CardContent className="space-y-2 px-4 pb-3">
+                  <p className="text-xs text-gray-500 line-clamp-2">{program.reason}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3 text-gray-500">
+                      <span>{program.duration}</span>
                       <div className="flex items-center">
-                        <Award className="mr-1 h-4 w-4 text-yellow-500" />
+                        <Award className="mr-1 h-3 w-3 text-yellow-500" />
                         <span>{program.rating}</span>
                       </div>
                     </div>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="border-green-500 text-green-700 hover:bg-green-50 bg-transparent"
+                      className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                       asChild
                     >
                       <Link href={`/programs/${program.id}`}>
-                        Explore
-                        <ChevronRight className="ml-1 h-4 w-4" />
+                        View
+                        <ChevronRight className="ml-1 h-3 w-3" />
                       </Link>
                     </Button>
                   </div>

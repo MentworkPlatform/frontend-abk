@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import {
@@ -31,7 +30,6 @@ import { Separator } from "@/components/ui/separator"
 export default function ProgramDetailPage() {
   const params = useParams()
   const programId = params.id as string
-  const [isEnrolled, setIsEnrolled] = useState(false)
 
   // Mock program data - in real app, this would be fetched based on programId
   const program = {
@@ -213,8 +211,8 @@ export default function ProgramDetailPage() {
   }
 
   const handleEnroll = () => {
-    setIsEnrolled(true)
-    // In real app, this would handle enrollment logic
+    // Navigate to join/enrollment page
+    window.location.href = `/programs/${programId}/join`
   }
 
   return (
@@ -243,12 +241,6 @@ export default function ProgramDetailPage() {
                   </Link>
                 </Button>
               )}
-              <Button variant="outline" asChild>
-                <Link href={`/lms/programs/${programId}/manage`}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage Program
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -522,31 +514,15 @@ export default function ProgramDetailPage() {
                   <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
                 </div>
 
-                {isEnrolled ? (
-                  <div className="space-y-4">
-                    <Button className="w-full bg-green-600 hover:bg-green-700" asChild>
-                      <Link href={`/lms/programs/${programId}`}>
-                        <Play className="h-4 w-4 mr-2" />
-                        Continue Learning
-                      </Link>
-                    </Button>
-                    <div className="text-center">
-                      <p className="text-sm text-green-600 font-medium">✓ Enrolled</p>
-                      <Progress value={35} className="mt-2" />
-                      <p className="text-xs text-gray-500 mt-1">35% complete</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
-                      Enroll Now
-                    </Button>
-                    <Button variant="outline" className="w-full bg-transparent">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Contact Instructor
-                    </Button>
-                  </div>
-                )}
+                <div className="space-y-4">
+                  <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
+                    Enroll Now
+                  </Button>
+                  <Button variant="outline" className="w-full bg-transparent">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contact Instructor
+                  </Button>
+                </div>
 
                 <Separator className="my-6" />
 

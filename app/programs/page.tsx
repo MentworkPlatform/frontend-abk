@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Search, Filter, Star, Clock, Users, BookOpen, Play, GraduationCap, ArrowRight } from "lucide-react"
+import { Search, Star, Clock, Users, BookOpen, Play, ArrowRight, Sparkles, GraduationCap } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -149,13 +150,17 @@ const groupPrograms = [
 const allPrograms = [...mentorshipPrograms, ...trainingPrograms, ...groupPrograms]
 
 export default function ProgramsPage() {
+  const searchParams = useSearchParams()
+  const fromOnboarding = searchParams.get("from") === "onboarding"
+  
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [selectedFormat, setSelectedFormat] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
 
-  const filteredPrograms = allPrograms.filter((program) => {
+  // Filter function for programs
+  const matchesFilters = (program: any) => {
     const matchesSearch =
       program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       program.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -166,7 +171,18 @@ export default function ProgramsPage() {
     const matchesTab = activeTab === "all" || program.type === activeTab
 
     return matchesSearch && matchesCategory && matchesLevel && matchesFormat && matchesTab
-  })
+  }
+
+  // Simple matching logic - in real app, this would use onboarding data from backend
+  // For now, we'll show some programs as "recommended" when coming from onboarding
+  const recommendedPrograms = useMemo(() => {
+    if (!fromOnboarding) return []
+    // Mock: Show first 3-4 programs as recommended (in real app, match based on onboarding data)
+    return allPrograms.slice(0, 4)
+  }, [fromOnboarding])
+
+  const filteredPrograms = allPrograms.filter(matchesFilters)
+  const filteredRecommended = recommendedPrograms.filter(matchesFilters)
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
@@ -177,33 +193,9 @@ export default function ProgramsPage() {
             <Link href="/">
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
             </Link>
-            <div className="flex items-center gap-4">
-              <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <Link href="/programs" className="text-[#FFD500] font-medium">
-                  Programs
-                </Link>
-                <Link href="/mentors" className="transition-colors hover:text-foreground/80">
-                  Find Mentors
-                </Link>
-                <Link href="/about" className="transition-colors hover:text-foreground/80">
-                  About
-                </Link>
-              </nav>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/lms/dashboard">
-                    <GraduationCap className="h-4 w-4 mr-2" />
-                    LMS Dashboard
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">Sign In</Link>
-                </Button>
-                <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
-                  <Link href="/get-started">Get Started</Link>
-                </Button>
-              </div>
-            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/mentee/dashboard">Dashboard</Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -229,10 +221,6 @@ export default function ProgramsPage() {
                   className="pl-10 h-12"
                 />
               </div>
-              <Button variant="outline" size="lg" className="md:w-auto bg-transparent">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -292,57 +280,73 @@ export default function ProgramsPage() {
           </div>
         </div>
 
-        {/* Program Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All Programs ({allPrograms.length})</TabsTrigger>
-            <TabsTrigger value="mentorship">Mentorship ({mentorshipPrograms.length})</TabsTrigger>
-            <TabsTrigger value="training">Training Courses ({trainingPrograms.length})</TabsTrigger>
-            <TabsTrigger value="group">Group Programs ({groupPrograms.length})</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="mt-8">
-            <ProgramGrid programs={filteredPrograms} />
-          </TabsContent>
-
-          <TabsContent value="mentorship" className="mt-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">1:1 Mentorship Programs</h2>
-              <p className="text-gray-600">Get personalized guidance from industry experts</p>
+        {/* Recommended Programs Section (only when coming from onboarding) */}
+        {fromOnboarding && filteredRecommended.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center gap-2 mb-6">
+              <Sparkles className="h-5 w-5 text-[#FFD500]" />
+              <h2 className="text-2xl font-bold">Recommended for You</h2>
             </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "mentorship")} />
-          </TabsContent>
+            <p className="text-gray-600 mb-6">
+              Based on your profile, here are programs that match your goals and interests
+            </p>
+            <ProgramGrid programs={filteredRecommended} />
+          </div>
+        )}
 
-          <TabsContent value="training" className="mt-8">
+        {/* All Programs Section */}
+        <div className={fromOnboarding ? "mb-12" : ""}>
+          {fromOnboarding && (
             <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Training Courses</h2>
-              <p className="text-gray-600">Comprehensive courses designed by expert trainers</p>
+              <h2 className="text-2xl font-bold mb-2">All Programs</h2>
+              <p className="text-gray-600">Browse all available programs</p>
             </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "training")} />
-          </TabsContent>
+          )}
+          
+          {/* Program Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all">All Programs ({allPrograms.length})</TabsTrigger>
+              <TabsTrigger value="mentorship">Mentorship ({mentorshipPrograms.length})</TabsTrigger>
+              <TabsTrigger value="training">Training Courses ({trainingPrograms.length})</TabsTrigger>
+              <TabsTrigger value="group">Group Programs ({groupPrograms.length})</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="group" className="mt-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Group Learning Programs</h2>
-              <p className="text-gray-600">Learn alongside peers in structured cohorts</p>
-            </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "group")} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="all" className="mt-8">
+              <ProgramGrid programs={filteredPrograms} />
+            </TabsContent>
+
+            <TabsContent value="mentorship" className="mt-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">1:1 Mentorship Programs</h2>
+                <p className="text-gray-600">Get personalized guidance from industry experts</p>
+              </div>
+              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "mentorship")} />
+            </TabsContent>
+
+            <TabsContent value="training" className="mt-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Training Courses</h2>
+                <p className="text-gray-600">Comprehensive courses designed by expert trainers</p>
+              </div>
+              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "training")} />
+            </TabsContent>
+
+            <TabsContent value="group" className="mt-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Group Learning Programs</h2>
+                <p className="text-gray-600">Learn alongside peers in structured cohorts</p>
+              </div>
+              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "group")} />
+            </TabsContent>
+          </Tabs>
+        </div>
 
         {/* Featured Training Programs Section */}
         <div className="mt-16 mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">Featured Training Programs</h2>
-              <p className="text-gray-600">Comprehensive courses created by expert trainers</p>
-            </div>
-            <Button variant="outline" asChild>
-              <Link href="/trainer/dashboard/programs/create">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Create Training Program
-              </Link>
-            </Button>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-2">Featured Training Programs</h2>
+            <p className="text-gray-600">Comprehensive courses created by expert trainers</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -35,7 +35,7 @@ export default function LoginPage() {
       setIsLoading(false)
       switch (activeTab) {
         case "mentee":
-          router.push("/dashboard")
+          router.push("/mentee/dashboard")
           break
         case "mentor":
           router.push("/mentor/dashboard")
@@ -44,7 +44,7 @@ export default function LoginPage() {
           router.push("/trainer/dashboard")
           break
         default:
-          router.push("/dashboard")
+          router.push("/mentee/dashboard")
       }
     }, 2000)
   }

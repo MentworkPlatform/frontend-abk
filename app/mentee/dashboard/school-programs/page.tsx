@@ -52,7 +52,7 @@ export default function SchoolProgramsPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/dashboard/school-programs/1" className="w-full">
+                  <Link href="/mentee/dashboard/school-programs/1" className="w-full">
                     <Button className="w-full">Continue Learning</Button>
                   </Link>
                 </CardFooter>

@@ -73,7 +73,7 @@ export default function JoinProgramPage() {
     // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false)
-      router.push("/dashboard")
+      router.push("/mentee/dashboard")
     }, 2000)
   }
 
@@ -87,28 +87,9 @@ export default function JoinProgramPage() {
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
             </Link>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/#programs" className="text-sm font-medium hover:underline">
-              Programs
-            </Link>
-            <Link href="/#how-it-works" className="text-sm font-medium hover:underline">
-              How It Works
-            </Link>
-            <Link href="/#featured-programs" className="text-sm font-medium hover:underline">
-              Featured Programs
-            </Link>
-            <Link href="/#partners" className="text-sm font-medium hover:underline">
-              Partners
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium hover:underline hidden md:block">
-              Log in
-            </Link>
-            <Button asChild className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
-              <Link href="/onboarding">Get Started</Link>
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/mentee/dashboard">Dashboard</Link>
+          </Button>
         </div>
       </header>
 

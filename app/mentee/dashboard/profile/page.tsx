@@ -390,7 +390,7 @@ export default function ProfilePage() {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4">
-            <Link href="/dashboard">
+            <Link href="/mentee/dashboard">
               <Button type="button" variant="outline">
                 Cancel
               </Button>

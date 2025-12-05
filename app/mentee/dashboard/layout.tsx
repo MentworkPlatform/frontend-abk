@@ -15,28 +15,28 @@ export default function DashboardLayout({
 }) {
   const navItems: NavItem[] = [
     {
-      href: "/dashboard",
+      href: "/mentee/dashboard",
       label: "Overview",
       icon: BarChart3,
       exactMatch: true,
     },
-    { href: "/dashboard/programs", label: "Programs", icon: BookOpen },
-    { href: "/dashboard/profile", label: "Profile", icon: Users },
+    { href: "/mentee/dashboard/programs", label: "Programs", icon: BookOpen },
+    { href: "/mentee/dashboard/profile", label: "Profile", icon: Users },
   ];
 
   const navLinks = [
     {
-      href: "/dashboard",
+      href: "/mentee/dashboard",
       label: "Overview",
       icon: <BarChart3 className="h-4 w-4" />,
     },
     {
-      href: "/dashboard/programs",
+      href: "/mentee/dashboard/programs",
       label: "Programs",
       icon: <BookOpen className="h-4 w-4" />,
     },
     {
-      href: "/dashboard/profile",
+      href: "/mentee/dashboard/profile",
       label: "Profile",
       icon: <Users className="h-4 w-4" />,
     },

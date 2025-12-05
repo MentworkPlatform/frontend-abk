@@ -35,9 +35,9 @@ export default function OnboardingPage() {
     goal: "",
     name: "",
     email: "",
+    password: "",
     industry: "",
     businessStage: "",
-    supportAreas: [] as string[],
     selectedSectors: [] as string[],
     selectedSubSectorSkills: [] as string[],
     selectedSkillsCapabilities: [] as string[],
@@ -47,20 +47,6 @@ export default function OnboardingPage() {
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const toggleSupportArea = (area: string) => {
-    setFormData((prev) => {
-      const currentAreas = [...prev.supportAreas];
-      if (currentAreas.includes(area)) {
-        return {
-          ...prev,
-          supportAreas: currentAreas.filter((a) => a !== area),
-        };
-      } else {
-        return { ...prev, supportAreas: [...currentAreas, area] };
-      }
-    });
   };
 
   const subSectorSkillsOptions = useMemo(() => {
@@ -99,7 +85,8 @@ export default function OnboardingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would submit the data to your backend
-    router.push("/dashboard");
+    // Redirect to programs marketplace with flag to show matching programs first
+    router.push("/programs?from=onboarding");
   };
 
   return (
@@ -135,7 +122,64 @@ export default function OnboardingPage() {
           <CardContent className="p-6 md:p-8">
             {step === 1 && (
               <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-4">Create Your Account</h2>
+                <p className="text-gray-600 mb-6">
+                  Let's start with your basic information
+                </p>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => updateFormData("name", e.target.value)}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        updateFormData("email", e.target.value)
+                      }
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        updateFormData("password", e.target.value)
+                      }
+                      placeholder="Create a password (min. 8 characters)"
+                      required
+                      minLength={8}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Must be at least 8 characters long
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">What are your goals?</h2>
+                <p className="text-gray-600 mb-6">
+                  Help us understand what you want to achieve
+                </p>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -147,7 +191,7 @@ export default function OnboardingPage() {
                       value={formData.goal}
                       onChange={(e) => updateFormData("goal", e.target.value)}
                       placeholder="e.g., Scale my startup, Secure funding, Improve team management..."
-                      rows={3}
+                      rows={4}
                       required
                     />
                   </div>
@@ -178,118 +222,86 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {step === 2 && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold mb-4">
-                  Tell us about yourself
-                </h2>
-
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => updateFormData("name", e.target.value)}
-                        placeholder="Enter your full name"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          updateFormData("email", e.target.value)
-                        }
-                        placeholder="Enter your email address"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="industry">Industry</Label>
-                      <Select
-                        value={formData.industry}
-                        onValueChange={(value) =>
-                          updateFormData("industry", value)
-                        }
-                      >
-                        <SelectTrigger id="industry">
-                          <SelectValue placeholder="Select your industry" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
-                          <SelectItem value="education">Education</SelectItem>
-                          <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="manufacturing">
-                            Manufacturing
-                          </SelectItem>
-                          <SelectItem value="agriculture">
-                            Agriculture
-                          </SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {step === 3 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold mb-4">Your Business</h2>
+                <h2 className="text-xl font-bold mb-4">Tell us about your business</h2>
+                <p className="text-gray-600 mb-6">
+                  This helps us match you with the right programs
+                </p>
 
-                <div className="space-y-4">
-                  <Label>What stage is your business at?</Label>
-                  <RadioGroup
-                    value={formData.businessStage}
-                    onValueChange={(value) =>
-                      updateFormData("businessStage", value)
-                    }
-                    className="space-y-3"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="idea" id="idea" />
-                      <Label htmlFor="idea" className="font-normal">
-                        Idea Stage
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="early-startup"
-                        id="early-startup"
-                      />
-                      <Label htmlFor="early-startup" className="font-normal">
-                        Early Startup (Pre-revenue)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="growing" id="growing" />
-                      <Label htmlFor="growing" className="font-normal">
-                        Growing Business (Revenue generating)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="established" id="established" />
-                      <Label htmlFor="established" className="font-normal">
-                        Established Business
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="scaling" id="scaling" />
-                      <Label htmlFor="scaling" className="font-normal">
-                        Scaling (Rapid growth phase)
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="industry">What industry are you in?</Label>
+                    <Select
+                      value={formData.industry}
+                      onValueChange={(value) =>
+                        updateFormData("industry", value)
+                      }
+                    >
+                      <SelectTrigger id="industry">
+                        <SelectValue placeholder="Select your industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="technology">Technology</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="healthcare">Healthcare</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="manufacturing">
+                          Manufacturing
+                        </SelectItem>
+                        <SelectItem value="agriculture">
+                          Agriculture
+                        </SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>What stage is your business at?</Label>
+                    <RadioGroup
+                      value={formData.businessStage}
+                      onValueChange={(value) =>
+                        updateFormData("businessStage", value)
+                      }
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="idea" id="idea" />
+                        <Label htmlFor="idea" className="font-normal">
+                          Idea Stage
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="early-startup"
+                          id="early-startup"
+                        />
+                        <Label htmlFor="early-startup" className="font-normal">
+                          Early Startup (Pre-revenue)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="growing" id="growing" />
+                        <Label htmlFor="growing" className="font-normal">
+                          Growing Business (Revenue generating)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="established" id="established" />
+                        <Label htmlFor="established" className="font-normal">
+                          Established Business
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="scaling" id="scaling" />
+                        <Label htmlFor="scaling" className="font-normal">
+                          Scaling (Rapid growth phase)
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                 </div>
               </div>
             )}
@@ -297,10 +309,16 @@ export default function OnboardingPage() {
             {step === 4 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Areas of Support</h2>
+                <p className="text-gray-600 mb-6">
+                  Select the sectors and skills you need help with
+                </p>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label>Sector</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Select one or more sectors you're interested in
+                    </p>
                     <MultiSelect
                       options={sectorsOptions}
                       selected={formData.selectedSectors}
@@ -316,19 +334,22 @@ export default function OnboardingPage() {
                           )
                         );
                       }}
-                      placeholder="Select sector"
+                      placeholder="Select sector(s)"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label>Sub-Sector (Skill)</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Choose specific skills within your selected sectors
+                    </p>
                     <MultiSelect
                       options={subSectorSkillsOptions}
                       selected={formData.selectedSubSectorSkills}
                       onSelectionChange={(selected) =>
                         updateFormData("selectedSubSectorSkills", selected)
                       }
-                      placeholder="Select skill"
+                      placeholder="Select skill(s)"
                       disabled={formData.selectedSectors.length === 0}
                       groupedOptions={subSectorSkillsGrouped}
                     />
@@ -341,6 +362,9 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label>Skills & Capabilities</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Additional skills you want to develop
+                    </p>
                     <MultiSelect
                       options={skillsCapabilitiesOptions}
                       selected={formData.selectedSkillsCapabilities}
@@ -351,15 +375,18 @@ export default function OnboardingPage() {
                     />
                   </div>
 
-                  <div className="space-y-2 mt-6">
+                  <div className="space-y-2">
                     <Label htmlFor="specificGoals">Specific Objectives</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      What specific objectives do you want to achieve through mentorship?
+                    </p>
                     <Textarea
                       id="specificGoals"
                       value={formData.specificGoals}
                       onChange={(e) =>
                         updateFormData("specificGoals", e.target.value)
                       }
-                      placeholder="What specific objectives do you want to achieve through mentorship?"
+                      placeholder="e.g., Learn how to pitch to investors, Build a marketing strategy, Improve financial management..."
                       rows={4}
                     />
                   </div>

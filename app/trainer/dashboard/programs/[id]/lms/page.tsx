@@ -665,6 +665,45 @@ export default function ProgramLMSPage() {
               </Card>
             </div>
 
+            {/* External Resources Links */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    External Resources
+                  </CardTitle>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      // Add link upload functionality
+                      const linkTitle = prompt("Enter link title:")
+                      const linkUrl = prompt("Enter link URL:")
+                      if (linkTitle && linkUrl) {
+                        // In a real app, this would call an API to save the link
+                        console.log("Adding external link:", { title: linkTitle, url: linkUrl })
+                        alert("Link added successfully! (This is a demo)")
+                      }
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upload Link
+                  </Button>
+                </div>
+                <CardDescription>Upload links to external resources for this topic</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No external resources added yet</p>
+                    <p className="text-sm">Click "Upload Link" to add external resources</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Feedback Section */}
             <Card>
               <CardHeader>

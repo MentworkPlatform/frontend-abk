@@ -30,10 +30,18 @@ import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { CurriculumModule, MentorAssignment, PlatformMentor } from "@/types/trainer"
-import type { CurriculumTemplate } from "@/types/curriculum"
+import { MultiSelect } from "@/components/ui/multi-select"
+import type { MentorAssignment, PlatformMentor } from "@/types/trainer"
+import type { CurriculumTemplate, CurriculumModule } from "@/types/curriculum"
 import { CurriculumBuilder } from "@/components/curriculum/curriculum-builder"
 import { TemplateSelector } from "@/components/curriculum/template-selector"
+import {
+  SECTORS,
+  SKILLS_CAPABILITIES,
+  getSkillsForSectors,
+  getSkillsGroupedBySector,
+} from "@/lib/constants/onboarding"
+import { useMemo } from "react"
 
 // Mock data for platform mentors
 const mockMentors: PlatformMentor[] = [
@@ -167,21 +175,17 @@ export default function CreateProgram() {
   // Step 1: Program Overview
   const [programData, setProgramData] = useState({
     title: "",
-    tagline: "",
     description: "",
-    category: "",
-    industry: "",
-    level: "",
-    language: "",
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
+    experienceLevel: "",
     format: "",
-    type: "group" as "one-on-one" | "group",
     maxParticipants: "",
     price: "",
-    duration: "",
-    startDate: "",
-    endDate: "",
+    durationWeeks: "",
+    numberOfSessions: "",
     learningOutcomes: ["", "", ""],
-    prerequisites: [""],
   })
 
   // Step 2: Curriculum
@@ -221,21 +225,46 @@ export default function CreateProgram() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false)
-      router.push("/trainer/dashboard/programs")
+      router.push("/trainer/dashboard")
     }, 2000)
   }
+
+  // Memoized options for sectors and skills
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }))
+  }, [])
+
+  const subSectorSkillsOptions = useMemo(() => {
+    const sectorSkills = getSkillsForSectors(programData.selectedSectors)
+    return sectorSkills.map((skill) => ({ value: skill, label: skill }))
+  }, [programData.selectedSectors])
+
+  const subSectorSkillsGrouped = useMemo(() => {
+    if (programData.selectedSectors.length === 0) return []
+    const grouped = getSkillsGroupedBySector(programData.selectedSectors)
+    return grouped.map((group) => ({
+      groupLabel: group.sectorName,
+      options: group.skills.map((skill) => ({ value: skill, label: skill })),
+    }))
+  }, [programData.selectedSectors])
+
+  const skillsCapabilitiesOptions = useMemo(() => {
+    return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }))
+  }, [])
 
   // Step 1 validation
   const isStep1Valid = () => {
     return (
       programData.title.trim() !== "" &&
-      programData.tagline.trim() !== "" &&
       programData.description.trim() !== "" &&
-      programData.category !== "" &&
-      programData.level !== "" &&
+      programData.selectedSectors.length > 0 &&
+      programData.experienceLevel !== "" &&
       programData.format !== "" &&
+      programData.maxParticipants.trim() !== "" &&
       programData.price.trim() !== "" &&
-      programData.duration.trim() !== ""
+      programData.durationWeeks.trim() !== "" &&
+      programData.numberOfSessions.trim() !== "" &&
+      programData.learningOutcomes.some((outcome) => outcome.trim() !== "")
     )
   }
 
@@ -276,13 +305,13 @@ export default function CreateProgram() {
         materials: topic.materials,
         prerequisites: [],
         requiredExpertise: [],
-        isPublished: true, // Topics from template are published by default
-        content: topic.content,
+        content: typeof topic.content === "string" ? undefined : topic.content,
+        isPublished: false,
       })),
       learningObjectives: templateModule.learningObjectives,
       materials: [],
       assessments: [],
-      isPublished: true, // Modules from template are published by default
+      isPublished: false,
     }))
     setCurriculum(convertedModules)
     setShowTemplateSelector(false) // Close the template selector after selection
@@ -397,6 +426,10 @@ export default function CreateProgram() {
             setProgramData={setProgramData}
             onNext={nextStep}
             isValid={isStep1Valid()}
+            sectorsOptions={sectorsOptions}
+            subSectorSkillsOptions={subSectorSkillsOptions}
+            subSectorSkillsGrouped={subSectorSkillsGrouped}
+            skillsCapabilitiesOptions={skillsCapabilitiesOptions}
           />
         )}
 
@@ -473,9 +506,22 @@ interface Step1Props {
   setProgramData: (data: any) => void
   onNext: () => void
   isValid: boolean
+  sectorsOptions: { value: string; label: string }[]
+  subSectorSkillsOptions: { value: string; label: string }[]
+  subSectorSkillsGrouped: { groupLabel: string; options: { value: string; label: string }[] }[]
+  skillsCapabilitiesOptions: { value: string; label: string }[]
 }
 
-function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: Step1Props) {
+function Step1ProgramOverview({
+  programData,
+  setProgramData,
+  onNext,
+  isValid,
+  sectorsOptions,
+  subSectorSkillsOptions,
+  subSectorSkillsGrouped,
+  skillsCapabilitiesOptions,
+}: Step1Props) {
   const updateLearningOutcome = (index: number, value: string) => {
     const updated = [...programData.learningOutcomes]
     updated[index] = value
@@ -491,7 +537,7 @@ function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: 
 
   const removeLearningOutcome = (index: number) => {
     if (programData.learningOutcomes.length > 1) {
-      const updated = programData.learningOutcomes.filter((_, i) => i !== index)
+      const updated = programData.learningOutcomes.filter((_: string, i: number) => i !== index)
       setProgramData({ ...programData, learningOutcomes: updated })
     }
   }
@@ -504,25 +550,14 @@ function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: 
           <CardDescription>Tell us about your training program</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Program Title *</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Digital Marketing Bootcamp"
-                value={programData.title}
-                onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tagline">Tagline *</Label>
-              <Input
-                id="tagline"
-                placeholder="A catchy subtitle for your program"
-                value={programData.tagline}
-                onChange={(e) => setProgramData({ ...programData, tagline: e.target.value })}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="title">Program Title *</Label>
+            <Input
+              id="title"
+              placeholder="e.g., Digital Marketing Bootcamp"
+              value={programData.title}
+              onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
+            />
           </div>
 
           <div className="space-y-2">
@@ -536,34 +571,64 @@ function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: 
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label>Sector *</Label>
+            <MultiSelect
+              options={sectorsOptions}
+              selected={programData.selectedSectors}
+              onSelectionChange={(selected) => {
+                // Clear sub-sector skills when sectors change
+                const newSubSectorSkills = getSkillsForSectors(selected)
+                setProgramData({
+                  ...programData,
+                  selectedSectors: selected,
+                  selectedSubSectorSkills: programData.selectedSubSectorSkills.filter((skill: string) =>
+                    newSubSectorSkills.includes(skill),
+                  ),
+                })
+              }}
+              placeholder="Select sector(s)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Sub-Sector (Skill) *</Label>
+            <MultiSelect
+              options={subSectorSkillsOptions}
+              selected={programData.selectedSubSectorSkills}
+              onSelectionChange={(selected) =>
+                setProgramData({ ...programData, selectedSubSectorSkills: selected })
+              }
+              placeholder="Select skill(s)"
+              disabled={programData.selectedSectors.length === 0}
+              groupedOptions={subSectorSkillsGrouped}
+            />
+            {programData.selectedSectors.length === 0 && (
+              <p className="text-sm text-gray-500">Please select a sector first</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Skills & Capabilities *</Label>
+            <MultiSelect
+              options={skillsCapabilitiesOptions}
+              selected={programData.selectedSkillsCapabilities}
+              onSelectionChange={(selected) =>
+                setProgramData({ ...programData, selectedSkillsCapabilities: selected })
+              }
+              placeholder="Select skills & capabilities"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
+              <Label htmlFor="experienceLevel">Experience Level *</Label>
               <Select
-                value={programData.category}
-                onValueChange={(value) => setProgramData({ ...programData, category: value })}
+                value={programData.experienceLevel}
+                onValueChange={(value) => setProgramData({ ...programData, experienceLevel: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="technology">Technology</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="leadership">Leadership</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="level">Experience Level *</Label>
-              <Select
-                value={programData.level}
-                onValueChange={(value) => setProgramData({ ...programData, level: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
+                  <SelectValue placeholder="Select experience level" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="beginner">Beginner</SelectItem>
@@ -583,44 +648,25 @@ function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: 
                   <SelectValue placeholder="Select format" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="virtual">Virtual</SelectItem>
-                  <SelectItem value="in-person">In-Person</SelectItem>
                   <SelectItem value="hybrid">Hybrid</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="in-person">In-Person</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Label>Program Type *</Label>
-            <RadioGroup
-              value={programData.type}
-              onValueChange={(value) => setProgramData({ ...programData, type: value as "one-on-one" | "group" })}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="group" id="group" />
-                <Label htmlFor="group">Group Program (Multiple participants)</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="one-on-one" id="one-on-one" />
-                <Label htmlFor="one-on-one">1:1 Program (Individual participants)</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {programData.type === "group" && (
-              <div className="space-y-2">
-                <Label htmlFor="maxParticipants">Max Participants</Label>
-                <Input
-                  id="maxParticipants"
-                  type="number"
-                  placeholder="e.g., 25"
-                  value={programData.maxParticipants}
-                  onChange={(e) => setProgramData({ ...programData, maxParticipants: e.target.value })}
-                />
-              </div>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="maxParticipants">Max Participants *</Label>
+              <Input
+                id="maxParticipants"
+                type="number"
+                placeholder="e.g., 25"
+                value={programData.maxParticipants}
+                onChange={(e) => setProgramData({ ...programData, maxParticipants: e.target.value })}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price (USD) *</Label>
               <Input
@@ -632,13 +678,23 @@ function Step1ProgramOverview({ programData, setProgramData, onNext, isValid }: 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (weeks) *</Label>
+              <Label htmlFor="durationWeeks">Duration (Weeks) *</Label>
               <Input
-                id="duration"
+                id="durationWeeks"
                 type="number"
                 placeholder="e.g., 12"
-                value={programData.duration}
-                onChange={(e) => setProgramData({ ...programData, duration: e.target.value })}
+                value={programData.durationWeeks}
+                onChange={(e) => setProgramData({ ...programData, durationWeeks: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="numberOfSessions">Number of Sessions *</Label>
+              <Input
+                id="numberOfSessions"
+                type="number"
+                placeholder="e.g., 8"
+                value={programData.numberOfSessions}
+                onChange={(e) => setProgramData({ ...programData, numberOfSessions: e.target.value })}
               />
             </div>
           </div>
@@ -970,7 +1026,7 @@ function Step3AssignMentors({
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="outline">${assignment.proposedRate}/hr</Badge>
+                        <Badge variant="outline">${assignment.proposedRate}/session</Badge>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1303,7 +1359,7 @@ function MentorAssignmentModal({
   onAssign,
 }: MentorAssignmentModalProps) {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([])
-  const [proposedRate, setProposedRate] = useState(mentor.hourlyRate)
+  const [proposedRate, setProposedRate] = useState(150) // Default pay per session
   const [customMessage, setCustomMessage] = useState("")
 
   const handleAssign = () => {
@@ -1378,7 +1434,7 @@ function MentorAssignmentModal({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-medium">${mentor.hourlyRate}/hr</p>
+                  <p className="text-lg font-medium">${mentor.hourlyRate}/session</p>
                   <Badge variant={mentor.availability === "available" ? "default" : "secondary"}>
                     {mentor.availability}
                   </Badge>
@@ -1400,16 +1456,16 @@ function MentorAssignmentModal({
 
           {/* Proposed Rate */}
           <div className="space-y-2">
-            <Label htmlFor="proposedRate">Proposed Hourly Rate ($)</Label>
+            <Label htmlFor="proposedRate">Pay Per Session ($)</Label>
             <Input
               id="proposedRate"
               type="number"
               min="0"
               step="5"
               value={proposedRate}
-              onChange={(e) => setProposedRate(Number.parseInt(e.target.value) || mentor.hourlyRate)}
+              onChange={(e) => setProposedRate(Number.parseInt(e.target.value) || 150)}
             />
-            <p className="text-xs text-muted-foreground">Mentor's standard rate is ${mentor.hourlyRate}/hr</p>
+            <p className="text-xs text-muted-foreground">Enter the amount to pay per session</p>
             <div className="flex items-center text-xs text-muted-foreground">
               <Info className="h-3 w-3 mr-1" />
               Mentors are paid on the platform after completion of their assigned sessions.
@@ -1487,10 +1543,10 @@ function MentorAssignmentModal({
                     <strong>Total Duration:</strong> {Math.round(getSelectedTopicsDuration() / 60)} hours
                   </p>
                   <p>
-                    <strong>Proposed Rate:</strong> ${proposedRate}/hour
+                    <strong>Pay Per Session:</strong> ${proposedRate}/session
                   </p>
                   <p>
-                    <strong>Estimated Cost:</strong> ${Math.round((getSelectedTopicsDuration() / 60) * proposedRate)}
+                    <strong>Estimated Cost:</strong> ${selectedTopics.length * proposedRate} ({selectedTopics.length} sessions × ${proposedRate})
                   </p>
                 </div>
               </CardContent>

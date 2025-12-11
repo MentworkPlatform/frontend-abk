@@ -29,7 +29,6 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
       learningObjectives: [""],
       materials: [],
       assessments: [],
-      isPublished: false,
     }
     setModules([...modules, newModule])
   }
@@ -53,7 +52,6 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
       materials: [],
       prerequisites: [],
       requiredExpertise: [],
-      isPublished: false,
     }
 
     setModules(
@@ -188,11 +186,6 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                 <div className="flex items-center space-x-2">
                   <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
                   <Badge variant="outline">Module {moduleIndex + 1}</Badge>
-                  <Switch
-                    checked={module.isPublished}
-                    onCheckedChange={(checked) => updateModule(module.id, { isPublished: checked })}
-                  />
-                  <Label className="text-sm">Published</Label>
                 </div>
                 {modules.length > 1 && (
                   <Button
@@ -309,13 +302,6 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 {getTopicIcon(topic.type)}
                               </div>
                               <Badge variant="secondary">Topic {topicIndex + 1}</Badge>
-                              <Switch
-                                checked={topic.isPublished}
-                                onCheckedChange={(checked) =>
-                                  updateTopic(module.id, topic.id, { isPublished: checked })
-                                }
-                              />
-                              <Label className="text-xs">Published</Label>
                             </div>
                             <Button
                               variant="ghost"
@@ -360,12 +346,32 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="live_session">Live Session</SelectItem>
+                                  <SelectItem value="online">Online</SelectItem>
                                   <SelectItem value="discussion">Discussion</SelectItem>
                                   <SelectItem value="project">Project</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                           </div>
+
+                          {topic.type === "online" && (
+                            <div className="space-y-1 mb-3">
+                              <Label className="text-xs">Meeting Link *</Label>
+                              <Input
+                                placeholder="https://meet.google.com/abc-defg-hij"
+                                value={(topic.content as any)?.meetingLink || ""}
+                                onChange={(e) =>
+                                  updateTopic(module.id, topic.id, {
+                                    content: { ...topic.content, meetingLink: e.target.value },
+                                  })
+                                }
+                                className="h-8 text-sm"
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                Create a meeting link for this online session
+                              </p>
+                            </div>
+                          )}
 
                           <div className="space-y-1">
                             <Label className="text-xs">Description *</Label>

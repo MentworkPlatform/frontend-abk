@@ -11,6 +11,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -85,7 +86,7 @@ export default function TrainerDashboard() {
       title: "Data Science Fundamentals",
       participants: 30,
       mentors: 5,
-      status: "inactive",
+      status: "completed",
       startDate: "2023-11-01",
       hasLMS: false,
     },
@@ -94,14 +95,24 @@ export default function TrainerDashboard() {
       title: "Personal Branding Workshop",
       participants: 12,
       mentors: 2,
-      status: "inactive",
+      status: "draft",
       startDate: "2023-10-15",
+      hasLMS: false,
+    },
+    {
+      id: "5",
+      title: "Product Management Masterclass",
+      participants: 0,
+      mentors: 0,
+      status: "draft",
+      startDate: null,
       hasLMS: false,
     },
   ]);
 
   const activePrograms = programs.filter((p) => p.status === "active");
-  const inactivePrograms = programs.filter((p) => p.status === "inactive");
+  const draftPrograms = programs.filter((p) => p.status === "draft");
+  const completedPrograms = programs.filter((p) => p.status === "completed");
 
   const getStatusColor = (status: string) => {
     return status === "active" ? "default" : "secondary";
@@ -191,155 +202,232 @@ export default function TrainerDashboard() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          {/* Active Programs */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">
-                Active Programs ({activePrograms.length})
-              </h3>
-            </div>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {activePrograms.map((program) => (
-                <Card
-                  key={program.id}
-                  className="hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src="/placeholder.svg?height=40&width=40"
-                            alt="Program"
-                          />
-                          <AvatarFallback>
-                            {program.title
-                              .split(" ")
-                              .map((word) => word[0])
-                              .join("")
-                              .slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {program.title}
-                          </CardTitle>
-                          <Badge
-                            variant={getStatusColor(program.status)}
-                            className="mt-1"
-                          >
-                            {program.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {program.participants}
-                        </div>
-                        <div className="flex items-center">
-                          <BookOpen className="h-4 w-4 mr-1" />
-                          {program.mentors} mentors
-                        </div>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/trainer/dashboard/programs/${program.id}/lms`}
-                    >
-                      <Button
-                        variant="outline"
-                        className="w-full bg-transparent"
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Manage Program
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+        {/* All Programs Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All Programs</CardTitle>
+            <CardDescription>View and manage all your programs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="active">
+                  Active ({activePrograms.length})
+                </TabsTrigger>
+                <TabsTrigger value="draft">
+                  Draft ({draftPrograms.length})
+                </TabsTrigger>
+                <TabsTrigger value="completed">
+                  Completed ({completedPrograms.length})
+                </TabsTrigger>
+              </TabsList>
 
-          {/* Inactive Programs */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">
-                Inactive Programs ({inactivePrograms.length})
-              </h3>
-            </div>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {inactivePrograms.map((program) => (
-                <Card
-                  key={program.id}
-                  className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src="/placeholder.svg?height=40&width=40"
-                            alt="Program"
-                          />
-                          <AvatarFallback>
-                            {program.title
-                              .split(" ")
-                              .map((word) => word[0])
-                              .join("")
-                              .slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {program.title}
-                          </CardTitle>
-                          <Badge
-                            variant={getStatusColor(program.status)}
-                            className="mt-1"
-                          >
-                            {program.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {program.participants}
-                        </div>
-                        <div className="flex items-center">
-                          <BookOpen className="h-4 w-4 mr-1" />
-                          {program.mentors} mentors
-                        </div>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/trainer/dashboard/programs/${program.id}/lms`}
+              <TabsContent value="active" className="mt-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {activePrograms.map((program) => (
+                    <Card
+                      key={program.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer"
                     >
-                      <Button
-                        variant="outline"
-                        className="w-full bg-transparent"
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Program
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src="/placeholder.svg?height=40&width=40"
+                                alt="Program"
+                              />
+                              <AvatarFallback>
+                                {program.title
+                                  .split(" ")
+                                  .map((word) => word[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">
+                                {program.title}
+                              </CardTitle>
+                              <Badge
+                                variant={getStatusColor(program.status)}
+                                className="mt-1"
+                              >
+                                {program.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-1" />
+                              {program.participants}
+                            </div>
+                            <div className="flex items-center">
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              {program.mentors} mentors
+                            </div>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/trainer/dashboard/programs/${program.id}/lms`}
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full bg-transparent"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Manage Program
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="draft" className="mt-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {draftPrograms.map((program) => (
+                    <Card
+                      key={program.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src="/placeholder.svg?height=40&width=40"
+                                alt="Program"
+                              />
+                              <AvatarFallback>
+                                {program.title
+                                  .split(" ")
+                                  .map((word) => word[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">
+                                {program.title}
+                              </CardTitle>
+                              <Badge
+                                variant={getStatusColor(program.status)}
+                                className="mt-1"
+                              >
+                                {program.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-1" />
+                              {program.participants}
+                            </div>
+                            <div className="flex items-center">
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              {program.mentors} mentors
+                            </div>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/trainer/dashboard/programs/${program.id}/lms`}
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full bg-transparent"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Program
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="completed" className="mt-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {completedPrograms.map((program) => (
+                    <Card
+                      key={program.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src="/placeholder.svg?height=40&width=40"
+                                alt="Program"
+                              />
+                              <AvatarFallback>
+                                {program.title
+                                  .split(" ")
+                                  .map((word) => word[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">
+                                {program.title}
+                              </CardTitle>
+                              <Badge
+                                variant={getStatusColor(program.status)}
+                                className="mt-1"
+                              >
+                                {program.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-1" />
+                              {program.participants}
+                            </div>
+                            <div className="flex items-center">
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              {program.mentors} mentors
+                            </div>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/trainer/dashboard/programs/${program.id}/lms`}
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full bg-transparent"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Program
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

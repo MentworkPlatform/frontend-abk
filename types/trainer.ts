@@ -52,6 +52,7 @@ export interface CurriculumModule {
   learningObjectives: string[]
   materials: string[]
   assessments: string[]
+  isPublished?: boolean // Optional for compatibility
 }
 
 export interface CurriculumTopic {
@@ -60,10 +61,12 @@ export interface CurriculumTopic {
   description: string
   duration: number // in minutes
   order: number
-  type: "lecture" | "workshop" | "discussion" | "project" | "assessment"
+  type: "video" | "document" | "quiz" | "assignment" | "live_session" | "discussion" | "project" | "online" | "lecture" | "workshop" | "assessment"
   materials: string[]
   prerequisites: string[]
   requiredExpertise: string[] // What expertise areas this topic requires
+  content?: any // For meeting links and other content
+  isPublished?: boolean // Optional for compatibility
 }
 
 export interface MentorAssignment {

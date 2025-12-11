@@ -2,7 +2,7 @@
 
 import type React from "react";
 import Link from "next/link";
-import { LayoutDashboard, BookOpen, User } from "lucide-react";
+import { LayoutDashboard, BookOpen, User, Settings } from "lucide-react";
 import { DashboardSidebar, type NavItem } from "@/components/dashboard-sidebar";
 
 export default function TrainerLayout({
@@ -17,8 +17,8 @@ export default function TrainerLayout({
       icon: LayoutDashboard,
       exactMatch: true,
     },
-    { href: "/trainer/dashboard/programs", label: "Programs", icon: BookOpen },
     { href: "/trainer/profile", label: "Profile", icon: User },
+    { href: "/trainer/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
   const logoContent = (

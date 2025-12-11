@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DollarSign, CreditCard, Bell, Lock } from "lucide-react"
+import { DollarSign, CreditCard, Bell, Lock, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from "next/link"
 
 export default function MentorSettingsPage() {
   return (
@@ -20,6 +21,10 @@ export default function MentorSettingsPage() {
           <TabsTrigger value="payment">
             <DollarSign className="h-4 w-4 mr-2" />
             Payment Details
+          </TabsTrigger>
+          <TabsTrigger value="profile">
+            <User className="h-4 w-4 mr-2" />
+            Profile
           </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="h-4 w-4 mr-2" />
@@ -72,6 +77,28 @@ export default function MentorSettingsPage() {
                 </div>
 
                 <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Save Payment Details</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="profile">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>
+                Update your profile details. You can also edit these in your Profile page.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  To edit your profile information, expertise, and other details added during onboarding, please visit your{" "}
+                  <Link href="/mentor/dashboard/profile" className="text-blue-600 hover:underline font-medium">
+                    Profile page
+                  </Link>
+                  .
+                </p>
               </div>
             </CardContent>
           </Card>

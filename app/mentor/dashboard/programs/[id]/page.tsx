@@ -13,6 +13,10 @@ import {
   FileText,
   ArrowLeft,
   Star,
+  Link as LinkIcon,
+  ExternalLink,
+  MessageSquare,
+  Send,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -21,6 +25,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
 
 interface Props {
@@ -49,7 +55,12 @@ const programTopics = [
         paymentStatus: "paid",
         amount: 150,
         meetingId: "123-456-789",
+        meetingLink: "https://meet.google.com/abc-defg-hij",
         recordingUrl: "https://example.com/recording1",
+        facilitatorLinks: [
+          { id: 1, title: "Pitch Deck Template", url: "https://example.com/template1", type: "resource" },
+          { id: 2, title: "Funding Checklist", url: "https://example.com/checklist1", type: "resource" },
+        ],
       },
       {
         id: 2,
@@ -63,7 +74,11 @@ const programTopics = [
         paymentStatus: "paid",
         amount: 150,
         meetingId: "123-456-790",
+        meetingLink: "https://meet.google.com/xyz-uvwx-rst",
         recordingUrl: "https://example.com/recording2",
+        facilitatorLinks: [
+          { id: 3, title: "Preparation Guide", url: "https://example.com/guide1", type: "resource" },
+        ],
       },
     ],
     assessments: [{ id: 1, title: "Funding Readiness Quiz", status: "completed", avgScore: 85 }],
@@ -92,7 +107,11 @@ const programTopics = [
         paymentStatus: "paid",
         amount: 200,
         meetingId: "123-456-791",
+        meetingLink: "https://zoom.us/j/123456789",
         recordingUrl: "https://example.com/recording3",
+        facilitatorLinks: [
+          { id: 4, title: "Storytelling Framework", url: "https://example.com/framework1", type: "resource" },
+        ],
       },
       {
         id: 4,
@@ -106,7 +125,9 @@ const programTopics = [
         paymentStatus: "pending",
         amount: 200,
         meetingId: "123-456-792",
+        meetingLink: "https://zoom.us/j/987654321",
         recordingUrl: null,
+        facilitatorLinks: [],
       },
     ],
     assessments: [{ id: 2, title: "Pitch Deck Review", status: "active", avgScore: null }],
@@ -132,7 +153,9 @@ const programTopics = [
         paymentStatus: "pending",
         amount: 175,
         meetingId: "123-456-793",
+        meetingLink: "https://meet.google.com/def-ghij-klm",
         recordingUrl: null,
+        facilitatorLinks: [],
       },
       {
         id: 6,
@@ -146,7 +169,9 @@ const programTopics = [
         paymentStatus: "pending",
         amount: 175,
         meetingId: "123-456-794",
+        meetingLink: "https://meet.google.com/nop-qrst-uvw",
         recordingUrl: null,
+        facilitatorLinks: [],
       },
     ],
     assessments: [{ id: 3, title: "Investor Outreach Plan", status: "upcoming", avgScore: null }],
@@ -157,6 +182,10 @@ const programTopics = [
 export default function MentorProgramDashboard({ params }: Props) {
   const [selectedTopic, setSelectedTopic] = useState<number | null>(null)
   const [activeDetailTab, setActiveDetailTab] = useState("sessions")
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
+  const [selectedSessionForFeedback, setSelectedSessionForFeedback] = useState<any>(null)
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [feedbackComment, setFeedbackComment] = useState("")
 
   // Calculate overall stats
   const totalSessions = programTopics.flatMap((topic) => topic.sessions).length
@@ -362,10 +391,11 @@ export default function MentorProgramDashboard({ params }: Props) {
             </DialogHeader>
 
             <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="sessions">Sessions</TabsTrigger>
                 <TabsTrigger value="assessments">Assessments</TabsTrigger>
-                <TabsTrigger value="feedback">Feedback</TabsTrigger>
+                <TabsTrigger value="links">Facilitator Links</TabsTrigger>
+                <TabsTrigger value="feedback">Student Feedback</TabsTrigger>
               </TabsList>
 
               <TabsContent value="sessions" className="space-y-4">
@@ -439,6 +469,14 @@ export default function MentorProgramDashboard({ params }: Props) {
                           <div className="space-y-2">
                             <p className="text-sm font-medium">Meeting Details</p>
                             <p className="text-sm text-muted-foreground">ID: {session.meetingId}</p>
+                            {session.meetingLink && (
+                              <Button variant="outline" size="sm" asChild className="mr-2">
+                                <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                                  <Video className="h-4 w-4 mr-2" />
+                                  Join Meeting
+                                </a>
+                              </Button>
+                            )}
                             {session.recordingUrl && (
                               <Button variant="outline" size="sm" asChild>
                                 <a href={session.recordingUrl} target="_blank" rel="noopener noreferrer">
@@ -450,27 +488,44 @@ export default function MentorProgramDashboard({ params }: Props) {
                           </div>
                         </div>
 
-                        <div className="flex gap-2">
-                          {session.status === "upcoming" && (
-                            <>
-                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        <div className="flex gap-2 flex-wrap">
+                          {session.status === "upcoming" && session.meetingLink && (
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" asChild>
+                              <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
                                 <Video className="h-4 w-4 mr-2" />
                                 Join Meeting
-                              </Button>
-                              {!session.mentorConfirmed && (
-                                <Button variant="outline" size="sm">
-                                  Confirm Attendance
-                                </Button>
-                              )}
-                            </>
-                          )}
-                          {session.status === "completed" && session.recordingUrl && (
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={session.recordingUrl} target="_blank" rel="noopener noreferrer">
-                                <Play className="h-4 w-4 mr-2" />
-                                View Recording
                               </a>
                             </Button>
+                          )}
+                          {session.status === "upcoming" && !session.mentorConfirmed && (
+                            <Button variant="outline" size="sm">
+                              Confirm Attendance
+                            </Button>
+                          )}
+                          {session.status === "completed" && (
+                            <>
+                              {session.recordingUrl && (
+                                <Button variant="outline" size="sm" asChild>
+                                  <a href={session.recordingUrl} target="_blank" rel="noopener noreferrer">
+                                    <Play className="h-4 w-4 mr-2" />
+                                    View Recording
+                                  </a>
+                                </Button>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedSessionForFeedback(session)
+                                  setShowFeedbackDialog(true)
+                                  setFeedbackRating(0)
+                                  setFeedbackComment("")
+                                }}
+                              >
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Rate Facilitator
+                              </Button>
+                            </>
                           )}
                         </div>
                       </CardContent>
@@ -500,6 +555,44 @@ export default function MentorProgramDashboard({ params }: Props) {
                       </CardContent>
                     </Card>
                   ))}
+              </TabsContent>
+
+              <TabsContent value="links" className="space-y-4">
+                {programTopics
+                  .find((t) => t.id === selectedTopic)
+                  ?.sessions.flatMap((session) =>
+                    (session.facilitatorLinks || []).map((link: any) => ({ ...link, sessionTitle: session.title })),
+                  )
+                  .map((link: any) => (
+                    <Card key={link.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-semibold flex items-center gap-2">
+                              <LinkIcon className="h-4 w-4" />
+                              {link.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground mt-1">{link.sessionTitle}</p>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={link.url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Open Link
+                            </a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                {programTopics
+                  .find((t) => t.id === selectedTopic)
+                  ?.sessions.flatMap((s) => s.facilitatorLinks || []).length === 0 && (
+                  <Card>
+                    <CardContent className="p-4 text-center text-muted-foreground">
+                      No links uploaded by facilitator yet
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="feedback" className="space-y-4">
@@ -535,6 +628,81 @@ export default function MentorProgramDashboard({ params }: Props) {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Feedback to Facilitator Dialog */}
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate & Provide Feedback to Facilitator</DialogTitle>
+            <DialogDescription>
+              Your feedback helps ensure timely payments and improves the program experience
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedSessionForFeedback && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm font-medium">{selectedSessionForFeedback.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {selectedSessionForFeedback.date} at {selectedSessionForFeedback.time}
+                </p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Rating</Label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setFeedbackRating(star)}
+                    className="focus:outline-none"
+                    type="button"
+                  >
+                    <Star
+                      className={`h-6 w-6 ${
+                        star <= feedbackRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feedback-comment">Feedback Comment</Label>
+              <Textarea
+                id="feedback-comment"
+                placeholder="Share your feedback about the facilitator and this session..."
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFeedbackDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  // In a real app, submit feedback to backend
+                  console.log("Feedback submitted:", {
+                    sessionId: selectedSessionForFeedback?.id,
+                    rating: feedbackRating,
+                    comment: feedbackComment,
+                  })
+                  setShowFeedbackDialog(false)
+                  setFeedbackRating(0)
+                  setFeedbackComment("")
+                  setSelectedSessionForFeedback(null)
+                }}
+                className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                disabled={feedbackRating === 0}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Submit Feedback
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

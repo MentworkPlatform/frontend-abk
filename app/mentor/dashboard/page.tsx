@@ -225,19 +225,148 @@ export default function MentorDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Teaching Opportunities Tab */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">Browse Teaching Opportunities</h3>
-            <p className="text-sm text-muted-foreground">
-              Programs created by trainers and organizations looking for mentors
-            </p>
+      {/* Active Programs */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Active Programs
+              </CardTitle>
+              <CardDescription>Programs you are currently teaching</CardDescription>
+            </div>
+            <Button variant="outline" asChild>
+              <Link href="/programs">Explore Programs</Link>
+            </Button>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {activePrograms.map((program) => (
+              <Card key={program.id} className="border">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">{program.title}</CardTitle>
+                      <CardDescription>{program.focusArea}</CardDescription>
+                    </div>
+                    <Badge className="bg-green-600">{program.status}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Mentees</p>
+                      <p className="font-medium">{program.mentees}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Sessions</p>
+                      <p className="font-medium">{program.completedSessions}/{program.totalSessions}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="font-medium">
+                        {Math.round((program.completedSessions / program.totalSessions) * 100)}%
+                      </span>
+                    </div>
+                    <Progress value={(program.completedSessions / program.totalSessions) * 100} />
+                  </div>
+                  <div className="flex items-center justify-between pt-2">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Next Session</p>
+                      <p className="text-sm font-medium">{program.nextSession}</p>
+                    </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/mentor/dashboard/programs/${program.id}`}>View Program</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {teachingOpportunities.map((opportunity) => (
+      {/* Recommended Programs to Teach */}
+      {suggestedOpportunities.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5" />
+              Recommended Programs to Teach
+            </CardTitle>
+            <CardDescription>
+              Based on your skills and goals, these programs match your expertise
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {suggestedOpportunities.map((opportunity) => (
+                <Card key={opportunity.id} className="border border-blue-200 bg-blue-50/50">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{opportunity.title}</CardTitle>
+                        <CardDescription>by {opportunity.creator}</CardDescription>
+                      </div>
+                      <Badge className="bg-blue-600">{opportunity.matchScore}% match</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground">{opportunity.description}</p>
+                    <div className="bg-white p-2 rounded text-xs">
+                      <p className="font-medium text-blue-900 mb-1">Why recommended:</p>
+                      <p className="text-blue-700">{opportunity.whyRecommended}</p>
+                    </div>
+                    <div className="flex items-center justify-between pt-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Compensation</p>
+                        <p className="text-sm font-medium">{opportunity.compensation}</p>
+                      </div>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        Request to Teach
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Program Teaching Invitations */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Program Teaching Invitations
+              </CardTitle>
+              <CardDescription>
+                Programs created by trainers and organizations looking for mentors
+              </CardDescription>
+            </div>
+            <Button variant="outline" asChild>
+              <Link href="/programs">Explore Programs</Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="opportunities">All Opportunities</TabsTrigger>
+              <TabsTrigger value="invitations">My Invitations</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="opportunities">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {teachingOpportunities.map((opportunity) => (
             <Card key={opportunity.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
@@ -295,9 +424,19 @@ export default function MentorDashboardPage() {
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Request to Join</Button>
               </CardFooter>
             </Card>
-          ))}
-        </div>
-      </Tabs>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="invitations">
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No pending invitations at this time.</p>
+                <p className="text-sm mt-2">Check back later for new teaching opportunities.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }

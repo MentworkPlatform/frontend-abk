@@ -41,38 +41,37 @@ export default function MentorOnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Goals
+    impactGoal: "",
+    revenueGoal: "",
+    timeframe: "",
+    // Personal Information
     name: "",
+    companyName: "",
     email: "",
-    expertise: [] as string[],
+    password: "",
+    // Expertise
     selectedSectors: [] as string[],
     selectedSubSectorSkills: [] as string[],
     selectedSkillsCapabilities: [] as string[],
-    industry: "",
+    businessStage: "",
     experience: "",
-    mentorshipStyle: [] as string[],
+    // Profile
     bio: "",
     achievements: "",
-    availability: [] as string[],
+    profilePhoto: "",
     linkedinUrl: "",
     twitterUrl: "",
     instagramUrl: "",
     websiteUrl: "",
+    // Scheduling
+    availability: [] as string[],
   });
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleExpertise = (area: string) => {
-    setFormData((prev) => {
-      const currentAreas = [...prev.expertise];
-      if (currentAreas.includes(area)) {
-        return { ...prev, expertise: currentAreas.filter((a) => a !== area) };
-      } else {
-        return { ...prev, expertise: [...currentAreas, area] };
-      }
-    });
-  };
 
   const subSectorSkillsOptions = useMemo(() => {
     const sectorSkills = getSkillsForSectors(formData.selectedSectors);
@@ -96,20 +95,6 @@ export default function MentorOnboardingPage() {
   const sectorsOptions = useMemo(() => {
     return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
   }, []);
-
-  const toggleMentorshipStyle = (style: string) => {
-    setFormData((prev) => {
-      const currentStyles = [...prev.mentorshipStyle];
-      if (currentStyles.includes(style)) {
-        return {
-          ...prev,
-          mentorshipStyle: currentStyles.filter((s) => s !== style),
-        };
-      } else {
-        return { ...prev, mentorshipStyle: [...currentStyles, style] };
-      }
-    });
-  };
 
   const toggleAvailability = (day: string) => {
     setFormData((prev) => {
@@ -135,6 +120,7 @@ export default function MentorOnboardingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would submit the data to your backend
+    console.log("Mentor onboarding data:", formData);
     router.push("/mentor/dashboard");
   };
 
@@ -154,13 +140,13 @@ export default function MentorOnboardingPage() {
 
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl md:text-3xl font-bold">Become a Mentor</h1>
-            <div className="text-sm font-medium">Step {step} of 5</div>
+            <div className="text-sm font-medium">Step {step} of 6</div>
           </div>
 
           <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
             <div
               className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(step / 5) * 100}%` }}
+              style={{ width: `${(step / 6) * 100}%` }}
             ></div>
           </div>
         </div>
@@ -169,7 +155,70 @@ export default function MentorOnboardingPage() {
           <CardContent className="p-6 md:p-8">
             {step === 1 && (
               <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-4">Your Goals</h2>
+                <p className="text-gray-600 mb-6">
+                  Help us understand what you want to achieve as a mentor
+                </p>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="impactGoal">
+                      Impact Goal - How many people do you want to train?
+                    </Label>
+                    <Input
+                      id="impactGoal"
+                      type="number"
+                      value={formData.impactGoal}
+                      onChange={(e) => updateFormData("impactGoal", e.target.value)}
+                      placeholder="e.g., 50, 100, 500"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="revenueGoal">
+                      Revenue Goal (in USD)
+                    </Label>
+                    <Input
+                      id="revenueGoal"
+                      type="number"
+                      value={formData.revenueGoal}
+                      onChange={(e) => updateFormData("revenueGoal", e.target.value)}
+                      placeholder="e.g., 10000, 50000, 100000"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="timeframe">
+                      Timeframe to achieve these goals
+                    </Label>
+                    <Select
+                      value={formData.timeframe}
+                      onValueChange={(value) =>
+                        updateFormData("timeframe", value)
+                      }
+                    >
+                      <SelectTrigger id="timeframe">
+                        <SelectValue placeholder="Select timeframe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="month">This Month</SelectItem>
+                        <SelectItem value="quarter">This Quarter</SelectItem>
+                        <SelectItem value="year">This Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Personal Information</h2>
+                <p className="text-gray-600 mb-6">
+                  Let's start with your basic information
+                </p>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
@@ -180,6 +229,19 @@ export default function MentorOnboardingPage() {
                         value={formData.name}
                         onChange={(e) => updateFormData("name", e.target.value)}
                         placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        value={formData.companyName}
+                        onChange={(e) =>
+                          updateFormData("companyName", e.target.value)
+                        }
+                        placeholder="Enter your company name"
                         required
                       />
                     </div>
@@ -199,60 +261,33 @@ export default function MentorOnboardingPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="industry">Primary Industry</Label>
-                      <Select
-                        value={formData.industry}
-                        onValueChange={(value) =>
-                          updateFormData("industry", value)
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) =>
+                          updateFormData("password", e.target.value)
                         }
-                      >
-                        <SelectTrigger id="industry">
-                          <SelectValue placeholder="Select your industry" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
-                          <SelectItem value="education">Education</SelectItem>
-                          <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="manufacturing">
-                            Manufacturing
-                          </SelectItem>
-                          <SelectItem value="agriculture">
-                            Agriculture
-                          </SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="experience">Years of Experience</Label>
-                      <Select
-                        value={formData.experience}
-                        onValueChange={(value) =>
-                          updateFormData("experience", value)
-                        }
-                      >
-                        <SelectTrigger id="experience">
-                          <SelectValue placeholder="Select your experience level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="3-5">3-5 years</SelectItem>
-                          <SelectItem value="5-10">5-10 years</SelectItem>
-                          <SelectItem value="10-15">10-15 years</SelectItem>
-                          <SelectItem value="15-plus">15+ years</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        placeholder="Create a password (min. 8 characters)"
+                        required
+                        minLength={8}
+                      />
+                      <p className="text-xs text-gray-500">
+                        Must be at least 8 characters long
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Your Expertise</h2>
+                <p className="text-gray-600 mb-6">
+                  Tell us about your professional expertise
+                </p>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -272,7 +307,7 @@ export default function MentorOnboardingPage() {
                           )
                         );
                       }}
-                      placeholder="Select sector"
+                      placeholder="Select sector(s)"
                     />
                   </div>
 
@@ -284,7 +319,7 @@ export default function MentorOnboardingPage() {
                       onSelectionChange={(selected) =>
                         updateFormData("selectedSubSectorSkills", selected)
                       }
-                      placeholder="Select skill"
+                      placeholder="Select skill(s)"
                       disabled={formData.selectedSectors.length === 0}
                       groupedOptions={subSectorSkillsGrouped}
                     />
@@ -307,84 +342,55 @@ export default function MentorOnboardingPage() {
                     />
                   </div>
 
-                  <div className="space-y-2 mt-6">
-                    <Label>
-                      Preferred Mentorship Style (Select all that apply)
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                      <Button
-                        type="button"
-                        variant={
-                          formData.mentorshipStyle.includes("one-on-one")
-                            ? "default"
-                            : "outline"
-                        }
-                        className={
-                          formData.mentorshipStyle.includes("one-on-one")
-                            ? "bg-[#FFD500] text-black"
-                            : ""
-                        }
-                        onClick={() => toggleMentorshipStyle("one-on-one")}
-                      >
-                        1:1 Sessions
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
-                          formData.mentorshipStyle.includes("group")
-                            ? "default"
-                            : "outline"
-                        }
-                        className={
-                          formData.mentorshipStyle.includes("group")
-                            ? "bg-[#FFD500] text-black"
-                            : ""
-                        }
-                        onClick={() => toggleMentorshipStyle("group")}
-                      >
-                        Group Sessions
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
-                          formData.mentorshipStyle.includes("workshop")
-                            ? "default"
-                            : "outline"
-                        }
-                        className={
-                          formData.mentorshipStyle.includes("workshop")
-                            ? "bg-[#FFD500] text-black"
-                            : ""
-                        }
-                        onClick={() => toggleMentorshipStyle("workshop")}
-                      >
-                        Workshops
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
-                          formData.mentorshipStyle.includes("course")
-                            ? "default"
-                            : "outline"
-                        }
-                        className={
-                          formData.mentorshipStyle.includes("course")
-                            ? "bg-[#FFD500] text-black"
-                            : ""
-                        }
-                        onClick={() => toggleMentorshipStyle("course")}
-                      >
-                        Courses
-                      </Button>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessStage">What stage is your business at?</Label>
+                    <Select
+                      value={formData.businessStage}
+                      onValueChange={(value) =>
+                        updateFormData("businessStage", value)
+                      }
+                    >
+                      <SelectTrigger id="businessStage">
+                        <SelectValue placeholder="Select business stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="launch">Launch</SelectItem>
+                        <SelectItem value="growth">Growth</SelectItem>
+                        <SelectItem value="maturity">Maturity</SelectItem>
+                        <SelectItem value="decline">Decline</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="experience">Years of Experience</Label>
+                    <Select
+                      value={formData.experience}
+                      onValueChange={(value) =>
+                        updateFormData("experience", value)
+                      }
+                    >
+                      <SelectTrigger id="experience">
+                        <SelectValue placeholder="Select your experience level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3-5">3-5 years</SelectItem>
+                        <SelectItem value="5-10">5-10 years</SelectItem>
+                        <SelectItem value="10-15">10-15 years</SelectItem>
+                        <SelectItem value="15-plus">15+ years</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Your Profile</h2>
+                <p className="text-gray-600 mb-6">
+                  Build your professional profile
+                </p>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -473,11 +479,14 @@ export default function MentorOnboardingPage() {
               </div>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">
                   Availability & Scheduling
                 </h2>
+                <p className="text-gray-600 mb-6">
+                  Set your availability and connect your calendar
+                </p>
 
                 <div className="space-y-4">
                   <Label>Available Days (Select all that apply)</Label>
@@ -652,11 +661,14 @@ export default function MentorOnboardingPage() {
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">
-                  Commission Structure & Programs
+                  Commission Model & Payment Setup
                 </h2>
+                <p className="text-gray-600 mb-6">
+                  Understand our business model and set up payment details
+                </p>
 
                 <div className="space-y-6">
                   <div className="bg-[#f8f8f8] p-6 rounded-lg border border-gray-200">
@@ -760,7 +772,24 @@ export default function MentorOnboardingPage() {
                     </Tabs>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                    <div className="flex items-start gap-3">
+                      <DollarSign className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-blue-900 mb-1">
+                          Payment Details Required
+                        </h4>
+                        <p className="text-sm text-blue-700 mb-3">
+                          To receive payments for your teaching sessions, you'll need to add your payment details in Settings after completing registration.
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          You can add bank account, mobile money, or other payment methods in your profile settings.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mt-6">
                     <Checkbox id="terms" />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to Mentwork's{" "}
@@ -797,7 +826,7 @@ export default function MentorOnboardingPage() {
                 <div></div>
               )}
 
-              {step < 5 ? (
+              {step < 6 ? (
                 <Button
                   type="button"
                   onClick={nextStep}

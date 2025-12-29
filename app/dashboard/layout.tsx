@@ -32,7 +32,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar'
 import MobileNav from '@/components/mobile-nav'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardLayout({
@@ -42,15 +42,21 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [userData, setUserData] = useState<{
+    name: string
+    role?: { name: string }
+  } | null>(null)
 
   useEffect(() => {
-    let userData = localStorage?.getItem('user')
+    let storedUserData = localStorage?.getItem('user')
     let token = localStorage?.getItem('token')
-    if (!userData || !token) {
+    if (!storedUserData || !token) {
       localStorage.clear()
       router.push('/login')
+    } else {
+      setUserData(JSON.parse(storedUserData))
     }
-  }, [])
+  }, [router])
 
   const handleLogout = () => {
     localStorage.clear()
@@ -246,14 +252,9 @@ export default function DashboardLayout({
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className='font-medium'>
-                    {JSON.parse(localStorage.getItem('user') || '{}').name}
-                  </p>
+                  <p className='font-medium'>{userData?.name || 'User'}</p>
                   <p className='text-xs text-gray-500'>
-                    {
-                      JSON.parse(localStorage.getItem('user') || '{}').role
-                        ?.name
-                    }
+                    {userData?.role?.name || 'User'}
                   </p>
                 </div>
               </div>

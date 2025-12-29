@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import {
   Calendar,
@@ -47,10 +46,19 @@ import {
 } from '@/components/ui/sidebar'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useEffect, useState } from 'react'
 
 export default function MentorDashboardPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [userData, setUserData] = useState<{ name: string } | null>(null)
+
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('user')
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData))
+    }
+  }, [])
 
   const toggleCardExpansion = (cardId: string) => {
     if (expandedCard === cardId) {
@@ -208,10 +216,7 @@ export default function MentorDashboardPage() {
                   <AvatarFallback>SJ</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className='font-medium'>
-                    {localStorage.getItem('user') &&
-                      JSON.parse(localStorage.getItem('user') as string).name}
-                  </p>
+                  <p className='font-medium'>{userData?.name || 'User'}</p>
                   <p className='text-xs text-gray-500'>Business Mentor</p>
                 </div>
               </div>
@@ -258,10 +263,7 @@ export default function MentorDashboardPage() {
                     <AvatarFallback>SJ</AvatarFallback>
                   </Avatar>
                   <div className='flex-1'>
-                    <p className='font-medium'>
-                      {localStorage.getItem('user') &&
-                        JSON.parse(localStorage.getItem('user') as string).name}
-                    </p>
+                    <p className='font-medium'>{userData?.name || 'User'}</p>
                     <p className='text-xs text-gray-500'>Business Mentor</p>
                   </div>
                 </div>
@@ -382,10 +384,7 @@ export default function MentorDashboardPage() {
             <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
               <div>
                 <h1 className='text-2xl font-bold'>
-                  Welcome back,{' '}
-                  {localStorage.getItem('user') &&
-                    JSON.parse(localStorage.getItem('user') as string).name}
-                  !
+                  Welcome back, {userData?.name || 'User'}!
                 </h1>
                 <p className='text-gray-500'>
                   Here's an overview of your mentorship programs

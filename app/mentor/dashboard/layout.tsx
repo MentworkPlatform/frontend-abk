@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/sidebar'
 import MobileNav from '@/components/mobile-nav'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function MentorDashboardLayout({
   children,
@@ -44,6 +44,7 @@ export default function MentorDashboardLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [userData, setUserData] = useState<{ name: string } | null>(null)
 
   const handleLogout = () => {
     localStorage.clear()
@@ -51,13 +52,15 @@ export default function MentorDashboardLayout({
   }
 
   useEffect(() => {
-    let userData = localStorage?.getItem('user')
+    let storedUserData = localStorage?.getItem('user')
     let token = localStorage?.getItem('token')
-    if (!userData || !token) {
+    if (!storedUserData || !token) {
       localStorage.clear()
       router.push('/login')
+    } else {
+      setUserData(JSON.parse(storedUserData))
     }
-  }, [])
+  }, [router])
 
   const navLinks = [
     {
@@ -272,10 +275,7 @@ export default function MentorDashboardLayout({
                   <AvatarFallback>SJ</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className='font-medium'>
-                    {localStorage.getItem('user') &&
-                      JSON.parse(localStorage.getItem('user') as string).name}
-                  </p>
+                  <p className='font-medium'>{userData?.name || 'User'}</p>
                   <p className='text-xs text-gray-500'>Business Mentors</p>
                 </div>
               </div>
@@ -308,11 +308,7 @@ export default function MentorDashboardLayout({
             </Link>
             <MobileNav
               userType='mentor'
-              userName={
-                (localStorage.getItem('user') &&
-                  JSON.parse(localStorage.getItem('user') as string).name) ||
-                'User'
-              }
+              userName={userData?.name || 'User'}
               userRole='Business Mentor'
               links={navLinks}
             />

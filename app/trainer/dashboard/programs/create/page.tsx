@@ -58,6 +58,8 @@ import { CurriculumBuilder } from '@/components/curriculum/curriculum-builder'
 import { TemplateSelector } from '@/components/curriculum/template-selector'
 import { API_URL } from '@/components/Serverurl'
 
+const LOCAL_STORAGE_KEY = 'trainer-create-program-progress'
+
 // Mock data for platform mentors
 const mockMentors: PlatformMentor[] = [
   {
@@ -237,6 +239,7 @@ export default function CreateProgram() {
   const [isLoading, setIsLoading] = useState(false)
   const [programId, setProgramId] = useState('')
   const [isDraftLoading, setIsDraftLoading] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Step 1: Program Overview
   const [programData, setProgramData] = useState({
@@ -248,6 +251,8 @@ export default function CreateProgram() {
     level: '',
     language: '',
     format: '',
+    meetingLink: '',
+    accessCredentials: '',
     type: 'group' as 'one-on-one' | 'group',
     maxParticipants: '',
     price: '',
@@ -279,6 +284,41 @@ export default function CreateProgram() {
     rating: 'all',
   })
 
+  const loadLocalState = () => {
+    try {
+      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (!savedState) {
+        setIsHydrated(true)
+        return
+      }
+
+      const parsed = JSON.parse(savedState)
+
+      if (parsed.programData) {
+        setProgramData((prev) => ({ ...prev, ...parsed.programData }))
+      }
+      if (parsed.curriculum) {
+        setCurriculum(parsed.curriculum)
+      }
+      if (parsed.mentorAssignments) {
+        setMentorAssignments(parsed.mentorAssignments)
+      }
+      if (parsed.selectedTemplate) {
+        setSelectedTemplate(parsed.selectedTemplate)
+      }
+      if (parsed.currentStep) {
+        setCurrentStep(parsed.currentStep)
+      }
+      if (parsed.programId) {
+        setProgramId(parsed.programId)
+      }
+    } catch (error) {
+      console.error('Error loading saved program progress:', error)
+    } finally {
+      setIsHydrated(true)
+    }
+  }
+
   // Handle draft loading from URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -288,8 +328,33 @@ export default function CreateProgram() {
 
     if (isDraft === 'true' && draftProgramId) {
       loadDraftData(draftProgramId, step ? parseInt(step) : 1)
+    } else {
+      loadLocalState()
     }
   }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const stateToPersist = {
+      currentStep,
+      programData,
+      curriculum,
+      mentorAssignments,
+      selectedTemplate,
+      programId,
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToPersist))
+  }, [
+    currentStep,
+    programData,
+    curriculum,
+    mentorAssignments,
+    selectedTemplate,
+    programId,
+    isHydrated,
+  ])
 
   const loadDraftData = async (draftProgramId: string, step: number) => {
     setIsDraftLoading(true)
@@ -320,6 +385,8 @@ export default function CreateProgram() {
             level: draft.data.level || '',
             language: draft.data.language || '',
             format: draft.data.format || '',
+            meetingLink: draft.data.meetingLink || '',
+            accessCredentials: draft.data.accessCredentials || '',
             type: draft.data.type || 'group',
             maxParticipants: draft.data.maxParticipants || '',
             price: draft.data.price || '',
@@ -348,6 +415,7 @@ export default function CreateProgram() {
       console.error('Error loading draft:', error)
     } finally {
       setIsDraftLoading(false)
+      setIsHydrated(true)
     }
   }
 
@@ -439,6 +507,7 @@ export default function CreateProgram() {
       const data = await response.json()
       setIsLoading(false)
       if (data.success) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY)
         router.push('/trainer/dashboard/programs')
         window.scrollTo(0, 0)
       } else {
@@ -887,6 +956,41 @@ function Step1ProgramOverview({
             </div>
           </div>
 
+          {(programData.format === '1' || programData.format === '3') && (
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='meetingLink'>Meeting Link</Label>
+                <Input
+                  id='meetingLink'
+                  type='url'
+                  placeholder='Paste Google Meet, Zoom, or Teams link'
+                  value={programData.meetingLink}
+                  onChange={(e) =>
+                    setProgramData({
+                      ...programData,
+                      meetingLink: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='accessCredentials'>Access Credentials</Label>
+                <Textarea
+                  id='accessCredentials'
+                  placeholder='Passcode, waiting room notes, or dial-in details'
+                  rows={2}
+                  value={programData.accessCredentials}
+                  onChange={(e) =>
+                    setProgramData({
+                      ...programData,
+                      accessCredentials: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+
           <div className='space-y-3'>
             <Label>Program Type *</Label>
             <RadioGroup
@@ -1250,7 +1354,7 @@ function Step3AssignMentors({
                           <div>
                             <p className='text-sm font-medium'>{topic.title}</p>
                             <p className='text-xs text-muted-foreground'>
-                              {topic.duration} min • {topic.type}
+                              {topic.duration} min | {topic.type}
                             </p>
                           </div>
                         </div>
@@ -1363,7 +1467,7 @@ function Step3AssignMentors({
                               </span>
                             </div>
                             <span className='text-xs text-muted-foreground'>
-                              •
+                              ({assignment.mentor.totalReviews} reviews)
                             </span>
                             <span className='text-xs text-muted-foreground'>
                               {assignment.mentor.totalSessions} sessions
@@ -1934,7 +2038,7 @@ function MentorAssignmentModal({
                 {selectedTopics.length > 0 && (
                   <span>
                     {' '}
-                    • {Math.round(getSelectedTopicsDuration() / 60)} hours
+                    | {Math.round(getSelectedTopicsDuration() / 60)} hours
                   </span>
                 )}
               </div>

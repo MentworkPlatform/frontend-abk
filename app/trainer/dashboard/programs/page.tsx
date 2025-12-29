@@ -35,6 +35,8 @@ import {
 import type { TrainerProgram } from '@/types/trainer'
 import { API_URL } from '@/components/Serverurl'
 
+export const dynamic = 'force-dynamic'
+
 export default function TrainerPrograms() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')

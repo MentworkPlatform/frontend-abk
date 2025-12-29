@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import { ArrowLeft, Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,10 +10,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 
 export default function CreateProgramPage() {
+  const [sessionFormat, setSessionFormat] = useState("virtual")
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12">
       <div className="container max-w-3xl">
@@ -98,27 +102,40 @@ export default function CreateProgramPage() {
                 <h2 className="text-xl font-bold">Program Structure</h2>
 
                 <div className="space-y-4">
-                  <Label>Session Format</Label>
-                  <RadioGroup defaultValue="video">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="video" id="video" />
-                      <Label htmlFor="video" className="font-normal">
-                        Video Call
-                      </Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="session-format">Session Format</Label>
+                    <Select value={sessionFormat} onValueChange={setSessionFormat}>
+                      <SelectTrigger id="session-format">
+                        <SelectValue placeholder="Select session format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="virtual">Virtual</SelectItem>
+                        <SelectItem value="in-person">In-Person</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {(sessionFormat === "virtual" || sessionFormat === "hybrid") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="meeting-link">Meeting Link</Label>
+                        <Input
+                          id="meeting-link"
+                          placeholder="Paste Google Meet, Zoom, Teams link"
+                          type="url"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="access-credentials">Access Credentials</Label>
+                        <Textarea
+                          id="access-credentials"
+                          placeholder="Passcode, waiting room instructions, or dial-in details"
+                          rows={2}
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="in-person" id="in-person" />
-                      <Label htmlFor="in-person" className="font-normal">
-                        In-Person
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="hybrid" id="hybrid" />
-                      <Label htmlFor="hybrid" className="font-normal">
-                        Hybrid
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                  )}
                 </div>
 
                 <div className="space-y-2">

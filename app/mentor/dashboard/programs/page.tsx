@@ -333,7 +333,7 @@ const MentorProgramsPage = () => {
               </div>
               <div className="flex gap-2 w-full md:w-auto">
                 <Button asChild className="flex-1 md:flex-none bg-[#FFD500] text-black hover:bg-[#e6c000]">
-                  <Link href="/create-program">
+                  <Link href="/trainer/dashboard/programs/create">
                     <Plus className="mr-2 h-4 w-4" /> Create Program
                   </Link>
                 </Button>
@@ -631,3 +631,4 @@ const MentorProgramsPage = () => {
 }
 
 export default MentorProgramsPage
+

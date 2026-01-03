@@ -64,6 +64,7 @@ export interface CurriculumTopic {
   materials: string[]
   prerequisites: string[]
   requiredExpertise: string[] // What expertise areas this topic requires
+  feedbackLink?: string
 }
 
 export interface MentorAssignment {

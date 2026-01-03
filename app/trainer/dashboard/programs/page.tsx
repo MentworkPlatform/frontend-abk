@@ -43,6 +43,9 @@ export default function TrainerPrograms() {
   const [filterStatus, setFilterStatus] = useState('all')
 
   const [programs, setPrograms] = useState<TrainerProgram[]>([])
+  const [publishLoading, setPublishLoading] = useState<
+    Record<string | number, boolean>
+  >({})
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -146,7 +149,7 @@ export default function TrainerPrograms() {
       console.log(error)
       return []
     }
-  }
+  } 
 
   const filteredPrograms = programs.filter((program) => {
     const matchesSearch =
@@ -391,19 +394,22 @@ function ProgramList({ programs, getStatusColor }: ProgramListProps) {
                 </div>
               </div>
               <div className='mt-auto flex justify-between items-center'>
-                {isActive ? (
-                  <Button variant='outline' size='sm'>
-                    View Details
-                  </Button>
-                ) : isDraft ? (
-                  <Button variant='outline' size='sm'>
-                    Continue Editing
-                  </Button>
-                ) : (
-                  <Button variant='outline' size='sm' disabled>
-                    View Details
-                  </Button>
-                )}
+                <div className='flex gap-2'>
+                  {isActive ? (
+                    <Button variant='outline' size='sm'>
+                      View Details
+                    </Button>
+                  ) : isDraft ? (
+                    <Button variant='outline' size='sm'>
+                      Continue Editing
+                    </Button>
+                  ) : (
+                    <Button variant='outline' size='sm' disabled>
+                      View Details
+                    </Button>
+                  )}
+                  
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>

@@ -28,6 +28,16 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import type { TrainerProgram } from '@/types/trainer'
 import { API_URL } from '@/components/Serverurl'
@@ -40,6 +50,14 @@ export default function ProgramDetails() {
   const [program, setProgram] = useState<TrainerProgram | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isReproposeOpen, setIsReproposeOpen] = useState(false)
+  const [selectedAssignment, setSelectedAssignment] = useState<any>(null)
+  const [reproposeRate, setReproposeRate] = useState('')
+  const [reproposeMessage, setReproposeMessage] = useState('')
+  const [reproposeError, setReproposeError] = useState('')
+  const [isSubmittingRepropose, setIsSubmittingRepropose] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [publishError, setPublishError] = useState('')
 
   useEffect(() => {
     fetchProgramDetails()
@@ -65,6 +83,113 @@ export default function ProgramDetails() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openReproposeModal = (assignment: any) => {
+    setSelectedAssignment(assignment)
+    setReproposeRate(
+      assignment?.proposedRate ??
+        assignment?.proposedHourlyRate ??
+        assignment?.rate ??
+        ''
+    )
+    setReproposeMessage('')
+    setReproposeError('')
+    setIsReproposeOpen(true)
+  }
+
+  const handleRepropose = async () => {
+    const assignmentId =
+      selectedAssignment?.id ??
+      selectedAssignment?.topicMentorId ??
+      selectedAssignment?.topicId
+
+    console.log('Selected Assignment:', selectedAssignment)
+
+    if (!assignmentId) {
+      setReproposeError('Missing assignment id.')
+      return
+    }
+
+    const parsedRate = Number(reproposeRate)
+    if (!Number.isFinite(parsedRate) || parsedRate <= 0) {
+      setReproposeError('Enter a valid hourly rate.')
+      return
+    }
+
+    setReproposeError('')
+    setIsSubmittingRepropose(true)
+
+    console.log(assignmentId, selectedAssignment?.topicMentorId)
+
+    try {
+      const response = await fetch(
+        `${API_URL}/programs/topic-mentors/${assignmentId}/repropose`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+          body: JSON.stringify({
+            proposedHourlyRate: parsedRate,
+            customMessage: reproposeMessage.trim() || undefined,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`)
+      }
+
+      const data = await response.json()
+      if (data?.success === false) {
+        throw new Error(data?.message || 'Unable to re-propose')
+      }
+
+      await fetchProgramDetails()
+      setIsReproposeOpen(false)
+      setSelectedAssignment(null)
+    } catch (err) {
+      console.error('Error reproposing topic mentor', err)
+      setReproposeError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.'
+      )
+    } finally {
+      setIsSubmittingRepropose(false)
+    }
+  }
+
+  const handlePublish = async () => {
+    if (!program) return
+    setPublishError('')
+    setIsPublishing(true)
+    try {
+      const response = await fetch(
+        `${API_URL}/programs/publish-program/${program.id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        }
+      )
+      const data = await response.json()
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || 'Failed to publish program')
+      }
+      await fetchProgramDetails()
+    } catch (err) {
+      console.error('Error publishing program', err)
+      setPublishError(
+        err instanceof Error ? err.message : 'Unable to publish program'
+      )
+    } finally {
+      setIsPublishing(false)
     }
   }
 
@@ -379,12 +504,29 @@ export default function ProgramDetails() {
                 {program.mentorAssignments?.length || 0} mentors assigned
               </CardDescription>
             </div>
-            <Link href={`/trainer/dashboard/programs/${program.id}/mentors`}>
-              <Button variant='outline' size='sm'>
-                <Users className='h-4 w-4 mr-2' />
-                Manage Mentors
+            <div className='flex items-center gap-2'>
+              {publishError && (
+                <span className='text-xs text-red-600'>{publishError}</span>
+              )}
+              <Button
+                size='sm'
+                className='bg-green-600 hover:bg-green-700 text-white'
+                disabled={program.status === 'published' || isPublishing}
+                onClick={handlePublish}
+              >
+                {program.status === 'published'
+                  ? 'Published'
+                  : isPublishing
+                  ? 'Publishing...'
+                  : 'Publish Program'}
               </Button>
-            </Link>
+              <Link href={`/trainer/dashboard/programs/${program.id}/mentors`}>
+                <Button variant='outline' size='sm'>
+                  <Users className='h-4 w-4 mr-2' />
+                  Manage Mentors
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -434,11 +576,28 @@ export default function ProgramDetails() {
                         </div>
                         <Badge
                           variant={
-                            assignment.confirmation ? 'default' : 'secondary'
+                            assignment?.status == 'APPROVED'
+                              ? 'default'
+                              : assignment?.status == 'REJECTED'
+                              ? 'destructive'
+                              : 'secondary'
                           }
-                          className='text-xs'
+                          className={`text-xs ${
+                            assignment?.status == 'REJECTED'
+                              ? 'cursor-pointer'
+                              : ''
+                          }`}
+                          onClick={() =>
+                            assignment?.status == 'REJECTED'
+                              ? openReproposeModal(assignment)
+                              : undefined
+                          }
                         >
-                          {assignment.confirmation ? 'Confirmed' : 'Pending'}
+                          {assignment?.status == 'APPROVED'
+                            ? 'Confirmed'
+                            : assignment?.status == 'REJECTED'
+                            ? 'Declined (view)'
+                            : 'Pending'}
                         </Badge>
                       </div>
                     </CardContent>
@@ -462,6 +621,97 @@ export default function ProgramDetails() {
         </CardContent>
       </Card>
 
+      <Dialog open={isReproposeOpen} onOpenChange={setIsReproposeOpen}>
+        <DialogContent className='sm:max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>Re-propose Offer</DialogTitle>
+            <DialogDescription>
+              Adjust the rate and message to invite this mentor again.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAssignment && (
+            <div className='space-y-4'>
+              <div className='p-3 border rounded-md bg-muted/30'>
+                <div className='flex items-center space-x-3'>
+                  <Avatar className='h-10 w-10'>
+                    <AvatarImage
+                      src={
+                        selectedAssignment.mentor?.profile
+                          ?.profile_picture_url || '/placeholder.svg'
+                      }
+                    />
+                    <AvatarFallback>
+                      {selectedAssignment.mentor?.name
+                        ?.split(' ')
+                        ?.map((n: string) => n[0])
+                        ?.join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className='font-medium'>
+                      {selectedAssignment.mentor?.name || 'Mentor'}
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
+                      Topic: {selectedAssignment.topicTitle}
+                    </p>
+                  </div>
+                </div>
+                {selectedAssignment.rejectionMessage && (
+                  <p className='mt-3 text-sm text-red-600'>
+                    Rejection reason: {selectedAssignment.rejectionMessage}
+                  </p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <label className='text-sm font-medium'>
+                  Proposed hourly rate (USD)
+                </label>
+                <Input
+                  type='number'
+                  min='0'
+                  step='1'
+                  value={reproposeRate}
+                  onChange={(e) => setReproposeRate(e.target.value)}
+                />
+              </div>
+
+              <div className='space-y-2'>
+                <label className='text-sm font-medium'>Custom message</label>
+                <Textarea
+                  rows={4}
+                  placeholder='Explain why this mentor is the right fit and any updated context.'
+                  value={reproposeMessage}
+                  onChange={(e) => setReproposeMessage(e.target.value)}
+                />
+              </div>
+
+              {reproposeError && (
+                <p className='text-sm text-red-600'>{reproposeError}</p>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className='gap-2'>
+            <Button
+              variant='outline'
+              onClick={() => setIsReproposeOpen(false)}
+              disabled={isSubmittingRepropose}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRepropose}
+              disabled={isSubmittingRepropose}
+              className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
+            >
+              {isSubmittingRepropose ? 'Submitting...' : 'Re-propose'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Quick Actions */}
       <Card>
         <CardHeader>
@@ -470,7 +720,11 @@ export default function ProgramDetails() {
         <CardContent>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <Link href={`/trainer/dashboard/programs/${program.id}/edit`}>
-              <Button variant='outline' className='w-full justify-start'>
+              <Button
+                variant='outline'
+                className='w-full justify-start'
+                disabled={program.status === 'published'}
+              >
                 <Edit className='h-4 w-4 mr-2' />
                 Edit Program Details
               </Button>

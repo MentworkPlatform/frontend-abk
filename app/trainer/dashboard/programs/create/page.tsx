@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
@@ -60,178 +60,66 @@ import { API_URL } from '@/components/Serverurl'
 
 const LOCAL_STORAGE_KEY = 'trainer-create-program-progress'
 
-// Mock data for platform mentors
-const mockMentors: PlatformMentor[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@email.com',
-    avatar: '/placeholder.svg?height=40&width=40',
-    title: 'Senior Digital Marketing Strategist',
-    company: 'Google',
-    bio: '10+ years in digital marketing with expertise in SEO, content strategy, and performance marketing. Former marketing lead at 3 successful startups.',
-    expertise: [
-      'Digital Marketing',
-      'SEO',
-      'Content Marketing',
-      'Social Media',
-      'Analytics',
-    ],
-    rating: 4.9,
-    totalReviews: 127,
-    totalSessions: 340,
-    hourlyRate: 150,
-    availability: 'available',
-    languages: ['English', 'Mandarin'],
-    timezone: 'PST',
-    responseTime: 'Usually responds within 1 hour',
-    successRate: 96,
-    specializations: ['B2B Marketing', 'SaaS Growth', 'Content Strategy'],
-    yearsOfExperience: 12,
-    education: [
-      'MBA Marketing - Stanford',
-      'BS Computer Science - UC Berkeley',
-    ],
-    certifications: ['Google Ads Certified', 'HubSpot Content Marketing'],
-    portfolioItems: [],
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    email: 'marcus.j@email.com',
-    avatar: '/placeholder.svg?height=40&width=40',
-    title: 'Lead Software Engineer',
-    company: 'Microsoft',
-    bio: 'Full-stack developer with 8 years of experience building scalable web applications. Passionate about mentoring and teaching modern development practices.',
-    expertise: [
-      'Web Development',
-      'JavaScript',
-      'React',
-      'Node.js',
-      'Cloud Architecture',
-    ],
-    rating: 4.8,
-    totalReviews: 89,
-    totalSessions: 245,
-    hourlyRate: 120,
-    availability: 'available',
-    languages: ['English', 'Spanish'],
-    timezone: 'EST',
-    responseTime: 'Usually responds within 2 hours',
-    successRate: 94,
-    specializations: ['React Development', 'API Design', 'Cloud Deployment'],
-    yearsOfExperience: 8,
-    education: [
-      'MS Computer Science - MIT',
-      'BS Software Engineering - Georgia Tech',
-    ],
-    certifications: [
-      'AWS Solutions Architect',
-      'React Developer Certification',
-    ],
-    portfolioItems: [],
-  },
-  {
-    id: '3',
-    name: 'Dr. Emily Rodriguez',
-    email: 'emily.rodriguez@email.com',
-    avatar: '/placeholder.svg?height=40&width=40',
-    title: 'UX Research Director',
-    company: 'Airbnb',
-    bio: 'PhD in Human-Computer Interaction with 15 years of experience in user research and product design. Led UX teams at Fortune 500 companies.',
-    expertise: [
-      'UX Design',
-      'User Research',
-      'Product Strategy',
-      'Design Thinking',
-      'Prototyping',
-    ],
-    rating: 5.0,
-    totalReviews: 156,
-    totalSessions: 420,
-    hourlyRate: 180,
-    availability: 'busy',
-    languages: ['English', 'Spanish', 'Portuguese'],
-    timezone: 'PST',
-    responseTime: 'Usually responds within 4 hours',
-    successRate: 98,
-    specializations: ['User Research', 'Design Systems', 'Product Strategy'],
-    yearsOfExperience: 15,
-    education: ['PhD HCI - Carnegie Mellon', 'MS Design - RISD'],
-    certifications: [
-      'Google UX Design Certificate',
-      'Nielsen Norman Group UX Certification',
-    ],
-    portfolioItems: [],
-  },
-  {
-    id: '4',
-    name: 'Alex Kim',
-    email: 'alex.kim@email.com',
-    avatar: '/placeholder.svg?height=40&width=40',
-    title: 'Data Science Manager',
-    company: 'Netflix',
-    bio: 'Data scientist and machine learning engineer with expertise in recommendation systems, analytics, and AI product development.',
-    expertise: [
-      'Data Science',
-      'Machine Learning',
-      'Python',
-      'Analytics',
-      'AI',
-    ],
-    rating: 4.7,
-    totalReviews: 73,
-    totalSessions: 180,
-    hourlyRate: 140,
-    availability: 'available',
-    languages: ['English', 'Korean'],
-    timezone: 'PST',
-    responseTime: 'Usually responds within 3 hours',
-    successRate: 92,
-    specializations: [
-      'ML Engineering',
-      'Data Analytics',
-      'Recommendation Systems',
-    ],
-    yearsOfExperience: 7,
-    education: ['MS Data Science - Stanford', 'BS Mathematics - UCLA'],
-    certifications: ['TensorFlow Developer', 'AWS Machine Learning'],
-    portfolioItems: [],
-  },
-  {
-    id: '5',
-    name: 'Lisa Thompson',
-    email: 'lisa.thompson@email.com',
-    avatar: '/placeholder.svg?height=40&width=40',
-    title: 'Product Management Lead',
-    company: 'Stripe',
-    bio: 'Product leader with 10 years of experience building fintech and B2B SaaS products. Expert in product strategy, roadmapping, and go-to-market.',
-    expertise: [
-      'Product Management',
-      'Product Strategy',
-      'Go-to-Market',
-      'Analytics',
-      'Leadership',
-    ],
-    rating: 4.9,
-    totalReviews: 112,
-    totalSessions: 290,
-    hourlyRate: 160,
-    availability: 'available',
-    languages: ['English', 'French'],
-    timezone: 'EST',
-    responseTime: 'Usually responds within 1 hour',
-    successRate: 95,
-    specializations: ['B2B Products', 'Fintech', 'Product Analytics'],
-    yearsOfExperience: 10,
-    education: ['MBA - Wharton', 'BS Engineering - MIT'],
-    certifications: [
-      'Product Management Certificate - Berkeley',
-      'Scrum Master',
-    ],
-    portfolioItems: [],
-  },
-]
+const mapApiMentorToPlatformMentor = (mentor: any): PlatformMentor => {
+  const profile = mentor?.profile || {}
+  const expertiseRaw = profile.expertise
+  const expertise = Array.isArray(expertiseRaw)
+    ? expertiseRaw
+    : typeof expertiseRaw === 'string'
+    ? expertiseRaw
+        .split(',')
+        .map((item: string) => item.trim())
+        .filter(Boolean)
+    : []
+
+  const availabilityValue =
+    typeof profile.availability === 'string'
+      ? profile.availability.toLowerCase()
+      : null
+
+  const availability: PlatformMentor['availability'] =
+    availabilityValue === 'available' ||
+    availabilityValue === 'busy' ||
+    availabilityValue === 'unavailable'
+      ? availabilityValue
+      : profile.availableForHire
+      ? 'available'
+      : 'unavailable'
+
+  return {
+    id: mentor?.id ? String(mentor.id) : '',
+    name: mentor?.name || 'Unknown Mentor',
+    email: mentor?.email || '',
+    avatar: profile.profile_picture_url || undefined,
+    title: profile.professional_background || 'Mentor',
+    company: profile.company || undefined,
+    bio: profile.bio || 'No bio available.',
+    expertise,
+    rating: profile.rating ?? 0,
+    totalReviews: profile.totalReviews ?? 0,
+    totalSessions: profile.totalSessions ?? 0,
+    hourlyRate: profile.hourlyRate ?? 0,
+    availability,
+    languages:
+      Array.isArray(profile.languages) && profile.languages.length > 0
+        ? profile.languages
+        : [],
+    timezone: profile.timezone || 'UTC',
+    responseTime: profile.responseTime || 'Usually responds within 24 hours',
+    successRate: profile.successRate ?? 0,
+    specializations: Array.isArray(profile.specializations)
+      ? profile.specializations
+      : expertise,
+    yearsOfExperience: profile.experience_years ?? 0,
+    education: Array.isArray(profile.education) ? profile.education : [],
+    certifications: Array.isArray(profile.certifications)
+      ? profile.certifications
+      : [],
+    portfolioItems: Array.isArray(profile.portfolioItems)
+      ? profile.portfolioItems
+      : [],
+  }
+}
 
 export default function CreateProgram() {
   const router = useRouter()
@@ -283,6 +171,8 @@ export default function CreateProgram() {
     priceRange: 'all',
     rating: 'all',
   })
+  const [mentors, setMentors] = useState<PlatformMentor[]>([])
+  const [isMentorsLoading, setIsMentorsLoading] = useState(false)
 
   const loadLocalState = () => {
     try {
@@ -319,6 +209,33 @@ export default function CreateProgram() {
     }
   }
 
+  const fetchMentors = useCallback(async () => {
+    setIsMentorsLoading(true)
+    try {
+      const response = await fetch(API_URL + '/mentors', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      })
+      const data = await response.json()
+      if (data?.success && Array.isArray(data.mentors)) {
+        setMentors(
+          data.mentors.map((mentor: any) =>
+            mapApiMentorToPlatformMentor(mentor)
+          )
+        )
+      } else {
+        console.error('Failed to fetch mentors:', data)
+      }
+    } catch (error) {
+      console.error('Error fetching mentors:', error)
+    } finally {
+      setIsMentorsLoading(false)
+    }
+  }, [])
+
   // Handle draft loading from URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -332,6 +249,16 @@ export default function CreateProgram() {
       loadLocalState()
     }
   }, [])
+
+  useEffect(() => {
+    fetchMentors()
+  }, [fetchMentors])
+
+  useEffect(() => {
+    if (currentStep === 3) {
+      fetchMentors()
+    }
+  }, [currentStep, fetchMentors])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -596,7 +523,7 @@ export default function CreateProgram() {
   }
 
   // Filter mentors based on search and filters
-  const filteredMentors = mockMentors.filter((mentor) => {
+  const filteredMentors = mentors.filter((mentor) => {
     const matchesSearch =
       mentor.name.toLowerCase().includes(mentorSearchQuery.toLowerCase()) ||
       mentor.expertise.some((exp) =>
@@ -777,6 +704,7 @@ export default function CreateProgram() {
           isOpen={showMentorBrowser}
           onClose={() => setShowMentorBrowser(false)}
           mentors={filteredMentors}
+          isLoading={isMentorsLoading}
           curriculum={curriculum}
           searchQuery={mentorSearchQuery}
           setSearchQuery={setMentorSearchQuery}
@@ -1603,6 +1531,7 @@ interface MentorBrowserModalProps {
   isOpen: boolean
   onClose: () => void
   mentors: PlatformMentor[]
+  isLoading: boolean
   curriculum: CurriculumModule[]
   searchQuery: string
   setSearchQuery: (query: string) => void
@@ -1616,6 +1545,7 @@ function MentorBrowserModal({
   isOpen,
   onClose,
   mentors,
+  isLoading,
   curriculum,
   searchQuery,
   setSearchQuery,
@@ -1734,7 +1664,11 @@ function MentorBrowserModal({
         {/* Mentors List */}
         <div className='flex-1 overflow-y-auto'>
           <div className='space-y-4 pr-2'>
-            {mentors.length === 0 ? (
+            {isLoading ? (
+              <div className='text-center py-8'>
+                <p className='text-muted-foreground'>Loading mentors...</p>
+              </div>
+            ) : mentors.length === 0 ? (
               <div className='text-center py-8'>
                 <Users className='h-8 w-8 text-muted-foreground mx-auto mb-2' />
                 <p className='text-muted-foreground'>

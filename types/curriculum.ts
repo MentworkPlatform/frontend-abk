@@ -69,6 +69,7 @@ export interface CurriculumTopic {
   materials: string[]
   prerequisites: string[]
   requiredExpertise: string[]
+  feedbackLink?: string
   content?: TopicContent
   isPublished: boolean
 }

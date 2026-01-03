@@ -90,6 +90,7 @@ export function CurriculumBuilder({
       materials: [],
       prerequisites: [],
       requiredExpertise: [],
+      feedbackLink: '',
       isPublished: false,
     }
 
@@ -492,6 +493,22 @@ export function CurriculumBuilder({
                               }
                               rows={2}
                               className='text-sm'
+                            />
+                          </div>
+
+                          <div className='space-y-1'>
+                            <Label className='text-xs'>
+                              Feedback Link (shared to mentees)
+                            </Label>
+                            <Input
+                              placeholder='https://...'
+                              value={topic.feedbackLink || ''}
+                              onChange={(e) =>
+                                updateTopic(module.id, topic.id, {
+                                  feedbackLink: e.target.value,
+                                })
+                              }
+                              className='h-8 text-sm'
                             />
                           </div>
                         </CardContent>

@@ -66,7 +66,7 @@ export default function TrainerPrograms() {
               map.set(program.id, program)
               return map
             }, new Map())
-            .values()
+            .values(),
         )
         setPrograms(uniquePrograms)
       } catch (error) {
@@ -149,7 +149,7 @@ export default function TrainerPrograms() {
       console.log(error)
       return []
     }
-  } 
+  }
 
   const filteredPrograms = programs.filter((program) => {
     const matchesSearch =
@@ -166,7 +166,7 @@ export default function TrainerPrograms() {
   })
 
   const getStatusColor = (
-    status: string
+    status: string,
   ): 'default' | 'secondary' | 'outline' | 'destructive' => {
     switch (status) {
       case 'active':
@@ -193,6 +193,41 @@ export default function TrainerPrograms() {
               Create New Program
             </Button>
           </Link>
+          <Button
+            variant='outline'
+            onClick={() => localStorage.removeItem('token')}
+            className='ml-2'
+          >
+            Logout
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => localStorage.removeItem('token')}
+            className='ml-2'
+          >
+            Logout
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => localStorage.removeItem('token')}
+            className='ml-2'
+          >
+            Logout
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => localStorage.removeItem('token')}
+            className='ml-2'
+          >
+            Logout
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => localStorage.removeItem('token')}
+            className='ml-2'
+          >
+            Logout
+          </Button>
         </div>
       </div>
 
@@ -408,7 +443,6 @@ function ProgramList({ programs, getStatusColor }: ProgramListProps) {
                       View Details
                     </Button>
                   )}
-                  
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

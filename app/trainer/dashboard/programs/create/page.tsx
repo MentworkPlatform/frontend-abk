@@ -66,11 +66,11 @@ const mapApiMentorToPlatformMentor = (mentor: any): PlatformMentor => {
   const expertise = Array.isArray(expertiseRaw)
     ? expertiseRaw
     : typeof expertiseRaw === 'string'
-    ? expertiseRaw
-        .split(',')
-        .map((item: string) => item.trim())
-        .filter(Boolean)
-    : []
+      ? expertiseRaw
+          .split(',')
+          .map((item: string) => item.trim())
+          .filter(Boolean)
+      : []
 
   const availabilityValue =
     typeof profile.availability === 'string'
@@ -83,8 +83,8 @@ const mapApiMentorToPlatformMentor = (mentor: any): PlatformMentor => {
     availabilityValue === 'unavailable'
       ? availabilityValue
       : profile.availableForHire
-      ? 'available'
-      : 'unavailable'
+        ? 'available'
+        : 'unavailable'
 
   return {
     id: mentor?.id ? String(mentor.id) : '',
@@ -128,6 +128,9 @@ export default function CreateProgram() {
   const [programId, setProgramId] = useState('')
   const [isDraftLoading, setIsDraftLoading] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [surveyTemplate, setSurveyTemplate] = useState([])
+
+  const [error, setError] = useState('')
 
   // Step 1: Program Overview
   const [programData, setProgramData] = useState({
@@ -209,6 +212,28 @@ export default function CreateProgram() {
     }
   }
 
+  const fetchSurveyTemplate = useCallback(async () => {
+    try {
+      const response = await fetch(API_URL + '/surveys/all-survey', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      })
+      const data = await response.json()
+      if (data?.success && Array.isArray(data.allsurvey)) {
+        setSurveyTemplate(data.allsurvey)
+      } else {
+        console.error('Failed to fetch survey template:', data)
+      }
+    } catch (error) {
+      console.error('Error fetching survey template:', error)
+    } finally {
+      //setIsMentorsLoading(false)
+    }
+  }, [])
+
   const fetchMentors = useCallback(async () => {
     setIsMentorsLoading(true)
     try {
@@ -223,8 +248,8 @@ export default function CreateProgram() {
       if (data?.success && Array.isArray(data.mentors)) {
         setMentors(
           data.mentors.map((mentor: any) =>
-            mapApiMentorToPlatformMentor(mentor)
-          )
+            mapApiMentorToPlatformMentor(mentor),
+          ),
         )
       } else {
         console.error('Failed to fetch mentors:', data)
@@ -252,6 +277,7 @@ export default function CreateProgram() {
 
   useEffect(() => {
     fetchMentors()
+    fetchSurveyTemplate()
   }, [fetchMentors])
 
   useEffect(() => {
@@ -259,6 +285,12 @@ export default function CreateProgram() {
       fetchMentors()
     }
   }, [currentStep, fetchMentors])
+
+  useEffect(() => {
+    if (currentStep == 2) {
+      fetchSurveyTemplate()
+    }
+  }, [currentStep, fetchSurveyTemplate])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -294,7 +326,7 @@ export default function CreateProgram() {
             'Content-Type': 'application/json',
             Authorization: 'Bearer ' + localStorage.getItem('token'),
           },
-        }
+        },
       )
       const data = await response.json()
       if (data.success && data.draft) {
@@ -347,6 +379,7 @@ export default function CreateProgram() {
   }
 
   const nextStep = async () => {
+    setError('')
     if (currentStep < 3) {
       let dataObject: any = {}
 
@@ -373,6 +406,7 @@ export default function CreateProgram() {
       }
 
       console.log('dataObject', dataObject)
+      setIsLoading(true)
 
       try {
         const response = await fetch(API_URL + '/programs/', {
@@ -391,13 +425,16 @@ export default function CreateProgram() {
           setCurrentStep(currentStep + 1)
           window.scrollTo(0, 0)
         } else {
-          //setError(data?.error)
+          setError(data?.error)
           console.error(data.error)
         }
       } catch (error) {
         setIsLoading(false)
-        console.error(error)
-        //setError('Something went wrong..pls try again')
+        //console.error(error)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+
+        console.log('error', error)
+        setError('Something went wrong..pls try again')
       }
     }
   }
@@ -411,6 +448,7 @@ export default function CreateProgram() {
 
   const handleSubmit = async () => {
     setIsLoading(true)
+    setError('')
 
     let dataObject = {
       step: 3,
@@ -440,11 +478,17 @@ export default function CreateProgram() {
       } else {
         //setError(data?.error)
         console.error(data.error)
+
+        setError(
+          data.error ? data.error : 'Something went wrong..pls try again',
+        )
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
       setIsLoading(false)
       console.error(error)
-      //setError('Something went wrong..pls try again')
+      setError('Something went wrong..pls try again')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     // Simulate API call
@@ -479,8 +523,8 @@ export default function CreateProgram() {
           module.topics.length > 0 &&
           module.topics.every(
             (topic) =>
-              topic.title.trim() !== '' && topic.description.trim() !== ''
-          )
+              topic.title.trim() !== '' && topic.description.trim() !== '',
+          ),
       )
     )
   }
@@ -516,7 +560,7 @@ export default function CreateProgram() {
         materials: [],
         assessments: [],
         isPublished: true, // Modules from template are published by default
-      })
+      }),
     )
     setCurriculum(convertedModules)
     setShowTemplateSelector(false) // Close the template selector after selection
@@ -527,7 +571,7 @@ export default function CreateProgram() {
     const matchesSearch =
       mentor.name.toLowerCase().includes(mentorSearchQuery.toLowerCase()) ||
       mentor.expertise.some((exp) =>
-        exp.toLowerCase().includes(mentorSearchQuery.toLowerCase())
+        exp.toLowerCase().includes(mentorSearchQuery.toLowerCase()),
       ) ||
       mentor.title.toLowerCase().includes(mentorSearchQuery.toLowerCase())
 
@@ -586,6 +630,12 @@ export default function CreateProgram() {
                 : 'Build a comprehensive training program and invite expert mentors to teach'}
             </p>
           </div>
+
+          {error && (
+            <div className='bg-red-50 mt-6 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm'>
+              {error}
+            </div>
+          )}
 
           {/* Progress Bar */}
           <div className='mt-6'>
@@ -679,11 +729,13 @@ export default function CreateProgram() {
           <Step2Curriculum
             curriculum={curriculum}
             setCurriculum={setCurriculum}
+            isLoading={isLoading}
             onNext={nextStep}
             onPrev={prevStep}
             isValid={isStep2Valid()}
             onShowTemplateSelector={() => setShowTemplateSelector(true)}
             selectedTemplate={selectedTemplate}
+            surveyTemplate={surveyTemplate}
           />
         )}
 
@@ -1018,7 +1070,7 @@ function Step1ProgramOverview({
                   </Button>
                 )}
               </div>
-            )
+            ),
           )}
           <Button
             type='button'
@@ -1055,16 +1107,20 @@ interface Step2Props {
   isValid: boolean
   onShowTemplateSelector: () => void
   selectedTemplate: CurriculumTemplate | null
+  surveyTemplate: any[]
+  isLoading: boolean
 }
 
 function Step2Curriculum({
   curriculum,
   setCurriculum,
   onNext,
+  isLoading,
   onPrev,
   isValid,
   onShowTemplateSelector,
   selectedTemplate,
+  surveyTemplate,
 }: Step2Props) {
   const getTotalDuration = () => {
     return curriculum.reduce(
@@ -1072,9 +1128,9 @@ function Step2Curriculum({
         total +
         module.topics.reduce(
           (moduleTotal, topic) => moduleTotal + topic.duration,
-          0
+          0,
         ),
-      0
+      0,
     )
   }
 
@@ -1145,6 +1201,7 @@ function Step2Curriculum({
           ) : (
             <CurriculumBuilder
               initialTemplate={selectedTemplate || undefined}
+              surveyTemplates={surveyTemplate}
               modules={curriculum}
               setModules={setCurriculum}
             />
@@ -1162,7 +1219,8 @@ function Step2Curriculum({
           disabled={!isValid}
           className='bg-[#FFD500] text-black hover:bg-[#e6c000]'
         >
-          Next: Assign Mentors
+          {isLoading ? 'Please Wait' : 'Next: Assign Mentors'}
+
           <ArrowRight className='h-4 w-4 ml-2' />
         </Button>
       </div>
@@ -1196,7 +1254,7 @@ function Step3AssignMentors({
 
   const getAssignedTopicsCount = () => {
     const assignedTopicIds = new Set(
-      mentorAssignments.flatMap((a) => a.topicIds)
+      mentorAssignments.flatMap((a) => a.topicIds),
     )
     return assignedTopicIds.size
   }
@@ -1250,8 +1308,8 @@ function Step3AssignMentors({
                     {Math.round(
                       module.topics.reduce(
                         (total, topic) => total + topic.duration,
-                        0
-                      ) / 60
+                        0,
+                      ) / 60,
                     )}
                     h
                   </Badge>
@@ -1260,10 +1318,10 @@ function Step3AssignMentors({
                 <div className='grid gap-2'>
                   {module.topics.map((topic, topicIndex) => {
                     const isAssigned = mentorAssignments.some((a) =>
-                      a.topicIds.includes(topic.id)
+                      a.topicIds.includes(topic.id),
                     )
                     const assignedMentor = mentorAssignments.find((a) =>
-                      a.topicIds.includes(topic.id)
+                      a.topicIds.includes(topic.id),
                     )
 
                     return (
@@ -1495,8 +1553,8 @@ function Step3AssignMentors({
                     (total, m) =>
                       total +
                       m.topics.reduce((t, topic) => t + topic.duration, 0),
-                    0
-                  ) / 60
+                    0,
+                  ) / 60,
                 )}{' '}
                 total hours
               </span>
@@ -1555,7 +1613,7 @@ function MentorBrowserModal({
   existingAssignments,
 }: MentorBrowserModalProps) {
   const allExpertiseAreas = Array.from(
-    new Set(mentors.flatMap((m) => m.expertise))
+    new Set(mentors.flatMap((m) => m.expertise)),
   )
 
   return (
@@ -1678,7 +1736,7 @@ function MentorBrowserModal({
             ) : (
               mentors.map((mentor) => {
                 const isAlreadyAssigned = existingAssignments.some(
-                  (a) => a.mentorId === mentor.id
+                  (a) => a.mentorId === mentor.id,
                 )
 
                 return (
@@ -1851,7 +1909,7 @@ function MentorAssignmentModal({
 
   const getAssignedTopics = () => {
     const assignedTopicIds = new Set(
-      existingAssignments.flatMap((a) => a.topicIds)
+      existingAssignments.flatMap((a) => a.topicIds),
     )
     return assignedTopicIds
   }
@@ -1860,7 +1918,7 @@ function MentorAssignmentModal({
     setSelectedTopics((prev) =>
       prev.includes(topicId)
         ? prev.filter((id) => id !== topicId)
-        : [...prev, topicId]
+        : [...prev, topicId],
     )
   }
 
@@ -1947,7 +2005,7 @@ function MentorAssignmentModal({
               value={proposedRate}
               onChange={(e) =>
                 setProposedRate(
-                  Number.parseInt(e.target.value) || mentor.hourlyRate
+                  Number.parseInt(e.target.value) || mentor.hourlyRate,
                 )
               }
             />
@@ -1987,7 +2045,7 @@ function MentorAssignmentModal({
                   <div className='space-y-2 pl-4'>
                     {module.topics.map((topic) => {
                       const isAlreadyAssigned = getAssignedTopics().has(
-                        topic.id
+                        topic.id,
                       )
                       const isSelected = selectedTopics.includes(topic.id)
 
@@ -2062,7 +2120,7 @@ function MentorAssignmentModal({
                   <p>
                     <strong>Estimated Cost:</strong> $
                     {Math.round(
-                      (getSelectedTopicsDuration() / 60) * proposedRate
+                      (getSelectedTopicsDuration() / 60) * proposedRate,
                     )}
                   </p>
                 </div>

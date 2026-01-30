@@ -41,12 +41,14 @@ interface CurriculumBuilderProps {
   initialTemplate?: CurriculumTemplate
   modules: CurriculumModule[]
   setModules: (modules: CurriculumModule[]) => void
+  surveyTemplates: any[]
 }
 
 export function CurriculumBuilder({
   initialTemplate,
   modules,
   setModules,
+  surveyTemplates,
 }: CurriculumBuilderProps) {
   const addModule = () => {
     const newModule: CurriculumModule = {
@@ -66,12 +68,12 @@ export function CurriculumBuilder({
 
   const updateModule = (
     moduleId: string,
-    updates: Partial<CurriculumModule>
+    updates: Partial<CurriculumModule>,
   ) => {
     setModules(
       modules.map((module) =>
-        module.id === moduleId ? { ...module, ...updates } : module
-      )
+        module.id === moduleId ? { ...module, ...updates } : module,
+      ),
     )
   }
 
@@ -98,15 +100,15 @@ export function CurriculumBuilder({
       modules.map((module) =>
         module.id === moduleId
           ? { ...module, topics: [...module.topics, newTopic] }
-          : module
-      )
+          : module,
+      ),
     )
   }
 
   const updateTopic = (
     moduleId: string,
     topicId: string,
-    updates: Partial<CurriculumTopic>
+    updates: Partial<CurriculumTopic>,
   ) => {
     setModules(
       modules.map((module) =>
@@ -114,11 +116,11 @@ export function CurriculumBuilder({
           ? {
               ...module,
               topics: module.topics.map((topic) =>
-                topic.id === topicId ? { ...topic, ...updates } : topic
+                topic.id === topicId ? { ...topic, ...updates } : topic,
               ),
             }
-          : module
-      )
+          : module,
+      ),
     )
   }
 
@@ -130,15 +132,15 @@ export function CurriculumBuilder({
               ...module,
               topics: module.topics.filter((topic) => topic.id !== topicId),
             }
-          : module
-      )
+          : module,
+      ),
     )
   }
 
   const updateLearningObjective = (
     moduleId: string,
     index: number,
-    value: string
+    value: string,
   ) => {
     const module = modules.find((m) => m.id === moduleId)
     if (module) {
@@ -171,9 +173,9 @@ export function CurriculumBuilder({
         total +
         module.topics.reduce(
           (moduleTotal, topic) => moduleTotal + topic.duration,
-          0
+          0,
         ),
-      0
+      0,
     )
   }
 
@@ -329,7 +331,7 @@ export function CurriculumBuilder({
                         updateLearningObjective(
                           module.id,
                           index,
-                          e.target.value
+                          e.target.value,
                         )
                       }
                     />
@@ -396,7 +398,7 @@ export function CurriculumBuilder({
                             <div className='flex items-center gap-2'>
                               <div
                                 className={`w-8 h-8 rounded flex items-center justify-center ${getTopicColor(
-                                  topic.type
+                                  topic.type,
                                 )}`}
                               >
                                 {getTopicIcon(topic.type)}
@@ -496,20 +498,40 @@ export function CurriculumBuilder({
                             />
                           </div>
 
-                          <div className='space-y-1'>
+                          <div className='space-y-1 mt-3'>
                             <Label className='text-xs'>
-                              Feedback Link (shared to mentees)
+                              Feedback Link (shared to mentees) *
                             </Label>
-                            <Input
-                              placeholder='https://...'
+
+                            <Select
                               value={topic.feedbackLink || ''}
-                              onChange={(e) =>
+                              onValueChange={(value) =>
                                 updateTopic(module.id, topic.id, {
-                                  feedbackLink: e.target.value,
+                                  feedbackLink: value,
                                 })
                               }
-                              className='h-8 text-sm'
-                            />
+                            >
+                              <SelectTrigger className='h-8 text-sm'>
+                                <SelectValue placeholder='Select a survey template' />
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {surveyTemplates?.length > 0 ? (
+                                  surveyTemplates.map((survey: any) => (
+                                    <SelectItem
+                                      key={survey.id}
+                                      value={survey.slug}
+                                    >
+                                      {survey.title}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className='px-2 py-1 text-xs text-muted-foreground'>
+                                    No surveys available
+                                  </div>
+                                )}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </CardContent>
                       </Card>

@@ -223,138 +223,138 @@ export default function TrainerDashboard() {
               </TabsList>
 
               <TabsContent value="active" className="mt-6">
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {activePrograms.map((program) => (
-                    <Card
-                      key={program.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src="/placeholder.svg?height=40&width=40"
-                                alt="Program"
-                              />
-                              <AvatarFallback>
-                                {program.title
-                                  .split(" ")
-                                  .map((word) => word[0])
-                                  .join("")
-                                  .slice(0, 2)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <CardTitle className="text-lg">
-                                {program.title}
-                              </CardTitle>
-                              <Badge
-                                variant={getStatusColor(program.status)}
-                                className="mt-1"
-                              >
-                                {program.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <Users className="h-4 w-4 mr-1" />
-                              {program.participants}
-                            </div>
-                            <div className="flex items-center">
-                              <BookOpen className="h-4 w-4 mr-1" />
-                              {program.mentors} mentors
-                            </div>
-                          </div>
-                        </div>
-                        <Link
-                          href={`/trainer/dashboard/programs/${program.id}/lms`}
-                        >
-                          <Button
-                            variant="outline"
-                            className="w-full bg-transparent"
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {activePrograms.map((program) => (
+                <Card
+                  key={program.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src="/placeholder.svg?height=40&width=40"
+                            alt="Program"
+                          />
+                          <AvatarFallback>
+                            {program.title
+                              .split(" ")
+                              .map((word) => word[0])
+                              .join("")
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">
+                            {program.title}
+                          </CardTitle>
+                          <Badge
+                            variant={getStatusColor(program.status)}
+                            className="mt-1"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Manage Program
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                            {program.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-1" />
+                          {program.participants}
+                        </div>
+                        <div className="flex items-center">
+                          <BookOpen className="h-4 w-4 mr-1" />
+                          {program.mentors} mentors
+                        </div>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/trainer/dashboard/programs/${program.id}/lms`}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full bg-transparent"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Manage Program
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
               </TabsContent>
 
               <TabsContent value="draft" className="mt-6">
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {draftPrograms.map((program) => (
-                    <Card
-                      key={program.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src="/placeholder.svg?height=40&width=40"
-                                alt="Program"
-                              />
-                              <AvatarFallback>
-                                {program.title
-                                  .split(" ")
-                                  .map((word) => word[0])
-                                  .join("")
-                                  .slice(0, 2)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <CardTitle className="text-lg">
-                                {program.title}
-                              </CardTitle>
-                              <Badge
-                                variant={getStatusColor(program.status)}
-                                className="mt-1"
-                              >
-                                {program.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <Users className="h-4 w-4 mr-1" />
-                              {program.participants}
-                            </div>
-                            <div className="flex items-center">
-                              <BookOpen className="h-4 w-4 mr-1" />
-                              {program.mentors} mentors
-                            </div>
-                          </div>
-                        </div>
-                        <Link
-                          href={`/trainer/dashboard/programs/${program.id}/lms`}
-                        >
-                          <Button
-                            variant="outline"
-                            className="w-full bg-transparent"
+                <Card
+                  key={program.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src="/placeholder.svg?height=40&width=40"
+                            alt="Program"
+                          />
+                          <AvatarFallback>
+                            {program.title
+                              .split(" ")
+                              .map((word) => word[0])
+                              .join("")
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">
+                            {program.title}
+                          </CardTitle>
+                          <Badge
+                            variant={getStatusColor(program.status)}
+                            className="mt-1"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Program
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
+                            {program.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-1" />
+                          {program.participants}
+                        </div>
+                        <div className="flex items-center">
+                          <BookOpen className="h-4 w-4 mr-1" />
+                          {program.mentors} mentors
+                        </div>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/trainer/dashboard/programs/${program.id}/lms`}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full bg-transparent"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Program
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
                 </div>
               </TabsContent>
 
@@ -405,9 +405,9 @@ export default function TrainerDashboard() {
                             <div className="flex items-center">
                               <BookOpen className="h-4 w-4 mr-1" />
                               {program.mentors} mentors
-                            </div>
-                          </div>
-                        </div>
+            </div>
+          </div>
+        </div>
                         <Link
                           href={`/trainer/dashboard/programs/${program.id}/lms`}
                         >

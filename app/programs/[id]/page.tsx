@@ -514,15 +514,15 @@ export default function ProgramDetailPage() {
                   <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
                 </div>
 
-                <div className="space-y-4">
-                  <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
-                    Enroll Now
-                  </Button>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contact Instructor
-                  </Button>
-                </div>
+                  <div className="space-y-4">
+                    <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
+                      Enroll Now
+                    </Button>
+                    <Button variant="outline" className="w-full bg-transparent">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Contact Instructor
+                    </Button>
+                  </div>
 
                 <Separator className="my-6" />
 

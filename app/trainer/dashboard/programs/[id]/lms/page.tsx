@@ -44,6 +44,37 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
+// Type definitions
+type Session = {
+  id: string
+  date: string
+  time: string
+  mentor: string
+  trainerConfirmed: boolean
+  mentorConfirmed: boolean
+  paymentStatus: "paid" | "pending" | "scheduled"
+  amount: number
+  meetingLink?: string
+  meetingId?: string
+  recordingUrl?: string
+  feedback: Array<{ id: string; author: string; rating: number; comment: string }>
+}
+
+type Topic = {
+  id: string
+  title: string
+  description: string
+  type: string
+  duration: number
+  status: string
+  mentors: string[]
+  participants: number
+  completionRate: number
+  assessments: Array<{ id: string; title: string; type: string; submissions: number; avgScore: number | null }>
+  feedback: { rating: number; reviews: number }
+  sessions?: Session[]
+}
+
 export default function ProgramLMSPage() {
   const params = useParams()
   const programId = params.id as string
@@ -58,7 +89,7 @@ export default function ProgramLMSPage() {
     maxParticipants: 30,
   })
 
-  const [topics] = useState([
+  const [topics] = useState<Topic[]>([
     {
       id: "topic-1",
       title: "SEO Fundamentals",
@@ -109,7 +140,7 @@ export default function ProgramLMSPage() {
           time: "2:00 PM",
           mentor: "Sarah Johnson",
           trainerConfirmed: true,
-          mentorConfirmed: false,
+          mentorConfirmed: true,
           paymentStatus: "pending",
           amount: 180,
           meetingLink: "https://meet.mentwork.com/session-2",
@@ -175,38 +206,45 @@ export default function ProgramLMSPage() {
     },
   ])
 
-  const [selectedTopic, setSelectedTopic] = useState(null)
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
-  const [selectedSession, setSelectedSession] = useState(null)
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [feedbackRating, setFeedbackRating] = useState(5)
   const [feedbackComment, setFeedbackComment] = useState("")
+  // Track which sessions have feedback submitted
+  const [sessionsWithFeedback, setSessionsWithFeedback] = useState<Set<string>>(new Set())
 
-  const handleAttendanceConfirmation = (topicId, sessionId, type) => {
+  const handleAttendanceConfirmation = (topicId: string, sessionId: string, type: string) => {
     console.log(`[v0] Confirming ${type} attendance for session ${sessionId} in topic ${topicId}`)
   }
 
-  const handleScheduleSession = (sessionData) => {
+  const handleScheduleSession = (sessionData: any) => {
     console.log(`[v0] Scheduling new session:`, sessionData)
     setShowScheduleDialog(false)
   }
 
-  const handleJoinMeeting = (meetingLink) => {
+  const handleJoinMeeting = (meetingLink: string) => {
     console.log(`[v0] Opening meeting link: ${meetingLink}`)
     window.open(meetingLink, "_blank")
   }
 
   const handleSubmitFeedback = () => {
+    if (!selectedSession) return
     console.log(`[v0] Submitting feedback for session ${selectedSession.id}:`, {
       rating: feedbackRating,
       comment: feedbackComment,
     })
+    // Mark session as having feedback submitted
+    if (selectedSession.id) {
+      setSessionsWithFeedback((prev) => new Set(prev).add(selectedSession.id))
+    }
     setShowFeedbackDialog(false)
     setFeedbackRating(5)
     setFeedbackComment("")
   }
 
-  const getPaymentStatusColor = (status) => {
+  const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case "paid":
         return "bg-green-100 text-green-700 border-green-200"
@@ -448,7 +486,7 @@ export default function ProgramLMSPage() {
                               {session.meetingLink && (
                                 <Button
                                   size="sm"
-                                  onClick={() => handleJoinMeeting(session.meetingLink)}
+                                  onClick={() => session.meetingLink && handleJoinMeeting(session.meetingLink)}
                                   className="bg-blue-600 hover:bg-blue-700"
                                 >
                                   <Video className="h-4 w-4 mr-1" />
@@ -486,7 +524,7 @@ export default function ProgramLMSPage() {
                                 <XCircle className="h-4 w-4 text-red-500" />
                               )}
                               <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Pending"}</span>
-                              {!session.trainerConfirmed && (
+                              {!session.trainerConfirmed && selectedTopic && (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -529,23 +567,43 @@ export default function ProgramLMSPage() {
                             <div>
                               <h5 className="font-medium text-sm text-purple-900">Session Feedback</h5>
                               <p className="text-xs text-purple-700">
-                                {session.feedback.length > 0
-                                  ? `${session.feedback.length} feedback received`
+                                {session.feedback.length > 0 || sessionsWithFeedback.has(session.id)
+                                  ? `${session.feedback.length + (sessionsWithFeedback.has(session.id) ? 1 : 0)} feedback received`
                                   : "No feedback yet"}
                               </p>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedSession(session)
-                                setShowFeedbackDialog(true)
-                              }}
-                              className="bg-white hover:bg-purple-50 w-full sm:w-auto"
-                            >
-                              <MessageSquare className="h-4 w-4 mr-1" />
-                              {session.feedback.length > 0 ? "View & Add" : "Add"} Feedback
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedSession(session)
+                                  setShowFeedbackDialog(true)
+                                }}
+                                className="bg-white hover:bg-purple-50 w-full sm:w-auto"
+                              >
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                {session.feedback.length > 0 || sessionsWithFeedback.has(session.id) ? "View & Add" : "Add"} Feedback
+                              </Button>
+                              {session.trainerConfirmed &&
+                                session.mentorConfirmed &&
+                                session.paymentStatus === "pending" &&
+                                (session.feedback.length > 0 || sessionsWithFeedback.has(session.id)) && (
+                                  <Button
+                                    size="sm"
+                                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto"
+                                    onClick={() => {
+                                      // In real app, trigger payment API call to pay the mentor
+                                      console.log("Triggering payment to mentor for session:", session.id)
+                                      alert(`Payment of $${session.amount} will be processed for mentor: ${session.mentor}. Payment will be sent after verification.`)
+                                      // In real app, this would call payment API and update payment status
+                                    }}
+                                  >
+                                    <DollarSign className="h-4 w-4 mr-1" />
+                                    Pay Mentor
+                                  </Button>
+                                )}
+                            </div>
                           </div>
 
                           {session.feedback.length > 0 && (

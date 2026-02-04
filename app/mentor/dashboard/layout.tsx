@@ -47,7 +47,7 @@ export default function MentorDashboardLayout({ children }: { children: React.Re
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-[#f5f5f5]">
+      <div className="flex min-h-screen bg-[#f5f5f5] w-full">
         {/* Desktop Sidebar */}
         <Sidebar className="hidden md:flex">
           <SidebarHeader>
@@ -128,7 +128,7 @@ export default function MentorDashboardLayout({ children }: { children: React.Re
         </div>
 
         <SidebarInset>
-          <div className="flex-1 md:p-8 p-4 pt-16 md:pt-8">{children}</div>
+          <div className="flex-1 md:p-8 p-4 pt-16 md:pt-8 w-full max-w-full">{children}</div>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -89,7 +89,7 @@ export default function JoinProgramPage() {
           </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/mentee/dashboard">Dashboard</Link>
-          </Button>
+            </Button>
         </div>
       </header>
 

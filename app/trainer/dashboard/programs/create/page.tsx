@@ -550,14 +550,14 @@ function Step1ProgramOverview({
           <CardDescription>Tell us about your training program</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Program Title *</Label>
-            <Input
-              id="title"
-              placeholder="e.g., Digital Marketing Bootcamp"
-              value={programData.title}
-              onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="title">Program Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Digital Marketing Bootcamp"
+                value={programData.title}
+                onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
+              />
           </div>
 
           <div className="space-y-2">
@@ -571,7 +571,7 @@ function Step1ProgramOverview({
             />
           </div>
 
-          <div className="space-y-2">
+            <div className="space-y-2">
             <Label>Sector *</Label>
             <MultiSelect
               options={sectorsOptions}
@@ -589,9 +589,9 @@ function Step1ProgramOverview({
               }}
               placeholder="Select sector(s)"
             />
-          </div>
+            </div>
 
-          <div className="space-y-2">
+            <div className="space-y-2">
             <Label>Sub-Sector (Skill) *</Label>
             <MultiSelect
               options={subSectorSkillsOptions}
@@ -657,16 +657,16 @@ function Step1ProgramOverview({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
+              <div className="space-y-2">
               <Label htmlFor="maxParticipants">Max Participants *</Label>
-              <Input
-                id="maxParticipants"
-                type="number"
-                placeholder="e.g., 25"
-                value={programData.maxParticipants}
-                onChange={(e) => setProgramData({ ...programData, maxParticipants: e.target.value })}
-              />
-            </div>
+                <Input
+                  id="maxParticipants"
+                  type="number"
+                  placeholder="e.g., 25"
+                  value={programData.maxParticipants}
+                  onChange={(e) => setProgramData({ ...programData, maxParticipants: e.target.value })}
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price (USD) *</Label>
               <Input

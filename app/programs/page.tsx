@@ -193,9 +193,9 @@ export default function ProgramsPage() {
             <Link href="/">
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
             </Link>
-            <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild>
               <Link href="/mentee/dashboard">Dashboard</Link>
-            </Button>
+                </Button>
           </div>
         </div>
       </header>
@@ -302,51 +302,51 @@ export default function ProgramsPage() {
               <p className="text-gray-600">Browse all available programs</p>
             </div>
           )}
-          
-          {/* Program Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">All Programs ({allPrograms.length})</TabsTrigger>
-              <TabsTrigger value="mentorship">Mentorship ({mentorshipPrograms.length})</TabsTrigger>
-              <TabsTrigger value="training">Training Courses ({trainingPrograms.length})</TabsTrigger>
-              <TabsTrigger value="group">Group Programs ({groupPrograms.length})</TabsTrigger>
-            </TabsList>
 
-            <TabsContent value="all" className="mt-8">
-              <ProgramGrid programs={filteredPrograms} />
-            </TabsContent>
+        {/* Program Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all">All Programs ({allPrograms.length})</TabsTrigger>
+            <TabsTrigger value="mentorship">Mentorship ({mentorshipPrograms.length})</TabsTrigger>
+            <TabsTrigger value="training">Training Courses ({trainingPrograms.length})</TabsTrigger>
+            <TabsTrigger value="group">Group Programs ({groupPrograms.length})</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="mentorship" className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">1:1 Mentorship Programs</h2>
-                <p className="text-gray-600">Get personalized guidance from industry experts</p>
-              </div>
-              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "mentorship")} />
-            </TabsContent>
+          <TabsContent value="all" className="mt-8">
+            <ProgramGrid programs={filteredPrograms} />
+          </TabsContent>
 
-            <TabsContent value="training" className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Training Courses</h2>
-                <p className="text-gray-600">Comprehensive courses designed by expert trainers</p>
-              </div>
-              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "training")} />
-            </TabsContent>
+          <TabsContent value="mentorship" className="mt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">1:1 Mentorship Programs</h2>
+              <p className="text-gray-600">Get personalized guidance from industry experts</p>
+            </div>
+            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "mentorship")} />
+          </TabsContent>
 
-            <TabsContent value="group" className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Group Learning Programs</h2>
-                <p className="text-gray-600">Learn alongside peers in structured cohorts</p>
-              </div>
-              <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "group")} />
-            </TabsContent>
-          </Tabs>
+          <TabsContent value="training" className="mt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Training Courses</h2>
+              <p className="text-gray-600">Comprehensive courses designed by expert trainers</p>
+            </div>
+            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "training")} />
+          </TabsContent>
+
+          <TabsContent value="group" className="mt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Group Learning Programs</h2>
+              <p className="text-gray-600">Learn alongside peers in structured cohorts</p>
+            </div>
+            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "group")} />
+          </TabsContent>
+        </Tabs>
         </div>
 
         {/* Featured Training Programs Section */}
         <div className="mt-16 mb-12">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2">Featured Training Programs</h2>
-            <p className="text-gray-600">Comprehensive courses created by expert trainers</p>
+              <h2 className="text-3xl font-bold mb-2">Featured Training Programs</h2>
+              <p className="text-gray-600">Comprehensive courses created by expert trainers</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

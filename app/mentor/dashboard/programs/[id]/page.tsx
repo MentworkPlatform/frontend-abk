@@ -71,7 +71,7 @@ const programTopics = [
         status: "completed",
         mentorConfirmed: true,
         trainerConfirmed: true,
-        paymentStatus: "paid",
+        paymentStatus: "pending",
         amount: 150,
         meetingId: "123-456-790",
         meetingLink: "https://meet.google.com/xyz-uvwx-rst",
@@ -186,6 +186,8 @@ export default function MentorProgramDashboard({ params }: Props) {
   const [selectedSessionForFeedback, setSelectedSessionForFeedback] = useState<any>(null)
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [feedbackComment, setFeedbackComment] = useState("")
+  // Track which sessions have feedback submitted
+  const [sessionsWithFeedback, setSessionsWithFeedback] = useState<Set<number>>(new Set())
 
   // Calculate overall stats
   const totalSessions = programTopics.flatMap((topic) => topic.sessions).length
@@ -228,7 +230,7 @@ export default function MentorProgramDashboard({ params }: Props) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
@@ -512,19 +514,40 @@ export default function MentorProgramDashboard({ params }: Props) {
                                   </a>
                                 </Button>
                               )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedSessionForFeedback(session)
-                                  setShowFeedbackDialog(true)
-                                  setFeedbackRating(0)
-                                  setFeedbackComment("")
-                                }}
-                              >
-                                <MessageSquare className="h-4 w-4 mr-2" />
-                                Rate Facilitator
-                              </Button>
+                              {!sessionsWithFeedback.has(session.id) ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedSessionForFeedback(session)
+                                    setShowFeedbackDialog(true)
+                                    setFeedbackRating(0)
+                                    setFeedbackComment("")
+                                  }}
+                                >
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Rate Facilitator
+                                </Button>
+                              ) : (
+                                <>
+                                  <Badge className="bg-green-100 text-green-800">Feedback Submitted</Badge>
+                                  {session.paymentStatus === "pending" && (
+                                    <Button
+                                      size="sm"
+                                      className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                      onClick={() => {
+                                        // In real app, trigger payment API call to request payment from facilitator
+                                        console.log("Triggering payment request for session:", session.id)
+                                        alert(`Payment request of $${session.amount} has been sent to the facilitator. Payment will be processed after verification.`)
+                                        // In real app, this would send a notification to facilitator and update status
+                                      }}
+                                    >
+                                      <DollarSign className="h-4 w-4 mr-2" />
+                                      Request Payment
+                                    </Button>
+                                  )}
+                                </>
+                              )}
                             </>
                           )}
                         </div>
@@ -688,6 +711,10 @@ export default function MentorProgramDashboard({ params }: Props) {
                     rating: feedbackRating,
                     comment: feedbackComment,
                   })
+                  // Mark session as having feedback submitted
+                  if (selectedSessionForFeedback?.id) {
+                    setSessionsWithFeedback((prev) => new Set(prev).add(selectedSessionForFeedback.id))
+                  }
                   setShowFeedbackDialog(false)
                   setFeedbackRating(0)
                   setFeedbackComment("")

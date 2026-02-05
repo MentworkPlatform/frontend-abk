@@ -496,12 +496,11 @@ export default function ProgramDetailPage() {
                 <div className="text-center mb-6">
                   <div className="flex flex-col items-center gap-2 mb-2">
                     <div className="flex items-center justify-center gap-2">
-                      <span className="text-3xl font-bold">${program.price}</span>
+                      <span className="text-3xl font-bold">₦{(program.price * 1500).toLocaleString()}</span>
                       {program.originalPrice && (
-                        <span className="text-lg text-gray-500 line-through">${program.originalPrice}</span>
+                        <span className="text-lg text-gray-500 line-through">₦{(program.originalPrice * 1500).toLocaleString()}</span>
                       )}
                     </div>
-                    <span className="text-lg text-gray-600">₦{(program.price * 1500).toLocaleString()} Naira</span>
                   </div>
                   <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
                 </div>

@@ -304,7 +304,7 @@ export default function JoinProgramPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Program Price</span>
-                      <span>${program.price}</span>
+                      <span>₦{(program.price * 1500).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-green-600">
                       <span>Free Sessions</span>
@@ -316,7 +316,7 @@ export default function JoinProgramPage() {
 
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${program.price}</span>
+                    <span>₦{(program.price * 1500).toLocaleString()}</span>
                   </div>
 
                   <div className="space-y-2 pt-4">

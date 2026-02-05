@@ -225,15 +225,12 @@ export default function TrainerOnboardingPage() {
     }
   };
 
-  const handleSkipAccount = () => {
-    setNeedsAccount(false);
-    setStep(6); // Go to next steps
-  };
 
   const handleCreateAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, create account and save draft, then continue to program creation
-    router.push(`/trainer/dashboard/programs/create?from=onboarding&title=${encodeURIComponent(formData.programTitle)}&outcome=${encodeURIComponent(formData.programOutcome)}&template=${selectedTemplate?.id || ''}`);
+    // In real app, create account and save draft
+    // After account creation, show Step 6 with options to complete profile or complete program
+    nextStep();
   };
 
   const totalSteps = 6;
@@ -594,17 +591,6 @@ export default function TrainerOnboardingPage() {
                     >
                       Create Account & Continue Building
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => {
-                        // Continue to program creation without account (session-based)
-                        router.push(`/trainer/dashboard/programs/create?from=onboarding&title=${encodeURIComponent(formData.programTitle)}&outcome=${encodeURIComponent(formData.programOutcome)}&template=${selectedTemplate?.id || ''}`);
-                      }}
-                    >
-                      Continue without account (progress may not be saved)
-                    </Button>
                   </div>
                 </form>
               </div>
@@ -614,56 +600,56 @@ export default function TrainerOnboardingPage() {
             {step === 6 && (
               <div className="space-y-6 text-center">
                 <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Program Draft Saved!</h2>
+                <h2 className="text-2xl font-bold mb-2">Account Created!</h2>
                 <p className="text-gray-600 mb-6">
-                  Continue building your program or explore other options
+                  What would you like to do next?
                 </p>
 
-                <div className="space-y-4">
-                  <Button
-                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14 text-lg"
-                    onClick={() => router.push(`/trainer/dashboard/programs/create?from=onboarding&title=${encodeURIComponent(formData.programTitle)}&outcome=${encodeURIComponent(formData.programOutcome)}&template=${selectedTemplate?.id || ''}`)}
-                  >
-                    Continue Building Program (Step 2: Build Curriculum)
-                  </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-yellow-50 border-2 border-[#FFD500] hover:shadow-md transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Complete Program</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-700 mb-4">
+                        Continue building your program draft and add curriculum modules
+                      </p>
+                      <Button
+                        className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                        onClick={() => router.push(`/trainer/dashboard/programs/create?from=onboarding&title=${encodeURIComponent(formData.programTitle)}&outcome=${encodeURIComponent(formData.programOutcome)}&template=${selectedTemplate?.id || ''}`)}
+                      >
+                        Continue Building Program
+                      </Button>
+                    </CardContent>
+                  </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-lg">Invite Mentors</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Find and invite mentors to teach specific topics
-                        </p>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => router.push("/trainer/dashboard")}
-                        >
-                          Manage Program
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-lg">Review Demand Insights</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-4">
-                          See more demand signals and market data
-                        </p>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => router.push("/trainer/dashboard")}
-                        >
-                          View Insights
-                        </Button>
-                      </CardContent>
-                    </Card>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Complete Profile</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Add your expertise, experience, and profile details
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => router.push("/trainer/dashboard/profile")}
+                      >
+                        Go to Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
                   </div>
+
+                <div className="pt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => router.push("/trainer/dashboard")}
+                  >
+                    Go to Dashboard
+                  </Button>
                 </div>
               </div>
             )}

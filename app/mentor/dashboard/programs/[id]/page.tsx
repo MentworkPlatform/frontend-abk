@@ -276,7 +276,7 @@ export default function MentorProgramDashboard({ params }: Props) {
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-2xl font-bold">${totalEarnings}</p>
+                <p className="text-2xl font-bold">₦{(totalEarnings * 1500).toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground">Earned</p>
               </div>
             </div>
@@ -287,7 +287,7 @@ export default function MentorProgramDashboard({ params }: Props) {
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-orange-500" />
               <div>
-                <p className="text-2xl font-bold">${pendingEarnings}</p>
+                <p className="text-2xl font-bold">₦{(pendingEarnings * 1500).toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground">Pending Payment</p>
               </div>
             </div>
@@ -455,7 +455,7 @@ export default function MentorProgramDashboard({ params }: Props) {
                             <p className="text-sm font-medium">Payment Status</p>
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4 text-green-600" />
-                              <span className="text-sm">${session.amount}</span>
+                              <span className="text-sm">₦{(session.amount * 1500).toLocaleString()}</span>
                               <Badge
                                 className={
                                   session.paymentStatus === "paid"
@@ -538,7 +538,7 @@ export default function MentorProgramDashboard({ params }: Props) {
                                       onClick={() => {
                                         // In real app, trigger payment API call to request payment from facilitator
                                         console.log("Triggering payment request for session:", session.id)
-                                        alert(`Payment request of $${session.amount} has been sent to the facilitator. Payment will be processed after verification.`)
+                                        alert(`Payment request of ₦${(session.amount * 1500).toLocaleString()} has been sent to the facilitator. Payment will be processed after verification.`)
                                         // In real app, this would send a notification to facilitator and update status
                                       }}
                                     >

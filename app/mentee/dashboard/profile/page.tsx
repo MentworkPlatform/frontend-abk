@@ -385,12 +385,12 @@ export default function ProfilePage() {
                     <SelectValue placeholder="Select your budget range" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="under-500">Under $500</SelectItem>
-                    <SelectItem value="500-1000">$500 - $1,000</SelectItem>
-                    <SelectItem value="1000-2500">$1,000 - $2,500</SelectItem>
-                    <SelectItem value="2500-5000">$2,500 - $5,000</SelectItem>
-                    <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
-                    <SelectItem value="10000-plus">$10,000+</SelectItem>
+                    <SelectItem value="under-500">Under ₦750,000</SelectItem>
+                    <SelectItem value="500-1000">₦750,000 - ₦1,500,000</SelectItem>
+                    <SelectItem value="1000-2500">₦1,500,000 - ₦3,750,000</SelectItem>
+                    <SelectItem value="2500-5000">₦3,750,000 - ₦7,500,000</SelectItem>
+                    <SelectItem value="5000-10000">₦7,500,000 - ₦15,000,000</SelectItem>
+                    <SelectItem value="10000-plus">₦15,000,000+</SelectItem>
                     <SelectItem value="not-sure">Not sure yet</SelectItem>
                   </SelectContent>
                 </Select>

@@ -36,7 +36,7 @@ const mockOpportunities = [
     timeCommitment: "2 hours per week",
     cohortTiming: "Next cohort starts in 2 weeks",
     facilitator: "Alex Thompson",
-    compensation: "$150/session",
+    compensation: "₦225,000/session",
     format: "Hybrid",
   },
   {
@@ -47,7 +47,7 @@ const mockOpportunities = [
     timeCommitment: "3 hours per week",
     cohortTiming: "Next cohort starts in 1 month",
     facilitator: "Emily Rodriguez",
-    compensation: "$200/session",
+    compensation: "₦300,000/session",
     format: "Online",
   },
   {
@@ -58,7 +58,7 @@ const mockOpportunities = [
     timeCommitment: "2.5 hours per week",
     cohortTiming: "Next cohort starts in 3 weeks",
     facilitator: "Sarah Johnson",
-    compensation: "$250/session",
+    compensation: "₦375,000/session",
     format: "Hybrid",
   },
   {
@@ -69,7 +69,7 @@ const mockOpportunities = [
     timeCommitment: "4 hours per week",
     cohortTiming: "Next cohort starts in 2 weeks",
     facilitator: "Dr. James Wilson",
-    compensation: "$180/session",
+    compensation: "₦270,000/session",
     format: "Online",
   },
 ];

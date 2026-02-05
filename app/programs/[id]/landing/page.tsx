@@ -574,7 +574,7 @@ export default function ProgramLandingPage() {
             <div className="sticky top-24">
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle className="text-2xl">${program.price}</CardTitle>
+                  <CardTitle className="text-2xl">₦{(program.price * 1500).toLocaleString()}</CardTitle>
                   <CardDescription>
                     {program.sessions} sessions ({program.freeSessionsIncluded} free)
                   </CardDescription>

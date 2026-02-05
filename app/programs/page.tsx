@@ -369,7 +369,7 @@ export default function ProgramsPage() {
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">${program.price}</span>
+                    <span className="font-bold text-lg">₦{(program.price * 1500).toLocaleString()}</span>
                     <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
                       <Link href={`/programs/${program.id}`}>View Course</Link>
                     </Button>
@@ -503,7 +503,7 @@ function ProgramCard({ program }: { program: any }) {
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="font-bold text-lg">${program.price}</span>
+          <span className="font-bold text-lg">₦{(program.price * 1500).toLocaleString()}</span>
           <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
             <Link href={`/programs/${program.id}`}>
               {isTraining ? "View Course" : isMentorship ? "View Program" : "Join Cohort"}

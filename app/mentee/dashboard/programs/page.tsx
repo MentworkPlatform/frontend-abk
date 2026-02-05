@@ -68,12 +68,8 @@ export default function ProgramsPage() {
       <div className="w-full space-y-6 p-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {programs.map((program) => (
-            <Card
-              key={program.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              asChild
-            >
-              <Link href={`/lms/programs/${program.id}`}>
+            <Link key={program.id} href={`/mentee/dashboard/programs/${program.id}`}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -112,8 +108,8 @@ export default function ProgramsPage() {
                     </Button>
                   </div>
                 </CardContent>
-              </Link>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
 

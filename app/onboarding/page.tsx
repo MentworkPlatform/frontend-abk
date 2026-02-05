@@ -5,7 +5,7 @@ import type React from "react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Clock, Users, Star, Heart, Bell, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Clock, Users, Star, Heart, Eye } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { SECTORS } from "@/lib/constants/onboarding";
 
 // Mock program data - in real app, this would come from API based on intent
 const mockPrograms = [
@@ -102,7 +105,8 @@ export default function OnboardingPage() {
   const [formData, setFormData] = useState({
     // Step 1: Intent Snapshot
     goals: [] as string[], // Max 2 selections
-    area: "", // Single selection
+    timeframe: "", // Timeframe for goals
+    area: [] as string[], // Multi-select using sectors
     stage: "", // Single selection
     // Step 4: Account Creation (only if needed)
     name: "",
@@ -125,6 +129,11 @@ export default function OnboardingPage() {
       return prev;
     });
   };
+
+  // Sector options for dropdown
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
+  }, []);
 
   // Filter programs based on intent (simplified matching logic)
   const relevantPrograms = useMemo(() => {
@@ -149,19 +158,6 @@ export default function OnboardingPage() {
     nextStep(); // Go to micro-commitment step
   };
 
-  const handleSaveInterest = () => {
-    // In real app, check if user is logged in
-    // If not logged in, prompt for account creation
-    setNeedsAccount(true);
-    nextStep();
-  };
-
-  const handleNotifyMe = () => {
-    // In real app, check if user is logged in
-    // If not logged in, prompt for account creation
-    setNeedsAccount(true);
-    nextStep();
-  };
 
   const handleSkipAccount = () => {
     // Allow user to continue without account
@@ -171,8 +167,9 @@ export default function OnboardingPage() {
 
   const handleCreateAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, create account and save progress
-    router.push("/mentee/dashboard");
+    // In real app, create account via API
+    // After account creation, show Step 5 (What's next?)
+    nextStep();
   };
 
   const handleContinueWithoutAccount = () => {
@@ -206,7 +203,7 @@ export default function OnboardingPage() {
               {step === 5 && "What's next?"}
             </h1>
             <div className="text-sm font-medium">
-              {step === 4 ? "Step 2 of 3 – Save your progress" : `Step ${step} of ${totalSteps}`}
+              Step {step} of {totalSteps}
             </div>
           </div>
 
@@ -267,30 +264,35 @@ export default function OnboardingPage() {
 
                   <div className="space-y-3">
                     <Label className="text-base font-semibold">
+                      What timeframe are you looking at?
+                    </Label>
+                    <Select
+                      value={formData.timeframe}
+                      onValueChange={(value) => updateFormData("timeframe", value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select timeframe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="immediately">Immediately</SelectItem>
+                        <SelectItem value="1-3-months">1-3 months</SelectItem>
+                        <SelectItem value="3-6-months">3-6 months</SelectItem>
+                        <SelectItem value="6-12-months">6-12 months</SelectItem>
+                        <SelectItem value="12-plus-months">12+ months</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">
                       Which area best describes your interest?
                     </Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {[
-                        "Food",
-                        "Fashion",
-                        "Creative / Media",
-                        "Tech / Digital",
-                        "Services",
-                        "Other",
-                      ].map((area) => (
-                        <div
-                          key={area}
-                          onClick={() => updateFormData("area", area)}
-                          className={`p-2 border rounded-md cursor-pointer text-center transition-all ${
-                            formData.area === area
-                              ? "border-[#FFD500] bg-yellow-50"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          <span className="font-medium text-sm">{area}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.area}
+                      onSelectionChange={(selected) => updateFormData("area", selected)}
+                      placeholder="Select area(s) of interest"
+                    />
                   </div>
 
                   <div className="space-y-3">
@@ -412,41 +414,73 @@ export default function OnboardingPage() {
             )}
 
             {/* Step 3: Micro-Commitment */}
-            {step === 3 && selectedProgram && (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-[#FFD500]" />
-                  <h2 className="text-xl font-bold mb-2">
-                    {relevantPrograms.find((p) => p.id === selectedProgram)?.title}
-                </h2>
-                  <p className="text-gray-600">
-                    {relevantPrograms.find((p) => p.id === selectedProgram)?.outcome}
-                  </p>
-                </div>
+            {step === 3 && selectedProgram && (() => {
+              const program = relevantPrograms.find((p) => p.id === selectedProgram);
+              if (!program) return null;
+              
+              return (
+                <div className="space-y-6">
+                  <Card className="border-2 border-[#FFD500]">
+                    <CardHeader>
+                      <div className="flex items-start gap-3 mb-4">
+                        <BookOpen className="h-8 w-8 text-[#FFD500] flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                          <CardTitle className="text-xl mb-2">{program.title}</CardTitle>
+                          <CardDescription className="text-base mb-4">
+                            {program.outcome}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-700">{program.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-gray-700">{program.rating} ({program.reviews} reviews)</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className="text-xs">
+                          {program.stage}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {program.format}
+                        </Badge>
+                      </div>
+                      
+                      <div className="pt-3 border-t">
+                        <p className="text-sm font-medium text-gray-700 mb-1">
+                          Facilitator
+                        </p>
+                        <p className="text-sm text-gray-600">{program.facilitator.name}</p>
+                        <p className="text-xs text-gray-500">{program.facilitator.credibility}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                <div className="space-y-3">
-                  <Button
-                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14"
-                    onClick={handleSaveInterest}
-                  >
-                    <Heart className="h-5 w-5 mr-2" />
-                    Save to Learning Path
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-14"
-                    onClick={handleNotifyMe}
-                  >
-                    <Bell className="h-5 w-5 mr-2" />
-                    Get Notified About Next Cohort
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14"
+                      onClick={() => {
+                        setNeedsAccount(true);
+                        nextStep();
+                      }}
+                    >
+                      Create Account to Continue
+                      <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                    <p className="text-xs text-center text-gray-500">
+                      Create an account to view full program details and enroll
+                    </p>
+                  </div>
                 </div>
-
-                <p className="text-xs text-center text-gray-500">
-                  Create an account to save your progress and get personalized recommendations
-                </p>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Step 4: Lightweight Account Creation */}
             {step === 4 && (
@@ -454,9 +488,6 @@ export default function OnboardingPage() {
                 <div className="text-center mb-6">
                   <p className="text-gray-600">
                     Create an account to save your progress
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Step 2 of 3 – Save your progress
                   </p>
                 </div>
 
@@ -506,14 +537,6 @@ export default function OnboardingPage() {
                       className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
                     >
                       Create Account & Continue
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={handleSkipAccount}
-                    >
-                      Continue without account
                     </Button>
                     </div>
                 </form>
@@ -565,7 +588,7 @@ export default function OnboardingPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-shadow border-2 border-[#FFD500] bg-yellow-50/50">
                     <CardHeader>
                       <CardTitle className="text-lg">Improve Recommendations</CardTitle>
                     </CardHeader>
@@ -574,14 +597,22 @@ export default function OnboardingPage() {
                         Add more details to get better matches
                       </p>
                       <Button
-                        variant="outline"
-                        className="w-full"
+                        className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
                         onClick={() => router.push("/mentee/dashboard/profile")}
                       >
                         Complete Profile
                       </Button>
                     </CardContent>
                   </Card>
+                </div>
+
+                <div className="pt-6 border-t">
+                  <Button
+                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                    onClick={() => router.push("/mentee/dashboard")}
+                  >
+                    Go to Dashboard
+                  </Button>
                 </div>
               </div>
             )}
@@ -606,7 +637,7 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   onClick={nextStep}
-                    disabled={formData.goals.length === 0 || !formData.area || !formData.stage}
+                    disabled={formData.goals.length === 0 || !formData.timeframe || formData.area.length === 0 || !formData.stage}
                   className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
                 >
                     See Programs <ArrowRight className="h-4 w-4" />

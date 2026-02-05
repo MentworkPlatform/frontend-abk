@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 // Mock data for the program
 const programData = {
@@ -54,7 +56,7 @@ const topics = [
         duration: "60 min",
         status: "completed",
         meetingLink: "https://meet.google.com/abc-defg-hij",
-        recording: "https://recordings.com/session1",
+        recording: null,
         attendanceConfirmed: { trainer: true, mentor: true },
         paymentStatus: "paid",
       },
@@ -78,7 +80,7 @@ const topics = [
         duration: "90 min",
         status: "completed",
         meetingLink: "https://meet.google.com/abc-defg-hij",
-        recording: "https://recordings.com/session2",
+        recording: null,
         attendanceConfirmed: { trainer: true, mentor: true },
         paymentStatus: "paid",
       },
@@ -136,6 +138,9 @@ const topics = [
 
 export default function LearnerProgramPage({ params }: { params: { id: string } }) {
   const [selectedTopic, setSelectedTopic] = useState<number | null>(null)
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [feedbackComment, setFeedbackComment] = useState("")
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -330,14 +335,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                                   </Button>
                                 )}
 
-                                {session.status === "completed" && session.recording && (
-                                  <Button variant="outline" className="w-full bg-transparent" asChild>
-                                    <a href={session.recording} target="_blank" rel="noopener noreferrer">
-                                      <Play className="mr-2 h-4 w-4" />
-                                      Watch Recording
-                                    </a>
-                                  </Button>
-                                )}
+                                {/* Recording not available for now */}
 
                                 {session.status === "completed" && (
                                   <div className="space-y-2">
@@ -377,14 +375,33 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                               </CardHeader>
                               <CardContent>
                                 {assessment.status === "completed" && assessment.score && (
-                                  <div className="flex items-center gap-2">
-                                    <Award className="h-4 w-4 text-yellow-500" />
-                                    <span className="font-semibold">{assessment.score}%</span>
+                                  <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                      <Award className="h-4 w-4 text-yellow-500" />
+                                      <span className="font-semibold">{assessment.score}%</span>
+                                    </div>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="w-full"
+                                      onClick={() => {
+                                        // In real app, navigate to assessment results page
+                                        // router.push(`/mentee/dashboard/programs/${params.id}/assessments/${assessment.id}`)
+                                        alert("Viewing assessment results...")
+                                      }}
+                                    >
+                                      View Results
+                                    </Button>
                                   </div>
                                 )}
                                 {assessment.status === "pending" && (
                                   <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
                                     Start Assessment
+                                  </Button>
+                                )}
+                                {assessment.status === "not_started" && (
+                                  <Button size="sm" variant="outline" className="w-full">
+                                    Not Available Yet
                                   </Button>
                                 )}
                               </CardContent>
@@ -393,44 +410,102 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                         </TabsContent>
 
                         <TabsContent value="feedback" className="space-y-4">
-                          {topic.feedback.length > 0 ? (
-                            topic.feedback.map((feedback) => (
-                              <Card key={feedback.id}>
-                                <CardHeader className="pb-3">
-                                  <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage src="/placeholder-avatar.jpg" />
-                                      <AvatarFallback>
-                                        {feedback.from
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium text-sm">{feedback.from}</p>
-                                      <div className="flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                          <Star
-                                            key={i}
-                                            className={`h-3 w-3 ${
-                                              i < feedback.rating ? "text-yellow-500 fill-current" : "text-gray-300"
-                                            }`}
-                                          />
-                                        ))}
+                          {/* Give Review & Rating Section */}
+                          <Card className="border-2 border-[#FFD500]">
+                            <CardHeader>
+                              <CardTitle className="text-lg">Give Review & Rating</CardTitle>
+                              <CardDescription>Share your feedback about this topic</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Your Rating</Label>
+                                <div className="flex items-center gap-2">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                      key={star}
+                                      type="button"
+                                      onClick={() => setFeedbackRating(star)}
+                                      className="focus:outline-none"
+                                    >
+                                      <Star
+                                        className={`h-6 w-6 ${
+                                          star <= feedbackRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                                        }`}
+                                      />
+                                    </button>
+                                  ))}
+                                  {feedbackRating > 0 && (
+                                    <span className="text-sm text-gray-600 ml-2">{feedbackRating} out of 5</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="feedback-comment">Your Feedback</Label>
+                                <Textarea
+                                  id="feedback-comment"
+                                  value={feedbackComment}
+                                  onChange={(e) => setFeedbackComment(e.target.value)}
+                                  placeholder="Share your thoughts about this topic..."
+                                  rows={4}
+                                />
+                              </div>
+                              <Button
+                                className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                disabled={feedbackRating === 0 || !feedbackComment.trim() || isSubmittingFeedback}
+                                onClick={async () => {
+                                  setIsSubmittingFeedback(true)
+                                  // TODO: Submit feedback via API
+                                  // await fetch(`/api/programs/${params.id}/topics/${topic.id}/feedback`, {...})
+                                  setTimeout(() => {
+                                    setIsSubmittingFeedback(false)
+                                    alert("Feedback submitted successfully!")
+                                    setFeedbackRating(0)
+                                    setFeedbackComment("")
+                                  }, 1000)
+                                }}
+                              >
+                                {isSubmittingFeedback ? "Submitting..." : "Submit Feedback"}
+                              </Button>
+                            </CardContent>
+                          </Card>
+
+                          {/* Received Feedback Section */}
+                          {topic.feedback.length > 0 && (
+                            <div className="space-y-4">
+                              <h4 className="font-medium text-sm text-gray-700">Feedback from Mentor</h4>
+                              {topic.feedback.map((feedback) => (
+                                <Card key={feedback.id}>
+                                  <CardHeader className="pb-3">
+                                    <div className="flex items-center gap-3">
+                                      <Avatar className="h-8 w-8">
+                                        <AvatarImage src="/placeholder-avatar.jpg" />
+                                        <AvatarFallback>
+                                          {feedback.from
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="font-medium text-sm">{feedback.from}</p>
+                                        <div className="flex items-center gap-1">
+                                          {[...Array(5)].map((_, i) => (
+                                            <Star
+                                              key={i}
+                                              className={`h-3 w-3 ${
+                                                i < feedback.rating ? "text-yellow-500 fill-current" : "text-gray-300"
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <p className="text-sm text-gray-600">{feedback.comment}</p>
-                                </CardContent>
-                              </Card>
-                            ))
-                          ) : (
-                            <div className="text-center py-8 text-gray-500">
-                              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                              <p>No feedback available yet</p>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">{feedback.comment}</p>
+                                  </CardContent>
+                                </Card>
+                              ))}
                             </div>
                           )}
                         </TabsContent>

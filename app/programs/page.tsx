@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Sample data for different program types
 const mentorshipPrograms = [
@@ -157,7 +156,6 @@ export default function ProgramsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [selectedFormat, setSelectedFormat] = useState("all")
-  const [activeTab, setActiveTab] = useState("all")
 
   // Filter function for programs
   const matchesFilters = (program: any) => {
@@ -166,11 +164,23 @@ export default function ProgramsPage() {
       program.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "all" || program.category.toLowerCase() === selectedCategory
     const matchesLevel = selectedLevel === "all" || program.level.toLowerCase() === selectedLevel
-    const matchesFormat =
-      selectedFormat === "all" || program.format.toLowerCase().includes(selectedFormat.toLowerCase())
-    const matchesTab = activeTab === "all" || program.type === activeTab
+    const matchesFormat = (() => {
+      if (selectedFormat === "all") return true
+      const programFormat = program.format.toLowerCase()
+      // Map program formats to filter values
+      if (selectedFormat === "hybrid") {
+        return programFormat.includes("hybrid")
+      }
+      if (selectedFormat === "online") {
+        return programFormat.includes("self-paced") || programFormat.includes("live") || programFormat.includes("online")
+      }
+      if (selectedFormat === "in-person") {
+        return programFormat.includes("in-person") || programFormat.includes("cohort") || programFormat.includes("1:1")
+      }
+      return false
+    })()
 
-    return matchesSearch && matchesCategory && matchesLevel && matchesFormat && matchesTab
+    return matchesSearch && matchesCategory && matchesLevel && matchesFormat
   }
 
   // Simple matching logic - in real app, this would use onboarding data from backend
@@ -223,7 +233,7 @@ export default function ProgramsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger>
                   <SelectValue placeholder="Category" />
@@ -257,23 +267,9 @@ export default function ProgramsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Formats</SelectItem>
-                  <SelectItem value="1:1">1:1 Mentoring</SelectItem>
-                  <SelectItem value="self-paced">Self-Paced</SelectItem>
-                  <SelectItem value="live">Live Sessions</SelectItem>
                   <SelectItem value="hybrid">Hybrid</SelectItem>
-                  <SelectItem value="cohort">Group/Cohort</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Duration</SelectItem>
-                  <SelectItem value="short">1-4 weeks</SelectItem>
-                  <SelectItem value="medium">1-3 months</SelectItem>
-                  <SelectItem value="long">3+ months</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="in-person">In-Person</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -303,43 +299,8 @@ export default function ProgramsPage() {
             </div>
           )}
 
-        {/* Program Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All Programs ({allPrograms.length})</TabsTrigger>
-            <TabsTrigger value="mentorship">Mentorship ({mentorshipPrograms.length})</TabsTrigger>
-            <TabsTrigger value="training">Training Courses ({trainingPrograms.length})</TabsTrigger>
-            <TabsTrigger value="group">Group Programs ({groupPrograms.length})</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="mt-8">
-            <ProgramGrid programs={filteredPrograms} />
-          </TabsContent>
-
-          <TabsContent value="mentorship" className="mt-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">1:1 Mentorship Programs</h2>
-              <p className="text-gray-600">Get personalized guidance from industry experts</p>
-            </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "mentorship")} />
-          </TabsContent>
-
-          <TabsContent value="training" className="mt-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Training Courses</h2>
-              <p className="text-gray-600">Comprehensive courses designed by expert trainers</p>
-            </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "training")} />
-          </TabsContent>
-
-          <TabsContent value="group" className="mt-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Group Learning Programs</h2>
-              <p className="text-gray-600">Learn alongside peers in structured cohorts</p>
-            </div>
-            <ProgramGrid programs={filteredPrograms.filter((p) => p.type === "group")} />
-          </TabsContent>
-        </Tabs>
+        {/* All Programs */}
+        <ProgramGrid programs={filteredPrograms} />
         </div>
 
         {/* Featured Training Programs Section */}

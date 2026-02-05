@@ -573,18 +573,18 @@ export default function ProgramLMSPage() {
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedSession(session)
-                                  setShowFeedbackDialog(true)
-                                }}
-                                className="bg-white hover:bg-purple-50 w-full sm:w-auto"
-                              >
-                                <MessageSquare className="h-4 w-4 mr-1" />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedSession(session)
+                                setShowFeedbackDialog(true)
+                              }}
+                              className="bg-white hover:bg-purple-50 w-full sm:w-auto"
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
                                 {session.feedback.length > 0 || sessionsWithFeedback.has(session.id) ? "View & Add" : "Add"} Feedback
-                              </Button>
+                            </Button>
                               {session.trainerConfirmed &&
                                 session.mentorConfirmed &&
                                 session.paymentStatus === "pending" &&

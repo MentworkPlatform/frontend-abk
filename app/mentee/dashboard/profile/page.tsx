@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Save, User, Briefcase, Target, Globe, Linkedin } from "lucide-react";
+import { Save, User, Briefcase, Target, Globe, Linkedin, DollarSign, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { DashboardHeader } from "@/components/dashboard-header";
 import {
   SECTORS,
   SKILLS_CAPABILITIES,
@@ -37,6 +36,7 @@ import { useMemo } from "react";
 export default function ProfilePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("personal");
   const [formData, setFormData] = useState({
     goal: "Scale my startup and secure funding",
     name: "John Doe",
@@ -55,7 +55,15 @@ export default function ProfilePage() {
     timeframe: "6-12-months",
     linkedinUrl: "",
     websiteUrl: "",
+    goalBudget: "",
   });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -106,17 +114,94 @@ export default function ProfilePage() {
     }, 1000);
   };
 
-  return (
-    <div className="flex-1 space-y-6">
-      <DashboardHeader
-        title="Profile Settings"
-        description="Update your profile information and goals"
-      />
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPasswordLoading(true);
 
-      <div className="w-full space-y-6 p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Information */}
-          <Card>
+    // Validate passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("New passwords do not match");
+      setIsPasswordLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (passwordData.newPassword.length < 8) {
+      alert("Password must be at least 8 characters long");
+      setIsPasswordLoading(false);
+      return;
+    }
+
+    // TODO: Add API call to update password
+    // const response = await fetch(API_URL + '/auth/change-password', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Bearer ' + localStorage.getItem('token'),
+    //   },
+    //   body: JSON.stringify({
+    //     currentPassword: passwordData.currentPassword,
+    //     newPassword: passwordData.newPassword,
+    //   }),
+    // })
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsPasswordLoading(false);
+      alert("Password updated successfully!");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }, 1000);
+  };
+
+  const tabs = [
+    { id: "personal", label: "Personal Information", icon: User },
+    { id: "goals", label: "Goals & Objectives", icon: Target },
+    { id: "budget", label: "Goal Budget", icon: DollarSign },
+    { id: "interests", label: "Areas of Interest", icon: Briefcase },
+    { id: "social", label: "Social Links", icon: Globe },
+    { id: "password", label: "Change Password", icon: Lock },
+  ];
+
+  return (
+    <div className="flex-1 flex w-full h-full">
+      {/* Left Sidebar - Tabs */}
+      <div className="w-64 border-r bg-white flex-shrink-0">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-semibold">Profile Settings</h2>
+          <p className="text-sm text-gray-500 mt-1">Update your profile</p>
+        </div>
+        <nav className="p-4 space-y-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-[#FFD500] text-black"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Right Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          <form id="profile-form" onSubmit={handleSubmit} className="space-y-6">
+            {/* Personal Information Tab */}
+            {activeTab === "personal" && (
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -238,9 +323,11 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+            )}
 
-          {/* Goals & Objectives */}
-          <Card>
+            {/* Goals & Objectives Tab */}
+            {activeTab === "goals" && (
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
@@ -275,9 +362,49 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+            )}
 
-          {/* Areas of Interest */}
-          <Card>
+            {/* Goal Budget Tab */}
+            {activeTab === "budget" && (
+              <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Goal Budget
+              </CardTitle>
+              <CardDescription>Budget allocated for achieving your goals</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="goalBudget">Budget Range</Label>
+                <Select
+                  value={formData.goalBudget}
+                  onValueChange={(value) => updateFormData("goalBudget", value)}
+                >
+                  <SelectTrigger id="goalBudget">
+                    <SelectValue placeholder="Select your budget range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="under-500">Under $500</SelectItem>
+                    <SelectItem value="500-1000">$500 - $1,000</SelectItem>
+                    <SelectItem value="1000-2500">$1,000 - $2,500</SelectItem>
+                    <SelectItem value="2500-5000">$2,500 - $5,000</SelectItem>
+                    <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
+                    <SelectItem value="10000-plus">$10,000+</SelectItem>
+                    <SelectItem value="not-sure">Not sure yet</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  This helps us recommend programs that fit your budget
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+            )}
+
+            {/* Areas of Interest Tab */}
+            {activeTab === "interests" && (
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5" />
@@ -340,9 +467,11 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+            )}
 
-          {/* Social Links */}
-          <Card>
+            {/* Social Links Tab */}
+            {activeTab === "social" && (
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5" />
@@ -387,24 +516,95 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+            )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4">
-            <Link href="/mentee/dashboard">
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
-            </Link>
-            <Button
-              type="submit"
-              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
-              disabled={isLoading}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {isLoading ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </form>
+            {/* Password Change Tab */}
+            {activeTab === "password" && (
+              <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Change Password
+              </CardTitle>
+              <CardDescription>Update your account password</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                    }
+                    placeholder="Enter your current password"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, newPassword: e.target.value })
+                    }
+                    placeholder="Enter your new password (min. 8 characters)"
+                    required
+                    minLength={8}
+                  />
+                  <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                    }
+                    placeholder="Confirm your new password"
+                    required
+                    minLength={8}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                  disabled={isPasswordLoading}
+                >
+                  {isPasswordLoading ? "Updating..." : "Update Password"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+            )}
+
+            {/* Action Buttons */}
+            {activeTab !== "password" && (
+              <div className="flex justify-end gap-4 pt-6 border-t">
+                <Link href="/mentee/dashboard">
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                </Link>
+                <Button
+                  type="submit"
+                  form="profile-form"
+                  className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                  disabled={isLoading}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

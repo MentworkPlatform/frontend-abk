@@ -351,7 +351,7 @@ export default function TrainerOnboardingPage() {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                    </div>
 
                 <Button
                   className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14 text-lg"
@@ -359,7 +359,7 @@ export default function TrainerOnboardingPage() {
                 >
                   Start Program
                 </Button>
-              </div>
+                    </div>
             )}
 
             {/* Step 3: Program Creation (Scaffolded) */}
@@ -370,7 +370,7 @@ export default function TrainerOnboardingPage() {
                   <p className="text-gray-600">
                     Choose a template to get started quickly, or build from scratch
                   </p>
-                </div>
+                    </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Template Option */}
@@ -412,7 +412,7 @@ export default function TrainerOnboardingPage() {
                             </div>
                           </div>
                         ))}
-                      </div>
+                    </div>
                     </CardContent>
                   </Card>
 
@@ -670,31 +670,31 @@ export default function TrainerOnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 6 && (
-              <div className="flex justify-between mt-8">
-                {step > 1 ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={prevStep}
+            <div className="flex justify-between mt-8">
+              {step > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
                     className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" /> Back
-                  </Button>
-                ) : (
-                  <div></div>
-                )}
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+              ) : (
+                <div></div>
+              )}
 
                 {step === 1 && (
-                  <Button
-                    type="button"
+                <Button
+                  type="button"
                     variant="outline"
                     onClick={() => router.push("/trainer/dashboard")}
                     className="flex items-center gap-2"
-                  >
+                >
                     Skip for now
-                  </Button>
-                )}
-              </div>
+                </Button>
+              )}
+            </div>
             )}
           </CardContent>
         </Card>

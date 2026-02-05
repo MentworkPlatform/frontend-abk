@@ -8,7 +8,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   BookOpen,
   Clock,
   Users,
@@ -22,11 +21,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   SECTORS,
-  getSkillsForSectors,
-  getSkillsGroupedBySector,
-} from "@/lib/constants/onboarding";
+} from "@/lib/constants/onboarding"
 
 // Mock opportunity data - in real app, this would come from API based on expertise
 const mockOpportunities = [
@@ -38,7 +36,7 @@ const mockOpportunities = [
     timeCommitment: "2 hours per week",
     cohortTiming: "Next cohort starts in 2 weeks",
     facilitator: "Alex Thompson",
-    compensation: "$150/session",
+    compensation: "₦225,000/session",
     format: "Hybrid",
   },
   {
@@ -49,7 +47,7 @@ const mockOpportunities = [
     timeCommitment: "3 hours per week",
     cohortTiming: "Next cohort starts in 1 month",
     facilitator: "Emily Rodriguez",
-    compensation: "$200/session",
+    compensation: "₦300,000/session",
     format: "Online",
   },
   {
@@ -60,7 +58,7 @@ const mockOpportunities = [
     timeCommitment: "2.5 hours per week",
     cohortTiming: "Next cohort starts in 3 weeks",
     facilitator: "Sarah Johnson",
-    compensation: "$250/session",
+    compensation: "₦375,000/session",
     format: "Hybrid",
   },
   {
@@ -71,7 +69,7 @@ const mockOpportunities = [
     timeCommitment: "4 hours per week",
     cohortTiming: "Next cohort starts in 2 weeks",
     facilitator: "Dr. James Wilson",
-    compensation: "$180/session",
+    compensation: "₦270,000/session",
     format: "Online",
   },
 ];
@@ -83,7 +81,7 @@ export default function MentorOnboardingPage() {
   const [needsAccount, setNeedsAccount] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Expertise Snapshot
-    teachingAreas: [] as string[], // Max 3 selections
+    selectedSectors: [] as string[], // Max 3 selections using sector IDs
     preferredStage: "", // Single selection
     // Step 4: Account Creation (only if needed)
     name: "",
@@ -95,38 +93,16 @@ export default function MentorOnboardingPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleTeachingArea = (area: string) => {
-    setFormData((prev) => {
-      const currentAreas = [...prev.teachingAreas];
-      if (currentAreas.includes(area)) {
-        return { ...prev, teachingAreas: currentAreas.filter((a) => a !== area) };
-      } else if (currentAreas.length < 3) {
-        return { ...prev, teachingAreas: [...currentAreas, area] };
-      }
-      return prev;
-    });
-  };
-
-  // Get teaching areas from sectors and skills
-  const teachingAreaOptions = useMemo(() => {
-    const areas: string[] = [];
-    SECTORS.forEach((sector) => {
-      areas.push(sector.name);
-      const skills = getSkillsForSectors([sector.id]);
-      skills.forEach((skill) => {
-        if (!areas.includes(skill)) {
-          areas.push(skill);
-        }
-      });
-    });
-    return areas.slice(0, 20); // Limit to reasonable number
+  // Sector options for dropdown
+  const sectorsOptions = useMemo(() => {
+    return SECTORS.map((sector) => ({ value: sector.id, label: sector.name }));
   }, []);
 
   // Filter opportunities based on expertise (simplified matching logic)
   const relevantOpportunities = useMemo(() => {
     // In real app, this would be API call with expertise data
     return mockOpportunities;
-  }, [formData.teachingAreas, formData.preferredStage]);
+  }, [formData.selectedSectors, formData.preferredStage]);
 
   const nextStep = () => {
     setStep((prev) => prev + 1);
@@ -145,20 +121,15 @@ export default function MentorOnboardingPage() {
   };
 
   const handleSaveInterest = () => {
-    // In real app, save interest and notify facilitator
+    // In real app, save interest
     setNeedsAccount(true);
     nextStep();
-  };
-
-  const handleSkipAccount = () => {
-    setNeedsAccount(false);
-    setStep(5); // Go to next steps
   };
 
   const handleCreateAccount = (e: React.FormEvent) => {
     e.preventDefault();
     // In real app, create account and save interest
-    router.push("/mentor/dashboard");
+    nextStep(); // Go to Step 5 (Done page)
   };
 
   const totalSteps = 5;
@@ -186,7 +157,7 @@ export default function MentorOnboardingPage() {
               {step === 5 && "What's next?"}
             </h1>
             <div className="text-sm font-medium">
-              {step === 4 ? "Step 2 of 3 – Save your interest" : `Step ${step} of ${totalSteps}`}
+              Step {step} of {totalSteps}
             </div>
           </div>
 
@@ -212,29 +183,20 @@ export default function MentorOnboardingPage() {
                     <Label className="text-base font-semibold">
                       Which areas can you teach confidently? (Select up to 3)
                     </Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {teachingAreaOptions.map((area) => (
-                        <div
-                          key={area}
-                          onClick={() => toggleTeachingArea(area)}
-                          className={`p-2.5 border rounded-md cursor-pointer transition-all text-center ${
-                            formData.teachingAreas.includes(area)
-                              ? "border-[#FFD500] bg-yellow-50"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            <span className="text-sm font-medium">{area}</span>
-                            {formData.teachingAreas.includes(area) && (
-                              <CheckCircle2 className="h-4 w-4 text-[#FFD500]" />
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {formData.teachingAreas.length > 0 && (
+                    <MultiSelect
+                      options={sectorsOptions}
+                      selected={formData.selectedSectors}
+                      onSelectionChange={(selected) => {
+                        // Limit to 3 selections
+                        if (selected.length <= 3) {
+                          updateFormData("selectedSectors", selected);
+                        }
+                      }}
+                      placeholder="Select sector(s)"
+                    />
+                    {formData.selectedSectors.length > 0 && (
                       <p className="text-xs text-gray-500">
-                        {formData.teachingAreas.length} of 3 selected
+                        {formData.selectedSectors.length} of 3 selected
                       </p>
                     )}
                   </div>
@@ -395,7 +357,7 @@ export default function MentorOnboardingPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">Compensation:</span>
-                        <span className="text-[#FFD500] font-bold">
+                        <span className="text-blue-700 font-bold">
                           {relevantOpportunities.find((o) => o.id === selectedOpportunity)?.compensation}
                         </span>
                       </div>
@@ -409,7 +371,7 @@ export default function MentorOnboardingPage() {
                     onClick={handleSaveInterest}
                   >
                     <CheckCircle className="h-5 w-5 mr-2" />
-                    Save Interest & Notify Facilitator
+                    Save Interest
                   </Button>
                 </div>
 
@@ -426,31 +388,28 @@ export default function MentorOnboardingPage() {
                   <p className="text-gray-600">
                     Create an account to save your interest
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Step 2 of 3 – Save your interest
-                  </p>
                 </div>
 
                 <form onSubmit={handleCreateAccount} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => updateFormData("name", e.target.value)}
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => updateFormData("name", e.target.value)}
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
                       onChange={(e) => updateFormData("email", e.target.value)}
-                      placeholder="Enter your email address"
+                        placeholder="Enter your email address"
                       required
                     />
                   </div>
@@ -478,51 +437,62 @@ export default function MentorOnboardingPage() {
                     >
                       Create Account & Save Interest
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={handleSkipAccount}
-                    >
-                      Continue without account
-                    </Button>
                   </div>
                 </form>
               </div>
             )}
 
-            {/* Step 5: Clear Next Step */}
+            {/* Step 5: Clear Next Step - Done Page */}
             {step === 5 && (
               <div className="space-y-6 text-center">
                 <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Interest Saved!</h2>
+                <h2 className="text-2xl font-bold mb-2">All Set!</h2>
                 <p className="text-gray-600 mb-6">
                   You'll be notified when facilitators confirm teaching slots
                 </p>
 
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-6">
-                    <Bell className="h-8 w-8 mx-auto mb-3 text-blue-600" />
-                    <p className="text-sm text-gray-700 mb-4">
-                      We'll send you an email when the facilitator reviews your interest and confirms the teaching opportunity.
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.push("/mentor/dashboard")}
-                    >
-                      Go to Dashboard
-                    </Button>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-blue-50 border-blue-200 hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-6">
+                      <Bell className="h-8 w-8 mx-auto mb-3 text-blue-600" />
+                      <h3 className="font-semibold mb-2">Explore More Opportunities</h3>
+                      <p className="text-sm text-gray-700 mb-4">
+                        Browse all available programs looking for mentors
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => router.push("/programs")}
+                      >
+                        Explore Programs
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-yellow-50 border-2 border-[#FFD500] hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-6">
+                      <Users className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                      <h3 className="font-semibold mb-2">Improve Recommendations</h3>
+                      <p className="text-sm text-gray-700 mb-4">
+                        Complete your profile to get better matched with opportunities
+                      </p>
+                      <Button
+                        className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                        onClick={() => router.push("/mentor/dashboard/profile")}
+                      >
+                        Complete Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 <div className="pt-4">
                   <Button
                     variant="ghost"
                     className="w-full"
-                    onClick={() => router.push("/mentor/dashboard/profile")}
+                    onClick={() => router.push("/mentor/dashboard")}
                   >
-                    Improve Matching by Adding More Details
+                    Go to Dashboard
                   </Button>
                 </div>
               </div>
@@ -530,34 +500,34 @@ export default function MentorOnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 5 && (
-              <div className="flex justify-between mt-8">
-                {step > 1 ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={prevStep}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" /> Back
-                  </Button>
-                ) : (
-                  <div></div>
-                )}
+            <div className="flex justify-between mt-8">
+              {step > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+              ) : (
+                <div></div>
+              )}
 
                 {step === 1 && (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={formData.teachingAreas.length === 0 || !formData.preferredStage}
-                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
-                  >
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                    disabled={formData.selectedSectors.length === 0 || !formData.preferredStage}
+                  className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
+                >
                     See Opportunities <ArrowRight className="h-4 w-4" />
-                  </Button>
+                </Button>
                 )}
 
                 {step === 2 && (
-                  <Button
-                    type="button"
+                <Button
+                  type="button"
                     variant="outline"
                     onClick={() => {
                       setNeedsAccount(false);
@@ -566,9 +536,9 @@ export default function MentorOnboardingPage() {
                     className="flex items-center gap-2"
                   >
                     Skip for now
-                  </Button>
-                )}
-              </div>
+                </Button>
+              )}
+            </div>
             )}
           </CardContent>
         </Card>

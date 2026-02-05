@@ -70,7 +70,7 @@ type Topic = {
   mentors: string[]
   participants: number
   completionRate: number
-  assessments: Array<{ id: string; title: string; type: string; submissions: number; avgScore: number | null }>
+  assessments: Array<{ id: string; title: string; type: string; submissions: number; avgScore: number | null; link?: string }>
   feedback: { rating: number; reviews: number }
   sessions?: Session[]
 }
@@ -206,14 +206,35 @@ export default function ProgramLMSPage() {
     },
   ])
 
+  const [topicsState, setTopicsState] = useState<Topic[]>(topics)
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
+  const [showAssessmentDialog, setShowAssessmentDialog] = useState(false)
+  const [showExternalResourceDialog, setShowExternalResourceDialog] = useState(false)
+  const [showAssignMentorDialog, setShowAssignMentorDialog] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [feedbackRating, setFeedbackRating] = useState(5)
   const [feedbackComment, setFeedbackComment] = useState("")
+  const [selectedMentorForAssignment, setSelectedMentorForAssignment] = useState<string>("")
+  const [assessmentForm, setAssessmentForm] = useState({
+    title: "",
+    type: "quiz",
+    link: "",
+  })
+  const [externalResourceForm, setExternalResourceForm] = useState({
+    title: "",
+    url: "",
+  })
   // Track which sessions have feedback submitted
   const [sessionsWithFeedback, setSessionsWithFeedback] = useState<Set<string>>(new Set())
+
+  // Mock accepted mentors list (in real app, this would come from API)
+  const acceptedMentors = [
+    { id: "1", mentorName: "Sarah Johnson", expertise: "SEO & Content Strategy" },
+    { id: "2", mentorName: "Michael Chen", expertise: "Social Media & Analytics" },
+    { id: "3", mentorName: "Emily Rodriguez", expertise: "Email Marketing" },
+  ]
 
   const handleAttendanceConfirmation = (topicId: string, sessionId: string, type: string) => {
     console.log(`[v0] Confirming ${type} attendance for session ${sessionId} in topic ${topicId}`)
@@ -227,6 +248,43 @@ export default function ProgramLMSPage() {
   const handleJoinMeeting = (meetingLink: string) => {
     console.log(`[v0] Opening meeting link: ${meetingLink}`)
     window.open(meetingLink, "_blank")
+  }
+
+  const handleAssignMentor = () => {
+    if (!selectedTopic || !selectedMentorForAssignment) {
+      console.error("Cannot assign mentor: missing selectedTopic or selectedMentorForAssignment")
+      return
+    }
+    
+    // Check if mentor is already assigned
+    if (selectedTopic.mentors.includes(selectedMentorForAssignment)) {
+      alert("This mentor is already assigned to this topic")
+      return
+    }
+    
+    const topicId = selectedTopic.id
+    const newMentors = [...selectedTopic.mentors, selectedMentorForAssignment]
+    
+    // Update both states
+    setTopicsState((prevTopics) =>
+      prevTopics.map((topic) =>
+        topic.id === topicId
+          ? {
+              ...topic,
+              mentors: newMentors,
+            }
+          : topic
+      )
+    )
+    
+    // Update selectedTopic immediately
+    setSelectedTopic({
+      ...selectedTopic,
+      mentors: newMentors,
+    })
+    
+    setShowAssignMentorDialog(false)
+    setSelectedMentorForAssignment("")
   }
 
   const handleSubmitFeedback = () => {
@@ -303,10 +361,12 @@ export default function ProgramLMSPage() {
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">{program.title}</h1>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <Badge variant={program.status === "active" ? "default" : "secondary"}>{program.status}</Badge>
-                  <span className="text-sm text-gray-500">
+                <h1 className="text-2xl font-semibold text-gray-900">{program.title}</h1>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <Badge variant={program.status === "active" ? "default" : "secondary"} className="text-xs font-medium">
+                    {program.status}
+                  </Badge>
+                  <span className="text-sm text-gray-600 font-medium">
                     {program.participants}/{program.maxParticipants} participants
                   </span>
                 </div>
@@ -330,8 +390,8 @@ export default function ProgramLMSPage() {
                   {getTopicIcon(selectedTopic.type)}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">{selectedTopic.title}</h2>
-                  <p className="text-gray-600">{selectedTopic.description}</p>
+                  <h2 className="text-xl font-semibold text-gray-900">{selectedTopic.title}</h2>
+                  <p className="text-sm text-gray-600 mt-1">{selectedTopic.description}</p>
                 </div>
               </div>
             </div>
@@ -342,8 +402,8 @@ export default function ProgramLMSPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Participants</p>
-                      <p className="text-2xl font-bold">{selectedTopic.participants}</p>
+                      <p className="text-sm text-gray-600 font-medium">Participants</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.participants}</p>
                     </div>
                     <Users className="h-6 w-6 text-blue-500" />
                   </div>
@@ -353,8 +413,8 @@ export default function ProgramLMSPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Completion</p>
-                      <p className="text-2xl font-bold">{selectedTopic.completionRate}%</p>
+                      <p className="text-sm text-gray-600 font-medium">Completion</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.completionRate}%</p>
                     </div>
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   </div>
@@ -364,8 +424,8 @@ export default function ProgramLMSPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Duration</p>
-                      <p className="text-2xl font-bold">{selectedTopic.duration}m</p>
+                      <p className="text-sm text-gray-600 font-medium">Duration</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.duration}m</p>
                     </div>
                     <Clock className="h-6 w-6 text-purple-500" />
                   </div>
@@ -375,8 +435,8 @@ export default function ProgramLMSPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Rating</p>
-                      <p className="text-2xl font-bold">{selectedTopic.feedback.rating || "N/A"}</p>
+                      <p className="text-sm text-gray-600 font-medium">Rating</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.feedback.rating || "N/A"}</p>
                     </div>
                     <BarChart3 className="h-6 w-6 text-orange-500" />
                   </div>
@@ -388,11 +448,11 @@ export default function ProgramLMSPage() {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                       <Video className="h-5 w-5" />
                       Online Sessions & Payment Tracking
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm text-gray-600 mt-1.5">
                       Schedule and manage online meetings for this topic. Both trainer and mentor must confirm
                       attendance for payment processing.
                     </CardDescription>
@@ -406,44 +466,48 @@ export default function ProgramLMSPage() {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Schedule Online Session</DialogTitle>
-                        <DialogDescription>Create a new online session for {selectedTopic.title}</DialogDescription>
+                        <DialogTitle className="text-xl font-semibold">Schedule Online Session</DialogTitle>
+                        <DialogDescription className="text-sm text-gray-600">
+                          Create a new online session for {selectedTopic.title}
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="date">Date</Label>
-                            <Input id="date" type="date" />
+                          <div className="space-y-2">
+                            <Label htmlFor="date" className="text-sm font-medium">Date</Label>
+                            <Input id="date" type="date" className="text-sm" />
                           </div>
-                          <div>
-                            <Label htmlFor="time">Time</Label>
-                            <Input id="time" type="time" />
+                          <div className="space-y-2">
+                            <Label htmlFor="time" className="text-sm font-medium">Time</Label>
+                            <Input id="time" type="time" className="text-sm" />
                           </div>
                         </div>
-                        <div>
-                          <Label htmlFor="mentor">Select Mentor</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="mentor" className="text-sm font-medium">Select Mentor</Label>
                           <Select>
-                            <SelectTrigger>
+                            <SelectTrigger className="text-sm">
                               <SelectValue placeholder="Choose a mentor" />
                             </SelectTrigger>
                             <SelectContent>
                               {selectedTopic.mentors.map((mentor) => (
-                                <SelectItem key={mentor} value={mentor}>
+                                <SelectItem key={mentor} value={mentor} className="text-sm">
                                   {mentor}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <Label htmlFor="amount">Payment Amount ($)</Label>
-                          <Input id="amount" type="number" placeholder="150" />
+                        <div className="space-y-2">
+                          <Label htmlFor="amount" className="text-sm font-medium">Payment Amount (₦)</Label>
+                          <Input id="amount" type="number" placeholder="150" className="text-sm" />
                         </div>
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button variant="outline" onClick={() => setShowScheduleDialog(false)} className="font-medium">
                             Cancel
                           </Button>
-                          <Button onClick={() => handleScheduleSession({})}>Schedule Session</Button>
+                          <Button onClick={() => handleScheduleSession({})} className="font-medium bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                            Schedule Session
+                          </Button>
                         </div>
                       </div>
                     </DialogContent>
@@ -459,12 +523,12 @@ export default function ProgramLMSPage() {
                           <div className="flex items-center gap-3">
                             <Video className="h-5 w-5 text-blue-500" />
                             <div>
-                              <h4 className="font-medium">{session.mentor}</h4>
-                              <p className="text-sm text-gray-600">
+                              <h4 className="font-semibold text-gray-900">{session.mentor}</h4>
+                              <p className="text-sm text-gray-600 mt-0.5">
                                 {new Date(session.date).toLocaleDateString()} at {session.time}
                               </p>
                               {session.meetingId && (
-                                <p className="text-xs text-gray-500">Meeting ID: {session.meetingId}</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Meeting ID: {session.meetingId}</p>
                               )}
                             </div>
                           </div>
@@ -472,7 +536,7 @@ export default function ProgramLMSPage() {
                             <Badge className={getPaymentStatusColor(session.paymentStatus)}>
                               {session.paymentStatus}
                             </Badge>
-                            <span className="font-medium">${session.amount}</span>
+                            <span className="font-medium">₦{(session.amount * 1500).toLocaleString()}</span>
                           </div>
                         </div>
 
@@ -573,18 +637,18 @@ export default function ProgramLMSPage() {
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedSession(session)
-                                  setShowFeedbackDialog(true)
-                                }}
-                                className="bg-white hover:bg-purple-50 w-full sm:w-auto"
-                              >
-                                <MessageSquare className="h-4 w-4 mr-1" />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedSession(session)
+                                setShowFeedbackDialog(true)
+                              }}
+                              className="bg-white hover:bg-purple-50 w-full sm:w-auto"
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
                                 {session.feedback.length > 0 || sessionsWithFeedback.has(session.id) ? "View & Add" : "Add"} Feedback
-                              </Button>
+                            </Button>
                               {session.trainerConfirmed &&
                                 session.mentorConfirmed &&
                                 session.paymentStatus === "pending" &&
@@ -595,7 +659,7 @@ export default function ProgramLMSPage() {
                                     onClick={() => {
                                       // In real app, trigger payment API call to pay the mentor
                                       console.log("Triggering payment to mentor for session:", session.id)
-                                      alert(`Payment of $${session.amount} will be processed for mentor: ${session.mentor}. Payment will be sent after verification.`)
+                                      alert(`Payment of ₦${(session.amount * 1500).toLocaleString()} will be processed for mentor: ${session.mentor}. Payment will be sent after verification.`)
                                       // In real app, this would call payment API and update payment status
                                     }}
                                   >
@@ -649,7 +713,7 @@ export default function ProgramLMSPage() {
               {/* Mentors Teaching */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                     <Users className="h-5 w-5" />
                     Mentors Teaching
                   </CardTitle>
@@ -668,19 +732,121 @@ export default function ProgramLMSPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{mentorName}</p>
-                            <p className="text-sm text-gray-600">Active Mentor</p>
+                            <p className="font-semibold text-gray-900">{mentorName}</p>
+                            <p className="text-sm text-gray-600 mt-0.5">Active Mentor</p>
                           </div>
                         </div>
                       ))}
+                      <Dialog open={showAssignMentorDialog} onOpenChange={setShowAssignMentorDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="w-full font-medium">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Assign Another Mentor
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-semibold">Assign Mentor to {selectedTopic.title}</DialogTitle>
+                            <DialogDescription className="text-sm text-gray-600">
+                              Select a mentor from your accepted mentors to assign to this topic
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="mentor-select" className="text-sm font-medium">Select Mentor</Label>
+                              <Select
+                                value={selectedMentorForAssignment}
+                                onValueChange={setSelectedMentorForAssignment}
+                              >
+                                <SelectTrigger className="text-sm">
+                                  <SelectValue placeholder="Choose a mentor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {acceptedMentors
+                                    .filter((mentor) => !selectedTopic.mentors.includes(mentor.mentorName))
+                                    .map((mentor) => (
+                                      <SelectItem key={mentor.id} value={mentor.mentorName} className="text-sm">
+                                        {mentor.mentorName} - {mentor.expertise}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              {acceptedMentors.filter((mentor) => !selectedTopic.mentors.includes(mentor.mentorName)).length === 0 && (
+                                <p className="text-xs text-gray-500 mt-1">All accepted mentors are already assigned to this topic</p>
+                              )}
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                              <Button variant="outline" onClick={() => setShowAssignMentorDialog(false)} className="font-medium">
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleAssignMentor}
+                                disabled={!selectedMentorForAssignment}
+                                className="font-medium bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                              >
+                                Assign Mentor
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>No mentors assigned yet</p>
-                      <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                        Assign Mentor
-                      </Button>
+                      <p className="text-sm font-medium">No mentors assigned yet</p>
+                      <Dialog open={showAssignMentorDialog} onOpenChange={setShowAssignMentorDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="mt-2 bg-transparent font-medium">
+                            Assign Mentor
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-semibold">Assign Mentor to {selectedTopic.title}</DialogTitle>
+                            <DialogDescription className="text-sm text-gray-600">
+                              Select a mentor from your accepted mentors to assign to this topic
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="mentor-select" className="text-sm font-medium">Select Mentor</Label>
+                              <Select
+                                value={selectedMentorForAssignment}
+                                onValueChange={setSelectedMentorForAssignment}
+                              >
+                                <SelectTrigger className="text-sm">
+                                  <SelectValue placeholder="Choose a mentor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {acceptedMentors
+                                    .filter((mentor) => !selectedTopic.mentors.includes(mentor.mentorName))
+                                    .map((mentor) => (
+                                      <SelectItem key={mentor.id} value={mentor.mentorName} className="text-sm">
+                                        {mentor.mentorName} - {mentor.expertise}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              {acceptedMentors.filter((mentor) => !selectedTopic.mentors.includes(mentor.mentorName)).length === 0 && (
+                                <p className="text-xs text-gray-500 mt-1">All accepted mentors are already assigned to this topic</p>
+                              )}
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                              <Button variant="outline" onClick={() => setShowAssignMentorDialog(false)} className="font-medium">
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleAssignMentor}
+                                disabled={!selectedMentorForAssignment}
+                                className="font-medium bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                              >
+                                Assign Mentor
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   )}
                 </CardContent>
@@ -689,7 +855,7 @@ export default function ProgramLMSPage() {
               {/* Assessments */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                     <Award className="h-5 w-5" />
                     Assessments
                   </CardTitle>
@@ -700,23 +866,106 @@ export default function ProgramLMSPage() {
                       {selectedTopic.assessments.map((assessment) => (
                         <div key={assessment.id} className="p-3 border rounded-lg">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{assessment.title}</h4>
-                            <Badge variant="outline">{assessment.type}</Badge>
+                            <h4 className="font-semibold text-gray-900">{assessment.title}</h4>
+                            <Badge variant="outline" className="text-xs font-medium">{assessment.type}</Badge>
                           </div>
-                          <div className="flex items-center justify-between text-sm text-gray-600">
-                            <span>{assessment.submissions} submissions</span>
-                            <span>Avg: {assessment.avgScore || "Not graded"}</span>
+                          <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                            <span className="font-medium">{assessment.submissions} submissions</span>
+                            <span className="font-medium">Avg: {assessment.avgScore || "Not graded"}</span>
                           </div>
+                          {assessment.link && (
+                            <div className="mt-2">
+                              <a
+                                href={assessment.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                              >
+                                <FileText className="h-3 w-3" />
+                                View Assessment Link
+                              </a>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <Award className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>No assessments created</p>
-                      <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                        Create Assessment
-                      </Button>
+                      <p className="text-sm font-medium">No assessments created</p>
+                      <Dialog open={showAssessmentDialog} onOpenChange={setShowAssessmentDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="mt-2 bg-transparent font-medium">
+                            Create Assessment
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-semibold">Create Assessment</DialogTitle>
+                            <DialogDescription className="text-sm text-gray-600">
+                              Add a new assessment for {selectedTopic.title}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="assessment-title">Assessment Title *</Label>
+                              <Input
+                                id="assessment-title"
+                                value={assessmentForm.title}
+                                onChange={(e) => setAssessmentForm({ ...assessmentForm, title: e.target.value })}
+                                placeholder="e.g., SEO Fundamentals Quiz"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="assessment-type">Assessment Type *</Label>
+                              <Select
+                                value={assessmentForm.type}
+                                onValueChange={(value) => setAssessmentForm({ ...assessmentForm, type: value })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="quiz">Quiz</SelectItem>
+                                  <SelectItem value="assignment">Assignment</SelectItem>
+                                  <SelectItem value="project">Project</SelectItem>
+                                  <SelectItem value="exam">Exam</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="assessment-link">Assessment Link (Optional)</Label>
+                              <Input
+                                id="assessment-link"
+                                type="url"
+                                value={assessmentForm.link}
+                                onChange={(e) => setAssessmentForm({ ...assessmentForm, link: e.target.value })}
+                                placeholder="https://example.com/assessment"
+                              />
+                              <p className="text-xs text-gray-500">Add a link to the assessment (Google Forms, Typeform, etc.)</p>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                              <Button variant="outline" onClick={() => setShowAssessmentDialog(false)}>
+                                Cancel
+                              </Button>
+                              <Button
+                                className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                onClick={() => {
+                                  // In real app, create assessment via API
+                                  console.log("Creating assessment:", assessmentForm)
+                                  alert("Assessment created successfully! (This is a demo)")
+                                  setAssessmentForm({ title: "", type: "quiz", link: "" })
+                                  setShowAssessmentDialog(false)
+                                }}
+                                disabled={!assessmentForm.title}
+                              >
+                                Create Assessment
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   )}
                 </CardContent>
@@ -727,36 +976,85 @@ export default function ProgramLMSPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                     <FileText className="h-5 w-5" />
                     External Resources
                   </CardTitle>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      // Add link upload functionality
-                      const linkTitle = prompt("Enter link title:")
-                      const linkUrl = prompt("Enter link URL:")
-                      if (linkTitle && linkUrl) {
-                        // In a real app, this would call an API to save the link
-                        console.log("Adding external link:", { title: linkTitle, url: linkUrl })
-                        alert("Link added successfully! (This is a demo)")
-                      }
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Upload Link
-                  </Button>
+                  <Dialog open={showExternalResourceDialog} onOpenChange={setShowExternalResourceDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="font-medium">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Upload Link
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold">Add External Resource</DialogTitle>
+                        <DialogDescription className="text-sm text-gray-600">
+                          Add a link to an external resource for {selectedTopic.title}. This will be accessible to mentees and viewable by both mentors and facilitators.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="resource-title" className="text-sm font-medium">
+                            Resource Title *
+                          </Label>
+                          <Input
+                            id="resource-title"
+                            value={externalResourceForm.title}
+                            onChange={(e) => setExternalResourceForm({ ...externalResourceForm, title: e.target.value })}
+                            placeholder="e.g., Google Analytics Guide"
+                            className="text-sm"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="resource-url" className="text-sm font-medium">
+                            Resource URL *
+                          </Label>
+                          <Input
+                            id="resource-url"
+                            type="url"
+                            value={externalResourceForm.url}
+                            onChange={(e) => setExternalResourceForm({ ...externalResourceForm, url: e.target.value })}
+                            placeholder="https://example.com/resource"
+                            className="text-sm"
+                            required
+                          />
+                          <p className="text-xs text-gray-500">Enter the full URL to the external resource</p>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button variant="outline" onClick={() => setShowExternalResourceDialog(false)} className="font-medium">
+                            Cancel
+                          </Button>
+                          <Button
+                            className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
+                            onClick={() => {
+                              // In real app, create resource via API
+                              console.log("Adding external resource:", externalResourceForm)
+                              setExternalResourceForm({ title: "", url: "" })
+                              setShowExternalResourceDialog(false)
+                              // Show success message (could use toast)
+                            }}
+                            disabled={!externalResourceForm.title || !externalResourceForm.url}
+                          >
+                            Add Resource
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <CardDescription>Upload links to external resources for this topic</CardDescription>
+                <CardDescription className="text-sm text-gray-600 mt-2">
+                  Upload links to external resources for this topic. Resources are accessible to mentees and viewable by both mentors and facilitators.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-center py-8 text-gray-500">
                     <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No external resources added yet</p>
-                    <p className="text-sm">Click "Upload Link" to add external resources</p>
+                    <p className="text-sm font-medium">No external resources added yet</p>
+                    <p className="text-xs mt-1">Click "Upload Link" to add external resources</p>
                   </div>
                 </div>
               </CardContent>
@@ -765,7 +1063,7 @@ export default function ProgramLMSPage() {
             {/* Feedback Section */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <MessageSquare className="h-5 w-5" />
                   Student Feedback
                 </CardTitle>
@@ -775,23 +1073,23 @@ export default function ProgramLMSPage() {
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
                       <div className="text-center">
-                        <div className="text-3xl font-bold">{selectedTopic.feedback.rating}</div>
-                        <div className="text-sm text-gray-600">Average Rating</div>
+                        <div className="text-3xl font-semibold text-gray-900">{selectedTopic.feedback.rating}</div>
+                        <div className="text-sm text-gray-600 font-medium mt-1">Average Rating</div>
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm text-gray-600 mb-1">{selectedTopic.feedback.reviews} reviews</div>
+                        <div className="text-sm text-gray-600 mb-1.5 font-medium">{selectedTopic.feedback.reviews} reviews</div>
                         <Progress value={(selectedTopic.feedback.rating / 5) * 100} className="h-2" />
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full bg-transparent">
+                    <Button variant="outline" className="w-full bg-transparent font-medium">
                       View All Feedback
                     </Button>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No feedback yet</p>
-                    <p className="text-sm">Feedback will appear after the topic is completed</p>
+                    <p className="text-sm font-medium">No feedback yet</p>
+                    <p className="text-xs mt-1">Feedback will appear after the topic is completed</p>
                   </div>
                 )}
               </CardContent>
@@ -802,13 +1100,66 @@ export default function ProgramLMSPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold">Program Topics Timeline</h2>
-                <p className="text-gray-600">Follow the progressive learning path for your program</p>
+                <h2 className="text-xl font-semibold text-gray-900">Program Topics Timeline</h2>
+                <p className="text-sm text-gray-600 mt-1">Follow the progressive learning path for your program</p>
               </div>
               <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Add Topic
               </Button>
+            </div>
+
+            {/* Quick Stats - Moved to Top */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">Total Topics</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{topicsState.length}</p>
+                    </div>
+                    <BookOpen className="h-6 w-6 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">Completed</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{topicsState.filter((t) => t.status === "completed").length}</p>
+                    </div>
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">Active</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">{topicsState.filter((t) => t.status === "active").length}</p>
+                    </div>
+                    <Clock className="h-6 w-6 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">Payments</p>
+                      <p className="text-2xl font-semibold text-gray-900 mt-1">
+                        {topicsState.reduce(
+                          (acc, t) => acc + (t.sessions?.filter((s) => s.paymentStatus === "paid").length || 0),
+                          0,
+                        )}
+                      </p>
+                    </div>
+                    <DollarSign className="h-6 w-6 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Timeline Line */}
@@ -836,70 +1187,79 @@ export default function ProgramLMSPage() {
                     {/* Topic Card */}
                     <Card
                       className="flex-1 cursor-pointer hover:shadow-md transition-shadow w-full"
-                      onClick={() => setSelectedTopic(topic)}
+                      onClick={() => {
+                        // Always get the latest topic from topicsState
+                        const latestTopic = topicsState.find((t) => t.id === topic.id)
+                        if (latestTopic) {
+                          setSelectedTopic(latestTopic)
+                        }
+                      }}
                     >
                       <CardHeader className="pb-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getTopicStatusColor(topic.status)}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className={`p-3 rounded-lg ${getTopicStatusColor(topic.status)} flex-shrink-0`}>
                               {getTopicIcon(topic.type)}
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{topic.title}</CardTitle>
-                              <p className="text-sm text-gray-600 mt-1">{topic.description}</p>
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{topic.title}</CardTitle>
+                                  <p className="text-sm text-gray-600 mt-0.5">{topic.description}</p>
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
                           </div>
                         </div>
                       </CardHeader>
 
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                          {/* Progress */}
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">Progress</span>
-                              <span className="font-medium">{topic.completionRate}%</span>
-                            </div>
-                            <Progress value={topic.completionRate} className="h-2" />
+                      <CardContent className="pt-0 space-y-4">
+                        {/* Progress Bar */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 font-medium">Progress</span>
+                            <span className="font-semibold text-gray-900">{topic.completionRate}%</span>
                           </div>
+                          <Progress value={topic.completionRate} className="h-2" />
+                        </div>
 
-                          {/* Duration */}
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-gray-500" />
+                            <Clock className="h-4 w-4 text-gray-500 flex-shrink-0" />
                             <div>
-                              <p className="text-sm text-gray-600">Duration</p>
-                              <p className="font-medium">{topic.duration}m</p>
-                            </div>
-                          </div>
-
-                          {/* Participants */}
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-gray-500" />
-                            <div>
-                              <p className="text-sm text-gray-600">Participants</p>
-                              <p className="font-medium">{topic.participants}</p>
+                              <p className="text-xs text-gray-500 font-medium">Duration</p>
+                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.duration}m</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Video className="h-4 w-4 text-gray-500" />
+                            <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
                             <div>
-                              <p className="text-sm text-gray-600">Sessions</p>
-                              <p className="font-medium">{topic.sessions ? topic.sessions.length : 0}</p>
+                              <p className="text-xs text-gray-500 font-medium">Participants</p>
+                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.participants}</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-gray-500" />
+                            <Video className="h-4 w-4 text-gray-500 flex-shrink-0" />
                             <div>
-                              <p className="text-sm text-gray-600">Payment</p>
-                              <p className="font-medium">
+                              <p className="text-xs text-gray-500 font-medium">Sessions</p>
+                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.sessions ? topic.sessions.length : 0}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs text-gray-500 font-medium">Payment</p>
+                              <p className="text-sm font-semibold text-gray-900 mt-0.5">
                                 {topic.sessions && topic.sessions.length > 0
                                   ? topic.sessions.every((s) => s.paymentStatus === "paid")
                                     ? "✅ Paid"
@@ -914,9 +1274,9 @@ export default function ProgramLMSPage() {
 
                         {/* Mentors */}
                         {topic.mentors.length > 0 && (
-                          <div className="mt-4 pt-4 border-t">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm text-gray-600">Mentors:</span>
+                          <div className="pt-3 border-t">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600 font-medium">Mentors:</span>
                               <div className="flex flex-wrap gap-1">
                                 {topic.mentors.map((mentor, mentorIndex) => (
                                   <Badge key={mentorIndex} variant="secondary" className="text-xs">
@@ -934,58 +1294,6 @@ export default function ProgramLMSPage() {
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Topics</p>
-                      <p className="text-2xl font-bold">{topics.length}</p>
-                    </div>
-                    <BookOpen className="h-6 w-6 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Completed</p>
-                      <p className="text-2xl font-bold">{topics.filter((t) => t.status === "completed").length}</p>
-                    </div>
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Active</p>
-                      <p className="text-2xl font-bold">{topics.filter((t) => t.status === "active").length}</p>
-                    </div>
-                    <Clock className="h-6 w-6 text-orange-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Payments</p>
-                      <p className="text-2xl font-bold">
-                        {topics.reduce(
-                          (acc, t) => acc + (t.sessions?.filter((s) => s.paymentStatus === "paid").length || 0),
-                          0,
-                        )}
-                      </p>
-                    </div>
-                    <DollarSign className="h-6 w-6 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         )}
 

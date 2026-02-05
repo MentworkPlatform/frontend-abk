@@ -11,12 +11,9 @@ import {
   Play,
   CheckCircle,
   Award,
-  MessageSquare,
   Download,
   Globe,
   Target,
-  GraduationCap,
-  Settings,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -179,7 +176,7 @@ export default function ProgramDetailPage() {
       "Private student community access",
       "Direct instructor support",
     ],
-    reviews: [
+    reviewList: [
       {
         id: 1,
         student: "Sarah Johnson",
@@ -232,16 +229,6 @@ export default function ProgramDetailPage() {
                 <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
               </Link>
             </div>
-            <div className="flex items-center gap-2">
-              {program.type === "training" && (
-                <Button variant="outline" asChild>
-                  <Link href={`/lms/programs/${programId}`}>
-                    <GraduationCap className="h-4 w-4 mr-2" />
-                    LMS View
-                  </Link>
-                </Button>
-              )}
-            </div>
           </div>
         </div>
       </header>
@@ -255,7 +242,9 @@ export default function ProgramDetailPage() {
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="outline">{program.category}</Badge>
                 <Badge className="bg-green-100 text-green-800">{program.level}</Badge>
-                <Badge className="bg-blue-100 text-blue-800">{program.format}</Badge>
+                {program.format !== "Self-paced" && (
+                  <Badge className="bg-blue-100 text-blue-800">{program.format}</Badge>
+                )}
               </div>
               <h1 className="text-3xl font-bold mb-4">{program.title}</h1>
               <p className="text-lg text-gray-600 mb-6">{program.description}</p>
@@ -286,7 +275,7 @@ export default function ProgramDetailPage() {
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-                <TabsTrigger value="instructor">Instructor</TabsTrigger>
+                <TabsTrigger value="instructor">Mentors</TabsTrigger>
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
               </TabsList>
 
@@ -460,7 +449,7 @@ export default function ProgramDetailPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {program.reviews.map((review) => (
+                  {program.reviewList.map((review) => (
                     <Card key={review.id}>
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
@@ -505,11 +494,13 @@ export default function ProgramDetailPage() {
             <Card className="sticky top-6">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <span className="text-3xl font-bold">${program.price}</span>
-                    {program.originalPrice && (
-                      <span className="text-lg text-gray-500 line-through">${program.originalPrice}</span>
-                    )}
+                  <div className="flex flex-col items-center gap-2 mb-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-3xl font-bold">₦{(program.price * 1500).toLocaleString()}</span>
+                      {program.originalPrice && (
+                        <span className="text-lg text-gray-500 line-through">₦{(program.originalPrice * 1500).toLocaleString()}</span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
                 </div>
@@ -517,10 +508,6 @@ export default function ProgramDetailPage() {
                   <div className="space-y-4">
                     <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
                       Enroll Now
-                    </Button>
-                    <Button variant="outline" className="w-full bg-transparent">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Contact Instructor
                     </Button>
                   </div>
 

@@ -138,70 +138,6 @@ export default function TrainerDashboard() {
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Your Upcoming Sessions
-            </CardTitle>
-            <CardDescription>
-              Next sessions scheduled with meeting links
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {upcomingSessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4"
-                >
-                  <Link
-                    href={`/trainer/dashboard/programs/${session.programId}/lms`}
-                    className="flex-1 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h4 className="font-medium hover:text-[#FFD500] transition-colors">
-                        {session.programTitle}
-                      </h4>
-                      <Badge variant="outline" className="text-xs">
-                        {session.topic}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {session.time} ({session.duration})
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {session.participants} participants
-                      </div>
-                    </div>
-                  </Link>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                    <div className="text-right text-sm">
-                      <p className="font-mono text-xs text-muted-foreground">
-                        ID: {session.meetingId}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.open(session.meetingLink, "_blank");
-                      }}
-                      className="bg-[#FFD500] hover:bg-[#e6c000] w-full sm:w-auto"
-                    >
-                      Join Meeting
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* All Programs Section */}
         <Card>
           <CardHeader>
@@ -426,6 +362,70 @@ export default function TrainerDashboard() {
                 </div>
               </TabsContent>
             </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Your Upcoming Sessions
+            </CardTitle>
+            <CardDescription>
+              Next sessions scheduled with meeting links
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {upcomingSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4"
+                >
+                  <Link
+                    href={`/trainer/dashboard/programs/${session.programId}/lms`}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h4 className="font-medium hover:text-[#FFD500] transition-colors">
+                        {session.programTitle}
+                      </h4>
+                      <Badge variant="outline" className="text-xs">
+                        {session.topic}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {session.time} ({session.duration})
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        {session.participants} participants
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                    <div className="text-right text-sm">
+                      <p className="font-mono text-xs text-muted-foreground">
+                        ID: {session.meetingId}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(session.meetingLink, "_blank");
+                      }}
+                      className="bg-[#FFD500] hover:bg-[#e6c000] w-full sm:w-auto"
+                    >
+                      Join Meeting
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

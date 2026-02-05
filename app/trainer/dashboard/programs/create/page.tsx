@@ -206,7 +206,7 @@ export default function CreateProgram() {
   })
 
   const nextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1)
       window.scrollTo(0, 0)
     }
@@ -252,10 +252,14 @@ export default function CreateProgram() {
     return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }))
   }, [])
 
-  // Step 1 validation
+  // Step 1 validation (just title)
   const isStep1Valid = () => {
+    return programData.title.trim() !== ""
+  }
+
+  // Step 2 validation (description + targeting)
+  const isStep2Valid = () => {
     return (
-      programData.title.trim() !== "" &&
       programData.description.trim() !== "" &&
       programData.selectedSectors.length > 0 &&
       programData.experienceLevel !== "" &&
@@ -268,8 +272,8 @@ export default function CreateProgram() {
     )
   }
 
-  // Step 2 validation
-  const isStep2Valid = () => {
+  // Step 3 validation (curriculum)
+  const isStep3Valid = () => {
     return (
       curriculum.length > 0 &&
       curriculum.every(
@@ -283,7 +287,7 @@ export default function CreateProgram() {
   }
 
   const getStepProgress = () => {
-    return (currentStep / 3) * 100
+    return (currentStep / 4) * 100
   }
 
   const handleTemplateSelect = (template: CurriculumTemplate) => {
@@ -366,7 +370,7 @@ export default function CreateProgram() {
           {/* Progress Bar */}
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Step {currentStep} of 3</span>
+              <span className="text-sm font-medium">Step {currentStep} of 4</span>
               <span className="text-sm text-muted-foreground">{Math.round(getStepProgress())}% Complete</span>
             </div>
             <Progress value={getStepProgress()} className="h-2" />
@@ -383,11 +387,11 @@ export default function CreateProgram() {
                 {currentStep > 1 ? <Check className="h-4 w-4" /> : "1"}
               </div>
               <span className={`text-sm ${currentStep >= 1 ? "font-medium" : "text-muted-foreground"}`}>
-                Program Overview
+                Basic Info
               </span>
             </div>
 
-            <div className="flex-1 h-px bg-gray-200 mx-4" />
+            <div className="flex-1 h-px bg-gray-200 mx-2" />
 
             <div className="flex items-center space-x-2">
               <div
@@ -398,11 +402,11 @@ export default function CreateProgram() {
                 {currentStep > 2 ? <Check className="h-4 w-4" /> : "2"}
               </div>
               <span className={`text-sm ${currentStep >= 2 ? "font-medium" : "text-muted-foreground"}`}>
-                Curriculum
+                Who is this for?
               </span>
             </div>
 
-            <div className="flex-1 h-px bg-gray-200 mx-4" />
+            <div className="flex-1 h-px bg-gray-200 mx-2" />
 
             <div className="flex items-center space-x-2">
               <div
@@ -410,9 +414,24 @@ export default function CreateProgram() {
                   currentStep >= 3 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
                 }`}
               >
-                3
+                {currentStep > 3 ? <Check className="h-4 w-4" /> : "3"}
               </div>
               <span className={`text-sm ${currentStep >= 3 ? "font-medium" : "text-muted-foreground"}`}>
+                Curriculum
+              </span>
+            </div>
+
+            <div className="flex-1 h-px bg-gray-200 mx-2" />
+
+            <div className="flex items-center space-x-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep >= 4 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                4
+              </div>
+              <span className={`text-sm ${currentStep >= 4 ? "font-medium" : "text-muted-foreground"}`}>
                 Assign Mentors
               </span>
             </div>
@@ -421,11 +440,21 @@ export default function CreateProgram() {
 
         {/* Step Content */}
         {currentStep === 1 && (
-          <Step1ProgramOverview
+          <Step1BasicInfo
             programData={programData}
             setProgramData={setProgramData}
             onNext={nextStep}
             isValid={isStep1Valid()}
+          />
+        )}
+
+        {currentStep === 2 && (
+          <Step2WhoIsThisFor
+            programData={programData}
+            setProgramData={setProgramData}
+            onNext={nextStep}
+            onPrev={prevStep}
+            isValid={isStep2Valid()}
             sectorsOptions={sectorsOptions}
             subSectorSkillsOptions={subSectorSkillsOptions}
             subSectorSkillsGrouped={subSectorSkillsGrouped}
@@ -433,19 +462,19 @@ export default function CreateProgram() {
           />
         )}
 
-        {currentStep === 2 && (
+        {currentStep === 3 && (
           <Step2Curriculum
             curriculum={curriculum}
             setCurriculum={setCurriculum}
             onNext={nextStep}
             onPrev={prevStep}
-            isValid={isStep2Valid()}
+            isValid={isStep3Valid()}
             onShowTemplateSelector={() => setShowTemplateSelector(true)}
             selectedTemplate={selectedTemplate}
           />
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <Step3AssignMentors
             curriculum={curriculum}
             mentorAssignments={mentorAssignments}
@@ -500,11 +529,56 @@ export default function CreateProgram() {
   )
 }
 
-// Step 1: Program Overview Component (same as before)
-interface Step1Props {
+// Step 1: Basic Information (Title only)
+interface Step1BasicInfoProps {
   programData: any
   setProgramData: (data: any) => void
   onNext: () => void
+  isValid: boolean
+}
+
+function Step1BasicInfo({
+  programData,
+  setProgramData,
+  onNext,
+  isValid,
+}: Step1BasicInfoProps) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Basic Information</CardTitle>
+          <CardDescription>Tell us about your training program</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Program Title *</Label>
+            <Input
+              id="title"
+              placeholder="e.g., Digital Marketing Bootcamp"
+              value={programData.title}
+              onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+          Next: Who is this for?
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Step 2: Who is this for? (Description + Targeting)
+interface Step2WhoIsThisForProps {
+  programData: any
+  setProgramData: (data: any) => void
+  onNext: () => void
+  onPrev: () => void
   isValid: boolean
   sectorsOptions: { value: string; label: string }[]
   subSectorSkillsOptions: { value: string; label: string }[]
@@ -512,16 +586,17 @@ interface Step1Props {
   skillsCapabilitiesOptions: { value: string; label: string }[]
 }
 
-function Step1ProgramOverview({
+function Step2WhoIsThisFor({
   programData,
   setProgramData,
   onNext,
+  onPrev,
   isValid,
   sectorsOptions,
   subSectorSkillsOptions,
   subSectorSkillsGrouped,
   skillsCapabilitiesOptions,
-}: Step1Props) {
+}: Step2WhoIsThisForProps) {
   const updateLearningOutcome = (index: number, value: string) => {
     const updated = [...programData.learningOutcomes]
     updated[index] = value
@@ -546,20 +621,10 @@ function Step1ProgramOverview({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Tell us about your training program</CardDescription>
+          <CardTitle>Who is this for?</CardTitle>
+          <CardDescription>Describe your program and define your target audience</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Program Title *</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Digital Marketing Bootcamp"
-                value={programData.title}
-                onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
-              />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="description">Program Description *</Label>
             <Textarea
@@ -668,11 +733,11 @@ function Step1ProgramOverview({
                 />
               </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Price (USD) *</Label>
+              <Label htmlFor="price">Price (₦) *</Label>
               <Input
                 id="price"
                 type="number"
-                placeholder="e.g., 1500"
+                placeholder="e.g., 2,250,000"
                 value={programData.price}
                 onChange={(e) => setProgramData({ ...programData, price: e.target.value })}
               />
@@ -728,7 +793,11 @@ function Step1ProgramOverview({
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onPrev}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
         <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
           Next: Build Curriculum
           <ArrowRight className="h-4 w-4 ml-2" />
@@ -1026,7 +1095,7 @@ function Step3AssignMentors({
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="outline">${assignment.proposedRate}/session</Badge>
+                        <Badge variant="outline">₦{(assignment.proposedRate * 1500).toLocaleString()}/session</Badge>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1215,10 +1284,10 @@ function MentorBrowserModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="0-100">$0 - $100</SelectItem>
-                <SelectItem value="100-150">$100 - $150</SelectItem>
-                <SelectItem value="150-200">$150 - $200</SelectItem>
-                <SelectItem value="200">$200+</SelectItem>
+                <SelectItem value="0-100">₦0 - ₦150,000</SelectItem>
+                <SelectItem value="100-150">₦150,000 - ₦225,000</SelectItem>
+                <SelectItem value="150-200">₦225,000 - ₦300,000</SelectItem>
+                <SelectItem value="200">₦300,000+</SelectItem>
               </SelectContent>
             </Select>
 
@@ -1278,7 +1347,7 @@ function MentorBrowserModal({
                                 <span className="text-sm font-medium">{mentor.rating}</span>
                                 <span className="text-xs text-muted-foreground">({mentor.totalReviews})</span>
                               </div>
-                              <p className="text-sm font-medium">${mentor.hourlyRate}/hr</p>
+                              <p className="text-sm font-medium">₦{(mentor.hourlyRate * 1500).toLocaleString()}/hr</p>
                               <Badge
                                 variant={mentor.availability === "available" ? "default" : "secondary"}
                                 className="text-xs mt-1"
@@ -1434,7 +1503,7 @@ function MentorAssignmentModal({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-medium">${mentor.hourlyRate}/session</p>
+                  <p className="text-lg font-medium">₦{(mentor.hourlyRate * 1500).toLocaleString()}/session</p>
                   <Badge variant={mentor.availability === "available" ? "default" : "secondary"}>
                     {mentor.availability}
                   </Badge>
@@ -1456,7 +1525,7 @@ function MentorAssignmentModal({
 
           {/* Proposed Rate */}
           <div className="space-y-2">
-            <Label htmlFor="proposedRate">Pay Per Session ($)</Label>
+            <Label htmlFor="proposedRate">Pay Per Session (₦)</Label>
             <Input
               id="proposedRate"
               type="number"
@@ -1543,10 +1612,10 @@ function MentorAssignmentModal({
                     <strong>Total Duration:</strong> {Math.round(getSelectedTopicsDuration() / 60)} hours
                   </p>
                   <p>
-                    <strong>Pay Per Session:</strong> ${proposedRate}/session
+                    <strong>Pay Per Session:</strong> ₦{(proposedRate * 1500).toLocaleString()}/session
                   </p>
                   <p>
-                    <strong>Estimated Cost:</strong> ${selectedTopics.length * proposedRate} ({selectedTopics.length} sessions × ${proposedRate})
+                    <strong>Estimated Cost:</strong> ₦{((selectedTopics.length * proposedRate) * 1500).toLocaleString()} ({selectedTopics.length} sessions × ₦{(proposedRate * 1500).toLocaleString()})
                   </p>
                 </div>
               </CardContent>

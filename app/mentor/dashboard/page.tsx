@@ -342,13 +342,13 @@ export default function MentorDashboardPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
+          <div>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 Program Teaching Invitations
               </CardTitle>
               <CardDescription>
-                Programs created by trainers and organizations looking for mentors
+              Programs created by trainers and organizations looking for mentors
               </CardDescription>
             </div>
             <Button variant="outline" asChild>
@@ -365,8 +365,8 @@ export default function MentorDashboardPage() {
             </TabsList>
 
             <TabsContent value="opportunities">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {teachingOpportunities.map((opportunity) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {teachingOpportunities.map((opportunity) => (
             <Card key={opportunity.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
@@ -424,8 +424,8 @@ export default function MentorDashboardPage() {
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Request to Join</Button>
               </CardFooter>
             </Card>
-                ))}
-              </div>
+          ))}
+        </div>
             </TabsContent>
 
             <TabsContent value="invitations">
@@ -434,7 +434,7 @@ export default function MentorDashboardPage() {
                 <p className="text-sm mt-2">Check back later for new teaching opportunities.</p>
               </div>
             </TabsContent>
-          </Tabs>
+      </Tabs>
         </CardContent>
       </Card>
     </div>

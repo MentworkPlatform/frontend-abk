@@ -37,11 +37,24 @@ export default function GetStartedPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {/* Learner Card */}
-          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-blue-500">
-            <div className="h-1 bg-blue-500" />
+          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-[#FFD500] overflow-hidden">
+            <div className="h-1 bg-[#FFD500]" />
             <CardHeader className="pb-4">
-              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <BookOpen className="h-7 w-7 text-blue-600" />
+              <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&q=80"
+                  alt="Learning and growth"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to icon if image fails
+                    const target = e.target as HTMLImageElement
+                    target.style.display = "none"
+                    const parent = target.parentElement
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-16 h-16 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>'
+                    }
+                  }}
+                />
               </div>
               <CardTitle className="text-2xl">I Want to Learn</CardTitle>
               <CardDescription className="text-base">
@@ -51,23 +64,23 @@ export default function GetStartedPage() {
             <CardContent className="flex-1 flex flex-col">
               <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Connect with industry experts</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Learn through structured programs</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Get personalized feedback</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Earn certificates</span>
                 </div>
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700" asChild>
+              <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
                 <Link href="/onboarding">
                   Get Started
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -77,11 +90,24 @@ export default function GetStartedPage() {
           </Card>
 
           {/* Mentor Card */}
-          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-purple-500">
-            <div className="h-1 bg-purple-500" />
+          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-[#FFD500] overflow-hidden">
+            <div className="h-1 bg-[#FFD500]" />
             <CardHeader className="pb-4">
-              <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <Users className="h-7 w-7 text-purple-600" />
+              <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img
+                  src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop&q=80"
+                  alt="Teaching and mentoring"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to icon if image fails
+                    const target = e.target as HTMLImageElement
+                    target.style.display = "none"
+                    const parent = target.parentElement
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-16 h-16 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>'
+                    }
+                  }}
+                />
               </div>
               <CardTitle className="text-2xl">I Want to Teach</CardTitle>
               <CardDescription className="text-base">
@@ -91,23 +117,23 @@ export default function GetStartedPage() {
             <CardContent className="flex-1 flex flex-col">
               <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">1:1 mentorship opportunities</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Flexible scheduling</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Earn per session</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-[#FFD500] rounded-full mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Build your reputation</span>
                 </div>
               </div>
-              <Button className="w-full bg-purple-600 hover:bg-purple-700" asChild>
+              <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
                 <Link href="/onboarding/mentor">
                   Get Started
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -117,11 +143,24 @@ export default function GetStartedPage() {
           </Card>
 
           {/* Trainer Card */}
-          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-[#FFD500]">
+          <Card className="flex flex-col h-full hover:shadow-lg transition-all border-2 hover:border-[#FFD500] overflow-hidden">
             <div className="h-1 bg-[#FFD500]" />
             <CardHeader className="pb-4">
-              <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                <Building className="h-7 w-7 text-yellow-600" />
+              <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&q=80"
+                  alt="Program hosting and management"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to icon if image fails
+                    const target = e.target as HTMLImageElement
+                    target.style.display = "none"
+                    const parent = target.parentElement
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-16 h-16 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>'
+                    }
+                  }}
+                />
               </div>
               <CardTitle className="text-2xl">I Want to Host</CardTitle>
               <CardDescription className="text-base">Create and manage comprehensive training programs</CardDescription>

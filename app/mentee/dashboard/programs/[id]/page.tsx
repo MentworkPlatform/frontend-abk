@@ -171,7 +171,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
         <div className="container py-6">
           <div className="flex items-center gap-4 mb-4">
             <Button variant="ghost" size="sm" asChild>

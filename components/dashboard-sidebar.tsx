@@ -59,7 +59,7 @@ export function DashboardSidebar({
       {customMobileHeader ? (
         customMobileHeader
       ) : (
-        <header className="lg:hidden bg-white border-b sticky top-0 z-40">
+        <header className="lg:hidden sticky top-0 z-40 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
           <div className="flex items-center justify-between p-4">
             {logoContent || defaultLogo}
             <Button

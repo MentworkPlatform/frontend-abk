@@ -118,7 +118,7 @@ export default function MentorDashboardLayout({ children }: { children: React.Re
         </Sidebar>
 
         {/* Mobile Header */}
-        <div className="fixed top-0 left-0 right-0 z-30 bg-white border-b md:hidden">
+        <div className="fixed top-0 left-0 right-0 z-30 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 md:hidden">
           <div className="flex items-center justify-between p-4">
             <Link href="/">
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-6" />

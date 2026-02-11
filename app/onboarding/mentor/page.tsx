@@ -534,7 +534,7 @@ export default function MentorOnboardingPage() {
                       setStep(5);
                     }}
                     className="flex items-center gap-2"
-                  >
+                >
                     Skip for now
                 </Button>
               )}

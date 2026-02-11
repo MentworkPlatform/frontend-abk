@@ -497,22 +497,22 @@ export default function MentorProgramDashboard({ params }: Props) {
                                 <Video className="h-4 w-4 mr-2" />
                                 Join Meeting
                               </a>
-                            </Button>
+                              </Button>
                           )}
                           {session.status === "upcoming" && !session.mentorConfirmed && (
-                            <Button variant="outline" size="sm">
-                              Confirm Attendance
-                            </Button>
+                                <Button variant="outline" size="sm">
+                                  Confirm Attendance
+                                </Button>
                           )}
                           {session.status === "completed" && (
                             <>
                               {session.recordingUrl && (
-                                <Button variant="outline" size="sm" asChild>
-                                  <a href={session.recordingUrl} target="_blank" rel="noopener noreferrer">
-                                    <Play className="h-4 w-4 mr-2" />
-                                    View Recording
-                                  </a>
-                                </Button>
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={session.recordingUrl} target="_blank" rel="noopener noreferrer">
+                                <Play className="h-4 w-4 mr-2" />
+                                View Recording
+                              </a>
+                            </Button>
                               )}
                               {!sessionsWithFeedback.has(session.id) ? (
                                 <Button

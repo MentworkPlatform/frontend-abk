@@ -51,6 +51,8 @@ export default function ProgramDetailPage() {
     language: "English",
     lastUpdated: "December 2023",
     certificateIncluded: true,
+    freeSessionsIncluded: 1,
+    sessions: 8,
     trainer: {
       id: "trainer-1",
       name: "Emily Rodriguez",
@@ -493,6 +495,17 @@ export default function ProgramDetailPage() {
             {/* Enrollment Card */}
             <Card className="sticky top-6">
               <CardContent className="p-6">
+                {program.freeSessionsIncluded > 0 && (
+                  <div className="mb-4 p-3 bg-green-50 border-2 border-green-200 rounded-lg text-center">
+                    <Badge className="bg-[#FFD500] text-black font-semibold mb-2">
+                      Free Trial Available
+                    </Badge>
+                    <p className="text-sm text-green-800 font-medium">
+                      Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing
+                    </p>
+                  </div>
+                )}
+
                 <div className="text-center mb-6">
                   <div className="flex flex-col items-center gap-2 mb-2">
                     <div className="flex items-center justify-center gap-2">

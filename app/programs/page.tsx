@@ -76,6 +76,7 @@ const trainingPrograms = [
     level: "Beginner",
     description: "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp.",
     skills: ["SEO", "Social Media", "PPC", "Analytics"],
+    freeSessionsIncluded: 1,
   },
   {
     id: 4,
@@ -143,6 +144,7 @@ const groupPrograms = [
     category: "Entrepreneurship",
     level: "Intermediate",
     description: "Join a cohort of entrepreneurs to build, validate, and launch your startup idea.",
+    freeSessionsIncluded: 2,
   },
 ]
 
@@ -317,7 +319,11 @@ export default function ProgramsPage() {
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <Play className="h-12 w-12 text-white" />
                   </div>
-                  <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black">{program.format}</Badge>
+                  {program.freeSessionsIncluded && program.freeSessionsIncluded > 0 && (
+                    <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black font-semibold">
+                      Free Trial Available
+                    </Badge>
+                  )}
                   <Badge className="absolute top-3 right-3 bg-green-500 text-white">{program.level}</Badge>
                 </div>
                 <CardContent className="p-6">
@@ -435,7 +441,11 @@ function ProgramCard({ program }: { program: any }) {
             <GraduationCap className="h-12 w-12 text-white" />
           </div>
         )}
-        <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black">{program.format}</Badge>
+        {program.freeSessionsIncluded && program.freeSessionsIncluded > 0 && (
+          <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black font-semibold">
+            Free Trial Available
+          </Badge>
+        )}
         <Badge className="absolute top-3 right-3 bg-green-500 text-white">{program.level}</Badge>
       </div>
       <CardContent className="p-6">

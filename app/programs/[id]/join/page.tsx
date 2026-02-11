@@ -40,6 +40,7 @@ const allPrograms = Array.from({ length: 6 }).map((_, index) => ({
 export default function JoinProgramPage() {
   const params = useParams()
   const router = useRouter()
+  const [enrollmentType, setEnrollmentType] = useState<"free-trial" | "full-program">("full-program")
   const [paymentMethod, setPaymentMethod] = useState("credit-card")
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -70,11 +71,20 @@ export default function JoinProgramPage() {
     e.preventDefault()
     setIsProcessing(true)
 
-    // Simulate payment processing
+    // Simulate payment processing or free trial enrollment
     setTimeout(() => {
       setIsProcessing(false)
       router.push("/mentee/dashboard")
     }, 2000)
+  }
+
+  const handleFreeTrialEnroll = () => {
+    setIsProcessing(true)
+    // Simulate free trial enrollment
+    setTimeout(() => {
+      setIsProcessing(false)
+      router.push("/mentee/dashboard")
+    }, 1500)
   }
 
   return (
@@ -116,8 +126,68 @@ export default function JoinProgramPage() {
               <CardContent>
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-6">
+                    {/* Enrollment Type Selection */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4">Payment Method</h3>
+                      <h3 className="text-lg font-bold mb-4">Enrollment Option</h3>
+                      <RadioGroup
+                        value={enrollmentType}
+                        onValueChange={(value) => setEnrollmentType(value as "free-trial" | "full-program")}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      >
+                        {program.freeSessionsIncluded > 0 && (
+                          <div>
+                            <RadioGroupItem value="free-trial" id="free-trial" className="peer sr-only" />
+                            <Label
+                              htmlFor="free-trial"
+                              className="flex flex-col items-start justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-[#FFD500] peer-data-[state=checked]:bg-[#FFFBEB] [&:has([data-state=checked])]:border-[#FFD500] [&:has([data-state=checked])]:bg-[#FFFBEB] cursor-pointer h-full"
+                            >
+                              <div className="w-full">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="font-bold">Free Trial</p>
+                                  <Badge className="bg-green-500 text-white">FREE</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-3">
+                                  Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free
+                                </p>
+                                <ul className="text-xs text-gray-500 space-y-1">
+                                  <li>✓ Experience the program value</li>
+                                  <li>✓ No payment required</li>
+                                  <li>✓ Upgrade anytime</li>
+                                </ul>
+                              </div>
+                            </Label>
+                          </div>
+                        )}
+
+                        <div>
+                          <RadioGroupItem value="full-program" id="full-program" className="peer sr-only" />
+                          <Label
+                            htmlFor="full-program"
+                            className="flex flex-col items-start justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-[#FFD500] peer-data-[state=checked]:bg-[#FFFBEB] [&:has([data-state=checked])]:border-[#FFD500] [&:has([data-state=checked])]:bg-[#FFFBEB] cursor-pointer h-full"
+                          >
+                            <div className="w-full">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="font-bold">Full Program</p>
+                                <Badge className="bg-[#FFD500] text-black">RECOMMENDED</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">
+                                Get access to all {program.sessions} sessions
+                              </p>
+                              <ul className="text-xs text-gray-500 space-y-1">
+                                <li>✓ All program materials</li>
+                                <li>✓ Certificate of completion</li>
+                                <li>✓ 30-day money-back guarantee</li>
+                              </ul>
+                            </div>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {enrollmentType === "full-program" && (
+                      <>
+                        <div>
+                          <h3 className="text-lg font-bold mb-4">Payment Method</h3>
                       <RadioGroup
                         value={paymentMethod}
                         onValueChange={setPaymentMethod}
@@ -211,46 +281,113 @@ export default function JoinProgramPage() {
                       </div>
                     )}
 
-                    <div className="flex items-center p-4 bg-[#FFFBEB] rounded-lg border border-[#FFD500]">
-                      <Lock className="h-5 w-5 text-[#FFD500] mr-3" />
-                      <p className="text-sm">
-                        Your payment information is secure. We use industry-standard encryption to protect your data.
-                      </p>
-                    </div>
+                        <div className="flex items-center p-4 bg-[#FFFBEB] rounded-lg border border-[#FFD500]">
+                          <Lock className="h-5 w-5 text-[#FFD500] mr-3" />
+                          <p className="text-sm">
+                            Your payment information is secure. We use industry-standard encryption to protect your data.
+                          </p>
+                        </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Processing...
-                        </>
-                      ) : (
-                        `Pay $${program.price} and Enroll`
-                      )}
-                    </Button>
+                        <Button
+                          type="submit"
+                          className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <svg
+                                className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Processing...
+                            </>
+                          ) : (
+                            `Pay ₦${(program.price * 1500).toLocaleString()} and Enroll`
+                          )}
+                        </Button>
+                      </>
+                    )}
+
+                    {enrollmentType === "free-trial" && (
+                      <div className="space-y-4">
+                        <div className="p-6 bg-green-50 rounded-lg border-2 border-green-200">
+                          <h4 className="font-bold text-lg mb-2 text-green-900">What's Included in Your Free Trial</h4>
+                          <ul className="space-y-2 text-sm text-green-800">
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                              <span>Access to {program.freeSessionsIncluded} free session{program.freeSessionsIncluded > 1 ? 's' : ''}</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                              <span>Meet your {program.type === "Group Program" ? "facilitator and cohort" : "mentor"}</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                              <span>Experience the program structure and content</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                              <span>Upgrade to full program anytime</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <Button
+                          type="button"
+                          onClick={handleFreeTrialEnroll}
+                          className="w-full bg-green-600 text-white hover:bg-green-700"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <svg
+                                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Enrolling...
+                            </>
+                          ) : (
+                            "Start Free Trial - No Payment Required"
+                          )}
+                        </Button>
+
+                        <p className="text-xs text-center text-gray-500">
+                          You can upgrade to the full program at any time during or after the trial
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </form>
               </CardContent>
@@ -301,23 +438,53 @@ export default function JoinProgramPage() {
 
                   <Separator />
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Program Price</span>
-                      <span>₦{(program.price * 1500).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-green-600">
-                      <span>Free Sessions</span>
-                      <span>{program.freeSessionsIncluded} included</span>
-                    </div>
-                  </div>
+                  {enrollmentType === "full-program" ? (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Program Price</span>
+                          <span>₦{(program.price * 1500).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-green-600">
+                          <span>Free Sessions</span>
+                          <span>{program.freeSessionsIncluded} included</span>
+                        </div>
+                      </div>
 
-                  <Separator />
+                      <Separator />
 
-                  <div className="flex justify-between font-bold">
-                    <span>Total</span>
-                    <span>₦{(program.price * 1500).toLocaleString()}</span>
-                  </div>
+                      <div className="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span>₦{(program.price * 1500).toLocaleString()}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Free Trial Access</span>
+                          <span className="text-green-600 font-semibold">FREE</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>{program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''}</span>
+                          <span>₦0</span>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span className="text-green-600">₦0</span>
+                      </div>
+
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-xs text-blue-800">
+                          After your free trial, you can upgrade to the full program for ₦{(program.price * 1500).toLocaleString()}
+                        </p>
+                      </div>
+                    </>
+                  )}
 
                   <div className="space-y-2 pt-4">
                     <div className="flex items-start gap-2">

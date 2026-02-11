@@ -100,8 +100,7 @@ export default function ProgramsPage() {
                     </div>
                     <Button
                       size="sm"
-                      variant="ghost"
-                      className="text-[#FFD500] hover:text-[#e6c000]"
+                      className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
                     >
                       View Program
                       <ArrowRight className="ml-1 h-4 w-4" />

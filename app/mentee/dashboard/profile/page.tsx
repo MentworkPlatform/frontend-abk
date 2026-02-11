@@ -201,7 +201,7 @@ export default function ProfilePage() {
           <form id="profile-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information Tab */}
             {activeTab === "personal" && (
-              <Card>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -327,7 +327,7 @@ export default function ProfilePage() {
 
             {/* Goals & Objectives Tab */}
             {activeTab === "goals" && (
-              <Card>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
@@ -404,7 +404,7 @@ export default function ProfilePage() {
 
             {/* Areas of Interest Tab */}
             {activeTab === "interests" && (
-              <Card>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5" />
@@ -471,7 +471,7 @@ export default function ProfilePage() {
 
             {/* Social Links Tab */}
             {activeTab === "social" && (
-              <Card>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5" />
@@ -584,26 +584,26 @@ export default function ProfilePage() {
           </Card>
             )}
 
-            {/* Action Buttons */}
+          {/* Action Buttons */}
             {activeTab !== "password" && (
               <div className="flex justify-end gap-4 pt-6 border-t">
                 <Link href="/mentee/dashboard">
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </Link>
-                <Button
-                  type="submit"
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </Link>
+            <Button
+              type="submit"
                   form="profile-form"
-                  className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                  disabled={isLoading}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
+              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              disabled={isLoading}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
             )}
-          </form>
+        </form>
         </div>
       </div>
     </div>

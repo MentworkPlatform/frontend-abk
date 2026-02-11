@@ -24,6 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { DashboardHeader } from "@/components/dashboard-header"
 
 // Mock data for the program
 const programData = {
@@ -141,15 +143,16 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [feedbackComment, setFeedbackComment] = useState("")
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+  const [testLink, setTestLink] = useState("")
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-500"
+        return "bg-gray-700"
       case "active":
-        return "bg-blue-500"
+        return "bg-gray-600"
       case "upcoming":
-        return "bg-yellow-500"
+        return "bg-gray-500"
       default:
         return "bg-gray-400"
     }
@@ -169,45 +172,33 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/mentee/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Link>
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <DashboardHeader
+        title={programData.title}
+        description={`with ${programData.mentor} • ${programData.completedTopics}/${programData.totalTopics} topics completed`}
+        actionButton={{
+          label: "Back to Programs",
+          href: "/mentee/dashboard/programs",
+          icon: ArrowLeft,
+        }}
+      />
 
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold">{programData.title}</h1>
-              <p className="text-gray-600">with {programData.mentor}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>
-                  {programData.completedTopics}/{programData.totalTopics} topics completed
-                </span>
-                <Badge variant="secondary">{programData.focusArea}</Badge>
+      <div className="px-6">
+        <Card className="border-none shadow-none bg-transparent">
+          <CardContent className="space-y-3 p-0">
+            <div className="flex items-center justify-between">
+              <Badge variant="secondary">{programData.focusArea}</Badge>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-[#FFD500]">{programData.progress}%</div>
+                <p className="text-sm text-gray-600">Overall Progress</p>
               </div>
             </div>
-
-            <div className="text-right">
-              <div className="text-2xl font-bold text-[#FFD500]">{programData.progress}%</div>
-              <p className="text-sm text-gray-600">Overall Progress</p>
-            </div>
-          </div>
-
-          <div className="mt-4">
             <Progress value={programData.progress} className="h-2" />
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
 
-      <div className="container py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="space-y-6 pt-6">
+          <div className="grid lg:grid-cols-3 gap-8">
           {/* Topics Timeline */}
           <div className="lg:col-span-2">
             <Card>
@@ -400,9 +391,35 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                                   </Button>
                                 )}
                                 {assessment.status === "not_started" && (
-                                  <Button size="sm" variant="outline" className="w-full">
-                                    Not Available Yet
-                                  </Button>
+                                  <div className="space-y-3">
+                                    <p className="text-sm text-gray-500">Test link not provided yet</p>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="test-link">Add Test Link (Optional)</Label>
+                                      <div className="flex gap-2">
+                                        <Input
+                                          id="test-link"
+                                          type="url"
+                                          placeholder="https://..."
+                                          value={testLink}
+                                          onChange={(e) => setTestLink(e.target.value)}
+                                          className="flex-1"
+                                        />
+                                        <Button 
+                                          size="sm"
+                                          className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                          onClick={() => {
+                                            if (testLink) {
+                                              // In real app, save the link
+                                              alert("Test link saved!")
+                                              setTestLink("")
+                                            }
+                                          }}
+                                        >
+                                          Save
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
                                 )}
                               </CardContent>
                             </Card>
@@ -523,6 +540,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
               </Card>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>

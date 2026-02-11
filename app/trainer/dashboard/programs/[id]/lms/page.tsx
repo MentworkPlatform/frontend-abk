@@ -335,15 +335,15 @@ export default function ProgramLMSPage() {
   const getTopicStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-700 border-green-200"
+        return "bg-green-50 text-green-700 border-green-200"
       case "active":
-        return "bg-blue-100 text-blue-700 border-blue-200"
+        return "bg-blue-50 text-blue-700 border-blue-200"
       case "upcoming":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200"
+        return "bg-orange-50 text-orange-700 border-orange-200"
       case "draft":
-        return "bg-gray-100 text-gray-700 border-gray-200"
+        return "bg-gray-50 text-gray-600 border-gray-200"
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200"
+        return "bg-gray-50 text-gray-600 border-gray-200"
     }
   }
 
@@ -453,8 +453,7 @@ export default function ProgramLMSPage() {
                       Online Sessions & Payment Tracking
                     </CardTitle>
                     <CardDescription className="text-sm text-gray-600 mt-1.5">
-                      Schedule and manage online meetings for this topic. Both trainer and mentor must confirm
-                      attendance for payment processing.
+                      Schedule and manage online meetings for this topic. Confirmations will be provided by participants after sessions.
                     </CardDescription>
                   </div>
                   <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
@@ -574,45 +573,41 @@ export default function ProgramLMSPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          {/* Trainer Confirmation */}
-                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <UserCheck className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm font-medium">Trainer Confirmation</span>
+                        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <p className="text-sm text-blue-800 font-medium mb-3">
+                            ℹ️ Session confirmations are provided by students after the session to verify attendance
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {/* Trainer Confirmation */}
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                              <div className="flex items-center gap-2">
+                                <UserCheck className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm font-medium">Trainer Confirmation</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {session.trainerConfirmed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-orange-500" />
+                                )}
+                                <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Awaiting"}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {session.trainerConfirmed ? (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-red-500" />
-                              )}
-                              <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Pending"}</span>
-                              {!session.trainerConfirmed && selectedTopic && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleAttendanceConfirmation(selectedTopic.id, session.id, "trainer")}
-                                >
-                                  Confirm
-                                </Button>
-                              )}
-                            </div>
-                          </div>
 
-                          {/* Mentor Confirmation */}
-                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <UserCheck className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm font-medium">Mentor Confirmation</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {session.mentorConfirmed ? (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-red-500" />
-                              )}
-                              <span className="text-sm">{session.mentorConfirmed ? "Confirmed" : "Pending"}</span>
+                            {/* Mentor Confirmation */}
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                              <div className="flex items-center gap-2">
+                                <UserCheck className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm font-medium">Mentor Confirmation</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {session.mentorConfirmed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-orange-500" />
+                                )}
+                                <span className="text-sm">{session.mentorConfirmed ? "Confirmed" : "Awaiting"}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -859,22 +854,76 @@ export default function ProgramLMSPage() {
                     <Award className="h-5 w-5" />
                     Assessments
                   </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 mt-1">
+                    Students submit their assessment links here for review
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {selectedTopic.assessments.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {selectedTopic.assessments.map((assessment) => (
-                        <div key={assessment.id} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
+                        <div key={assessment.id} className="p-4 border rounded-lg bg-white">
+                          <div className="flex items-center justify-between mb-3">
                             <h4 className="font-semibold text-gray-900">{assessment.title}</h4>
                             <Badge variant="outline" className="text-xs font-medium">{assessment.type}</Badge>
                           </div>
-                          <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                          <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
                             <span className="font-medium">{assessment.submissions} submissions</span>
                             <span className="font-medium">Avg: {assessment.avgScore || "Not graded"}</span>
                           </div>
+                          
+                          {/* Student Submitted Links */}
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+                            <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                              📎 Student Submitted Links
+                            </p>
+                            <div className="space-y-2">
+                              {/* Example student submissions */}
+                              <div className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
+                                    JD
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900">John Doe</p>
+                                    <a 
+                                      href="https://example.com/submission1" 
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-600 hover:underline"
+                                    >
+                                      View submission
+                                    </a>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-gray-500">2 days ago</span>
+                              </div>
+                              <div className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-semibold">
+                                    JS
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900">Jane Smith</p>
+                                    <a 
+                                      href="https://example.com/submission2" 
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-600 hover:underline"
+                                    >
+                                      View submission
+                                    </a>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-gray-500">3 days ago</span>
+                              </div>
+                              <p className="text-xs text-gray-500 text-center py-2">+ {assessment.submissions - 2} more submissions</p>
+                            </div>
+                          </div>
+
                           {assessment.link && (
-                            <div className="mt-2">
+                            <div className="mt-3">
+                              <p className="text-xs font-medium text-gray-600 mb-1">Facilitator Assessment Link:</p>
                               <a
                                 href={assessment.link}
                                 target="_blank"
@@ -882,7 +931,7 @@ export default function ProgramLMSPage() {
                                 className="text-sm text-blue-600 hover:underline flex items-center gap-1"
                               >
                                 <FileText className="h-3 w-3" />
-                                View Assessment Link
+                                View Assessment Instructions
                               </a>
                             </div>
                           )}
@@ -950,7 +999,7 @@ export default function ProgramLMSPage() {
                                 Cancel
                               </Button>
                               <Button
-                                className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
                                 onClick={() => {
                                   // In real app, create assessment via API
                                   console.log("Creating assessment:", assessmentForm)
@@ -1100,10 +1149,10 @@ export default function ProgramLMSPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Program Topics Timeline</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">Program Topics Timeline</h2>
                 <p className="text-sm text-gray-600 mt-1">Follow the progressive learning path for your program</p>
               </div>
-              <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto">
+              <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium w-full sm:w-auto">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Add Topic
               </Button>
@@ -1164,21 +1213,21 @@ export default function ProgramLMSPage() {
 
             {/* Timeline Line */}
             <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300 hidden md:block"></div>
+              <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200 hidden md:block"></div>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {topics.map((topic, index) => (
                   <div key={topic.id} className="relative flex flex-col md:flex-row md:items-start md:gap-6">
                     {/* Topic Number Circle */}
                     <div
-                      className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-4 font-bold text-lg flex-shrink-0 ${
+                      className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full font-semibold text-lg flex-shrink-0 text-white ${
                         topic.status === "completed"
-                          ? "bg-green-500 border-green-500 text-white"
+                          ? "bg-gray-700"
                           : topic.status === "active"
-                            ? "bg-blue-500 border-blue-500 text-white"
+                            ? "bg-gray-600"
                             : topic.status === "upcoming"
-                              ? "bg-yellow-500 border-yellow-500 text-white"
-                              : "bg-gray-200 border-gray-300 text-gray-600"
+                              ? "bg-gray-500"
+                              : "bg-gray-400"
                       }`}
                     >
                       {index + 1}
@@ -1186,7 +1235,7 @@ export default function ProgramLMSPage() {
 
                     {/* Topic Card */}
                     <Card
-                      className="flex-1 cursor-pointer hover:shadow-md transition-shadow w-full"
+                      className="flex-1 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all duration-200 w-full"
                       onClick={() => {
                         // Always get the latest topic from topicsState
                         const latestTopic = topicsState.find((t) => t.id === topic.id)
@@ -1232,34 +1281,34 @@ export default function ProgramLMSPage() {
                         {/* Metrics Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <div>
                               <p className="text-xs text-gray-500 font-medium">Duration</p>
-                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.duration}m</p>
+                              <p className="text-sm font-semibold text-gray-900">{topic.duration}m</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <Users className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <div>
                               <p className="text-xs text-gray-500 font-medium">Participants</p>
-                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.participants}</p>
+                              <p className="text-sm font-semibold text-gray-900">{topic.participants}</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Video className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <Video className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <div>
                               <p className="text-xs text-gray-500 font-medium">Sessions</p>
-                              <p className="text-sm font-semibold text-gray-900 mt-0.5">{topic.sessions ? topic.sessions.length : 0}</p>
+                              <p className="text-sm font-semibold text-gray-900">{topic.sessions ? topic.sessions.length : 0}</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <DollarSign className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <div>
                               <p className="text-xs text-gray-500 font-medium">Payment</p>
-                              <p className="text-sm font-semibold text-gray-900 mt-0.5">
+                              <p className="text-sm font-semibold text-gray-900">
                                 {topic.sessions && topic.sessions.length > 0
                                   ? topic.sessions.every((s) => s.paymentStatus === "paid")
                                     ? "✅ Paid"
@@ -1277,9 +1326,9 @@ export default function ProgramLMSPage() {
                           <div className="pt-3 border-t">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-gray-600 font-medium">Mentors:</span>
-                              <div className="flex flex-wrap gap-1">
+                              <div className="flex flex-wrap gap-1.5">
                                 {topic.mentors.map((mentor, mentorIndex) => (
-                                  <Badge key={mentorIndex} variant="secondary" className="text-xs">
+                                  <Badge key={mentorIndex} variant="secondary" className="text-xs font-medium">
                                     {mentor}
                                   </Badge>
                                 ))}
@@ -1333,7 +1382,7 @@ export default function ProgramLMSPage() {
                 <Button variant="outline" onClick={() => setShowFeedbackDialog(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSubmitFeedback} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                <Button onClick={handleSubmitFeedback} className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium">
                   <Send className="h-4 w-4 mr-2" />
                   Submit Feedback
                 </Button>

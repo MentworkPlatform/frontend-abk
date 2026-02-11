@@ -189,8 +189,8 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
             <div className="flex items-center justify-between">
               <Badge variant="secondary">{programData.focusArea}</Badge>
               <div className="text-right">
-                <div className="text-2xl font-bold text-[#FFD500]">{programData.progress}%</div>
-                <p className="text-sm text-gray-600">Overall Progress</p>
+                <div className="text-2xl font-semibold text-[#FFD500]">{programData.progress}%</div>
+                <p className="text-sm text-gray-600 font-medium">Overall Progress</p>
               </div>
             </div>
             <Progress value={programData.progress} className="h-2" />

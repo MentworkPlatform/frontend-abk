@@ -110,7 +110,12 @@ export default function MentorOnboardingPage() {
   };
 
   const prevStep = () => {
+    // If on step 4 (account) and no opportunity selected, go back to step 2
+    if (step === 4 && !selectedOpportunity) {
+      setStep(2);
+    } else {
     setStep((prev) => prev - 1);
+    }
     window.scrollTo(0, 0);
   };
 
@@ -286,7 +291,7 @@ export default function MentorOnboardingPage() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-xs text-gray-500">By {opportunity.facilitator}</p>
-                              <p className="text-sm font-medium text-[#FFD500] mt-1">
+                              <p className="text-base font-semibold text-gray-900 mt-1">
                                 {opportunity.compensation}
                               </p>
                             </div>
@@ -321,7 +326,7 @@ export default function MentorOnboardingPage() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => router.push("/programs")}
+                    onClick={() => router.push("/programs?view=mentor")}
                   >
                     Explore All Opportunities
                   </Button>
@@ -462,7 +467,7 @@ export default function MentorOnboardingPage() {
                       <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => router.push("/programs")}
+                        onClick={() => router.push("/programs?view=mentor")}
                       >
                         Explore Programs
                       </Button>
@@ -530,8 +535,8 @@ export default function MentorOnboardingPage() {
                   type="button"
                     variant="outline"
                     onClick={() => {
-                      setNeedsAccount(false);
-                      setStep(5);
+                      setNeedsAccount(true);
+                      setStep(4); // Go to account creation
                     }}
                     className="flex items-center gap-2"
                 >

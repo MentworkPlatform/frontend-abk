@@ -206,24 +206,24 @@ export default function MentorProgramDashboard({ params }: Props) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-500"
+        return "bg-gray-700"
       case "active":
-        return "bg-blue-500"
+        return "bg-gray-600"
       case "upcoming":
-        return "bg-yellow-500"
-      default:
         return "bg-gray-500"
+      default:
+        return "bg-gray-400"
     }
   }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>
+        return <Badge className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
       case "active":
-        return <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Active</Badge>
       case "upcoming":
-        return <Badge className="bg-yellow-100 text-yellow-800">Upcoming</Badge>
+        return <Badge className="bg-orange-50 text-orange-700 border-orange-200">Upcoming</Badge>
       default:
         return <Badge variant="outline">Draft</Badge>
     }
@@ -240,56 +240,56 @@ export default function MentorProgramDashboard({ params }: Props) {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Startup Funding Masterclass</h1>
-          <p className="text-muted-foreground">Mentor LMS Dashboard</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Startup Funding Masterclass</h1>
+          <p className="text-sm text-gray-600 mt-1">Mentor LMS Dashboard</p>
         </div>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">12</p>
-                <p className="text-sm text-muted-foreground">Active Mentees</p>
+                <p className="text-sm text-gray-600 font-medium">Active Mentees</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">12</p>
               </div>
+              <Users className="h-6 w-6 text-blue-500" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-500" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-sm text-gray-600 font-medium">Sessions Complete</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">
                   {completedSessions}/{totalSessions}
                 </p>
-                <p className="text-sm text-muted-foreground">Sessions Complete</p>
               </div>
+              <Calendar className="h-6 w-6 text-green-500" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">₦{(totalEarnings * 1500).toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Earned</p>
+                <p className="text-sm text-gray-600 font-medium">Earned</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">₦{(totalEarnings * 1500).toLocaleString()}</p>
               </div>
+              <DollarSign className="h-6 w-6 text-green-500" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-orange-500" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">₦{(pendingEarnings * 1500).toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Pending Payment</p>
+                <p className="text-sm text-gray-600 font-medium">Pending Payment</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">₦{(pendingEarnings * 1500).toLocaleString()}</p>
               </div>
+              <Clock className="h-6 w-6 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -298,8 +298,8 @@ export default function MentorProgramDashboard({ params }: Props) {
       {/* Topics Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle>Program Topics Timeline</CardTitle>
-          <CardDescription>Linear progression through program curriculum</CardDescription>
+          <CardTitle className="text-2xl font-semibold text-gray-900">Program Topics Timeline</CardTitle>
+          <CardDescription className="text-sm text-gray-600 mt-1">Linear progression through program curriculum</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -308,57 +308,67 @@ export default function MentorProgramDashboard({ params }: Props) {
                 {/* Timeline indicator */}
                 <div className="flex flex-col items-center">
                   <div
-                    className={`w-8 h-8 rounded-full ${getStatusColor(topic.status)} flex items-center justify-center text-white font-bold text-sm`}
+                    className={`w-12 h-12 rounded-full ${getStatusColor(topic.status)} flex items-center justify-center text-white font-semibold text-base`}
                   >
                     {index + 1}
                   </div>
-                  {index < programTopics.length - 1 && <div className="w-0.5 h-16 bg-gray-200 mt-2" />}
+                  {index < programTopics.length - 1 && <div className="w-px h-16 bg-gray-200 mt-2" />}
                 </div>
 
                 {/* Topic card */}
                 <Card
-                  className="flex-1 cursor-pointer hover:shadow-md transition-shadow"
+                  className="flex-1 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all duration-200"
                   onClick={() => setSelectedTopic(topic.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-lg">{topic.title}</h3>
-                        <p className="text-sm text-muted-foreground">{topic.description}</p>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg text-gray-900">{topic.title}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{topic.description}</p>
                       </div>
                       {getStatusBadge(topic.status)}
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{topic.duration}</span>
+                        <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Duration</p>
+                          <p className="text-sm font-semibold text-gray-900">{topic.duration}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{topic.participants} mentees</span>
+                        <Users className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Mentees</p>
+                          <p className="text-sm font-semibold text-gray-900">{topic.participants}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Video className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{topic.sessions.length} sessions</span>
+                        <Video className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Sessions</p>
+                          <p className="text-sm font-semibold text-gray-900">{topic.sessions.length}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          $
-                          {topic.sessions
-                            .filter((s) => s.paymentStatus === "paid")
-                            .reduce((sum, s) => sum + s.amount, 0)}{" "}
-                          earned
-                        </span>
+                        <DollarSign className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Earned</p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            ₦{(topic.sessions
+                              .filter((s) => s.paymentStatus === "paid")
+                              .reduce((sum, s) => sum + s.amount, 0) * 1500).toLocaleString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
                     {topic.status === "active" && (
                       <div className="mt-4">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Progress</span>
-                          <span>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-gray-600 font-medium">Progress</span>
+                          <span className="font-semibold text-gray-900">
                             {Math.round(
                               (topic.sessions.filter((s) => s.status === "completed").length / topic.sessions.length) *
                                 100,
@@ -388,8 +398,8 @@ export default function MentorProgramDashboard({ params }: Props) {
         <Dialog open={!!selectedTopic} onOpenChange={() => setSelectedTopic(null)}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{programTopics.find((t) => t.id === selectedTopic)?.title}</DialogTitle>
-              <DialogDescription>{programTopics.find((t) => t.id === selectedTopic)?.description}</DialogDescription>
+              <DialogTitle className="text-xl font-semibold">{programTopics.find((t) => t.id === selectedTopic)?.title}</DialogTitle>
+              <DialogDescription className="text-sm text-gray-600">{programTopics.find((t) => t.id === selectedTopic)?.description}</DialogDescription>
             </DialogHeader>
 
             <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
@@ -416,10 +426,10 @@ export default function MentorProgramDashboard({ params }: Props) {
                           <Badge
                             className={
                               session.status === "completed"
-                                ? "bg-green-100 text-green-800"
+                                ? "bg-green-50 text-green-700 border-green-200"
                                 : session.status === "upcoming"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-blue-100 text-blue-800"
+                                  ? "bg-orange-50 text-orange-700 border-orange-200"
+                                  : "bg-blue-50 text-blue-700 border-blue-200"
                             }
                           >
                             {session.status}
@@ -459,8 +469,8 @@ export default function MentorProgramDashboard({ params }: Props) {
                               <Badge
                                 className={
                                   session.paymentStatus === "paid"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                                    ? "bg-green-50 text-green-700 border-green-200"
+                                    : "bg-orange-50 text-orange-700 border-orange-200"
                                 }
                               >
                                 {session.paymentStatus}
@@ -530,11 +540,11 @@ export default function MentorProgramDashboard({ params }: Props) {
                                 </Button>
                               ) : (
                                 <>
-                                  <Badge className="bg-green-100 text-green-800">Feedback Submitted</Badge>
+                                  <Badge className="bg-green-50 text-green-700 border-green-200">Feedback Submitted</Badge>
                                   {session.paymentStatus === "pending" && (
                                     <Button
                                       size="sm"
-                                      className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                                      className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
                                       onClick={() => {
                                         // In real app, trigger payment API call to request payment from facilitator
                                         console.log("Triggering payment request for session:", session.id)
@@ -656,8 +666,8 @@ export default function MentorProgramDashboard({ params }: Props) {
       <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rate & Provide Feedback to Facilitator</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-semibold">Rate & Provide Feedback to Facilitator</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600">
               Your feedback helps ensure timely payments and improves the program experience
             </DialogDescription>
           </DialogHeader>
@@ -720,7 +730,7 @@ export default function MentorProgramDashboard({ params }: Props) {
                   setFeedbackComment("")
                   setSelectedSessionForFeedback(null)
                 }}
-                className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
                 disabled={feedbackRating === 0}
               >
                 <Send className="h-4 w-4 mr-2" />

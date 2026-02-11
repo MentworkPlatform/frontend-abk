@@ -71,6 +71,7 @@ export interface CurriculumTopic {
   requiredExpertise: string[]
   content?: TopicContent
   isPublished: boolean
+  isFree?: boolean // Mark session as free for trial
 }
 
 export interface TopicContent {

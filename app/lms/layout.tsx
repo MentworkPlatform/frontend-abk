@@ -48,7 +48,7 @@ export default function LMSLayout({
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Top Navigation */}
       <Suspense fallback={<div>Loading...</div>}>
-        <header className="bg-white border-b">
+        <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">

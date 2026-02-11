@@ -186,6 +186,7 @@ export default function CreateProgram() {
     durationWeeks: "",
     numberOfSessions: "",
     learningOutcomes: ["", "", ""],
+    prerequisites: [""],
   })
 
   // Step 2: Curriculum
@@ -543,6 +544,46 @@ function Step1BasicInfo({
   onNext,
   isValid,
 }: Step1BasicInfoProps) {
+  const updateLearningOutcome = (index: number, value: string) => {
+    const updated = [...programData.learningOutcomes]
+    updated[index] = value
+    setProgramData({ ...programData, learningOutcomes: updated })
+  }
+
+  const addLearningOutcome = () => {
+    setProgramData({
+      ...programData,
+      learningOutcomes: [...programData.learningOutcomes, ""],
+    })
+  }
+
+  const removeLearningOutcome = (index: number) => {
+    if (programData.learningOutcomes.length > 1) {
+      const updated = programData.learningOutcomes.filter((_: string, i: number) => i !== index)
+      setProgramData({ ...programData, learningOutcomes: updated })
+    }
+  }
+
+  const updatePrerequisite = (index: number, value: string) => {
+    const updated = [...programData.prerequisites]
+    updated[index] = value
+    setProgramData({ ...programData, prerequisites: updated })
+  }
+
+  const addPrerequisite = () => {
+    setProgramData({
+      ...programData,
+      prerequisites: [...programData.prerequisites, ""],
+    })
+  }
+
+  const removePrerequisite = (index: number) => {
+    if (programData.prerequisites.length > 1) {
+      const updated = programData.prerequisites.filter((_: string, i: number) => i !== index)
+      setProgramData({ ...programData, prerequisites: updated })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -560,6 +601,71 @@ function Step1BasicInfo({
               onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Program Description *</Label>
+            <Textarea
+              id="description"
+              placeholder="Describe what participants will learn and achieve..."
+              rows={4}
+              value={programData.description}
+              onChange={(e) => setProgramData({ ...programData, description: e.target.value })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Learning Outcomes</CardTitle>
+          <CardDescription>What will participants achieve by completing this program?</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {programData.learningOutcomes.map((outcome: string, index: number) => (
+            <div key={index} className="flex items-center space-x-2">
+              <Input
+                placeholder={`Learning outcome ${index + 1}`}
+                value={outcome}
+                onChange={(e) => updateLearningOutcome(index, e.target.value)}
+              />
+              {programData.learningOutcomes.length > 1 && (
+                <Button type="button" variant="outline" size="icon" onClick={() => removeLearningOutcome(index)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button type="button" variant="outline" onClick={addLearningOutcome} className="w-full bg-transparent">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Learning Outcome
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Prerequisites</CardTitle>
+          <CardDescription>What should participants know or have before starting?</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {programData.prerequisites.map((prerequisite: string, index: number) => (
+            <div key={index} className="flex items-center space-x-2">
+              <Input
+                placeholder={`Prerequisite ${index + 1}`}
+                value={prerequisite}
+                onChange={(e) => updatePrerequisite(index, e.target.value)}
+              />
+              {programData.prerequisites.length > 1 && (
+                <Button type="button" variant="outline" size="icon" onClick={() => removePrerequisite(index)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button type="button" variant="outline" onClick={addPrerequisite} className="w-full bg-transparent">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Prerequisite
+          </Button>
         </CardContent>
       </Card>
 
@@ -597,26 +703,6 @@ function Step2WhoIsThisFor({
   subSectorSkillsGrouped,
   skillsCapabilitiesOptions,
 }: Step2WhoIsThisForProps) {
-  const updateLearningOutcome = (index: number, value: string) => {
-    const updated = [...programData.learningOutcomes]
-    updated[index] = value
-    setProgramData({ ...programData, learningOutcomes: updated })
-  }
-
-  const addLearningOutcome = () => {
-    setProgramData({
-      ...programData,
-      learningOutcomes: [...programData.learningOutcomes, ""],
-    })
-  }
-
-  const removeLearningOutcome = (index: number) => {
-    if (programData.learningOutcomes.length > 1) {
-      const updated = programData.learningOutcomes.filter((_: string, i: number) => i !== index)
-      setProgramData({ ...programData, learningOutcomes: updated })
-    }
-  }
-
   return (
     <div className="space-y-6">
       <Card>
@@ -626,17 +712,6 @@ function Step2WhoIsThisFor({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="description">Program Description *</Label>
-            <Textarea
-              id="description"
-              placeholder="Describe what participants will learn and achieve..."
-              rows={4}
-              value={programData.description}
-              onChange={(e) => setProgramData({ ...programData, description: e.target.value })}
-            />
-          </div>
-
-            <div className="space-y-2">
             <Label>Sector *</Label>
             <MultiSelect
               options={sectorsOptions}
@@ -763,33 +838,6 @@ function Step2WhoIsThisFor({
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Learning Outcomes</CardTitle>
-          <CardDescription>What will participants achieve by completing this program?</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {programData.learningOutcomes.map((outcome: string, index: number) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Input
-                placeholder={`Learning outcome ${index + 1}`}
-                value={outcome}
-                onChange={(e) => updateLearningOutcome(index, e.target.value)}
-              />
-              {programData.learningOutcomes.length > 1 && (
-                <Button type="button" variant="outline" size="icon" onClick={() => removeLearningOutcome(index)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-          <Button type="button" variant="outline" onClick={addLearningOutcome} className="w-full bg-transparent">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Learning Outcome
-          </Button>
         </CardContent>
       </Card>
 

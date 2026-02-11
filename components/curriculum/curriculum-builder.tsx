@@ -29,6 +29,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
       learningObjectives: [""],
       materials: [],
       assessments: [],
+      isPublished: false,
     }
     setModules([...modules, newModule])
   }
@@ -52,6 +53,8 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
       materials: [],
       prerequisites: [],
       requiredExpertise: [],
+      isPublished: false,
+      isFree: false,
     }
 
     setModules(
@@ -346,32 +349,16 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="live_session">Live Session</SelectItem>
-                                  <SelectItem value="online">Online</SelectItem>
                                   <SelectItem value="discussion">Discussion</SelectItem>
                                   <SelectItem value="project">Project</SelectItem>
+                                  <SelectItem value="video">Video</SelectItem>
+                                  <SelectItem value="document">Document</SelectItem>
+                                  <SelectItem value="quiz">Quiz</SelectItem>
+                                  <SelectItem value="assignment">Assignment</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                           </div>
-
-                          {topic.type === "online" && (
-                            <div className="space-y-1 mb-3">
-                              <Label className="text-xs">Meeting Link *</Label>
-                              <Input
-                                placeholder="https://meet.google.com/abc-defg-hij"
-                                value={(topic.content as any)?.meetingLink || ""}
-                                onChange={(e) =>
-                                  updateTopic(module.id, topic.id, {
-                                    content: { ...topic.content, meetingLink: e.target.value },
-                                  })
-                                }
-                                className="h-8 text-sm"
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                Create a meeting link for this online session
-                              </p>
-                            </div>
-                          )}
 
                           <div className="space-y-1">
                             <Label className="text-xs">Description *</Label>
@@ -382,6 +369,19 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                               rows={2}
                               className="text-sm"
                             />
+                          </div>
+
+                          <div className="flex items-center space-x-2 pt-2">
+                            <input
+                              type="checkbox"
+                              id={`free-${topic.id}`}
+                              checked={topic.isFree || false}
+                              onChange={(e) => updateTopic(module.id, topic.id, { isFree: e.target.checked })}
+                              className="h-4 w-4 rounded border-gray-300 text-[#FFD500] focus:ring-[#FFD500]"
+                            />
+                            <Label htmlFor={`free-${topic.id}`} className="text-sm font-normal cursor-pointer">
+                              Free Trial Session {topic.isFree && <Badge className="ml-2 bg-green-500 text-white text-xs">FREE</Badge>}
+                            </Label>
                           </div>
                         </CardContent>
                       </Card>

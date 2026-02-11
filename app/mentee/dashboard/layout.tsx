@@ -68,7 +68,7 @@ export default function DashboardLayout({
   );
 
   const customMobileHeader = (
-    <div className="fixed top-0 left-0 right-0 z-30 w-full bg-white border-b md:hidden lg:hidden">
+    <div className="fixed top-0 left-0 right-0 z-30 w-full border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 md:hidden lg:hidden">
       <div className="flex items-center justify-between p-4">
         <Link href="/mentee/dashboard">
           <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-6" />

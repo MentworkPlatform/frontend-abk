@@ -322,22 +322,22 @@ export default function ProgramManagementPage() {
   const getTopicStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-700 border-green-200"
+        return "bg-green-50 text-green-700 border-green-200"
       case "active":
-        return "bg-blue-100 text-blue-700 border-blue-200"
+        return "bg-blue-50 text-blue-700 border-blue-200"
       case "upcoming":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200"
+        return "bg-orange-50 text-orange-700 border-orange-200"
       case "draft":
-        return "bg-gray-100 text-gray-700 border-gray-200"
+        return "bg-gray-50 text-gray-600 border-gray-200"
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200"
+        return "bg-gray-50 text-gray-600 border-gray-200"
     }
   }
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-20">
+      <header className="sticky top-0 z-20 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center gap-3 py-4">
             <Button variant="ghost" size="icon" className="h-9 w-9 -ml-2" asChild>
@@ -555,7 +555,7 @@ export default function ProgramManagementPage() {
                       </div>
                       <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
                         <DialogTrigger asChild>
-                          <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                          <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium">
                             <Plus className="h-4 w-4 mr-2" />
                             Schedule Session
                           </Button>
@@ -632,7 +632,7 @@ export default function ProgramManagementPage() {
                                 <Badge className={getPaymentStatusColor(session.paymentStatus)}>
                                   {session.paymentStatus}
                                 </Badge>
-                                <span className="font-medium">${session.amount}</span>
+                                <span className="font-medium">₦{(session.amount * 1500).toLocaleString()}</span>
                               </div>
                             </div>
 
@@ -977,10 +977,10 @@ export default function ProgramManagementPage() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold">Program Topics Timeline</h2>
-                    <p className="text-gray-600">Follow the progressive learning path for your program</p>
+                    <h2 className="text-2xl font-semibold text-gray-900">Program Topics Timeline</h2>
+                    <p className="text-sm text-gray-600 mt-1">Follow the progressive learning path for your program</p>
                   </div>
-                  <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                  <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium">
                     <BookOpen className="h-4 w-4 mr-2" />
                     Add Topic
                   </Button>
@@ -1041,21 +1041,21 @@ export default function ProgramManagementPage() {
 
                 {/* Timeline Line */}
                 <div className="relative">
-                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+                  <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200"></div>
 
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     {topicsState.map((topic, index) => (
                       <div key={topic.id} className="relative flex items-start gap-6">
                         {/* Topic Number Circle */}
                         <div
-                          className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-4 font-bold text-lg ${
+                          className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full font-semibold text-lg text-white ${
                             topic.status === "completed"
-                              ? "bg-green-500 border-green-500 text-white"
+                              ? "bg-gray-700"
                               : topic.status === "active"
-                                ? "bg-blue-500 border-blue-500 text-white"
+                                ? "bg-gray-600"
                                 : topic.status === "upcoming"
-                                  ? "bg-yellow-500 border-yellow-500 text-white"
-                                  : "bg-gray-200 border-gray-300 text-gray-600"
+                                  ? "bg-gray-500"
+                                  : "bg-gray-400"
                           }`}
                         >
                           {index + 1}
@@ -1063,7 +1063,7 @@ export default function ProgramManagementPage() {
 
                         {/* Topic Card */}
                         <Card
-                          className="flex-1 cursor-pointer hover:shadow-md transition-shadow"
+                          className="flex-1 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all duration-200"
                           onClick={() => {
                             // Always get the latest topic from topicsState
                             const latestTopic = topicsState.find((t) => t.id === topic.id)
@@ -1100,8 +1100,8 @@ export default function ProgramManagementPage() {
                             {/* Progress Bar */}
                             <div className="space-y-2">
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Progress</span>
-                                <span className="font-medium">{topic.completionRate}%</span>
+                                <span className="text-gray-600 font-medium">Progress</span>
+                                <span className="font-semibold text-gray-900">{topic.completionRate}%</span>
                               </div>
                               <Progress value={topic.completionRate} className="h-2" />
                             </div>
@@ -1109,34 +1109,34 @@ export default function ProgramManagementPage() {
                             {/* Metrics Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 <div>
-                                  <p className="text-xs text-gray-500">Duration</p>
-                                  <p className="text-sm font-medium">{topic.duration}m</p>
+                                  <p className="text-xs text-gray-500 font-medium">Duration</p>
+                                  <p className="text-sm font-semibold text-gray-900">{topic.duration}m</p>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                <Users className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 <div>
-                                  <p className="text-xs text-gray-500">Participants</p>
-                                  <p className="text-sm font-medium">{topic.participants}</p>
+                                  <p className="text-xs text-gray-500 font-medium">Participants</p>
+                                  <p className="text-sm font-semibold text-gray-900">{topic.participants}</p>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <Video className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                <Video className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 <div>
-                                  <p className="text-xs text-gray-500">Sessions</p>
-                                  <p className="text-sm font-medium">{topic.sessions ? topic.sessions.length : 0}</p>
+                                  <p className="text-xs text-gray-500 font-medium">Sessions</p>
+                                  <p className="text-sm font-semibold text-gray-900">{topic.sessions ? topic.sessions.length : 0}</p>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                <DollarSign className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 <div>
-                                  <p className="text-xs text-gray-500">Payment</p>
-                                  <p className="text-sm font-medium">
+                                  <p className="text-xs text-gray-500 font-medium">Payment</p>
+                                  <p className="text-sm font-semibold text-gray-900">
                                     {topic.sessions && topic.sessions.length > 0
                                       ? topic.sessions.every((s) => s.paymentStatus === "paid")
                                         ? "✅ Paid"
@@ -1153,10 +1153,10 @@ export default function ProgramManagementPage() {
                             {topic.mentors.length > 0 && (
                               <div className="pt-3 border-t">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-sm text-gray-600">Mentors:</span>
-                                  <div className="flex flex-wrap gap-1">
+                                  <span className="text-sm text-gray-600 font-medium">Mentors:</span>
+                                  <div className="flex flex-wrap gap-1.5">
                                     {topic.mentors.map((mentor, mentorIndex) => (
-                                      <Badge key={mentorIndex} variant="secondary" className="text-xs">
+                                      <Badge key={mentorIndex} variant="secondary" className="text-xs font-medium">
                                         {mentor}
                                       </Badge>
                                     ))}

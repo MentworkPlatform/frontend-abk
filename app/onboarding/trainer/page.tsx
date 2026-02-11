@@ -186,7 +186,12 @@ export default function TrainerOnboardingPage() {
   };
 
   const prevStep = () => {
-    setStep((prev) => prev - 1);
+    // If on step 5 (account) and no demand/program data selected, go back to step 1
+    if (step === 5 && !selectedDemand && !formData.programTitle) {
+      setStep(1);
+    } else {
+      setStep((prev) => prev - 1);
+    }
     window.scrollTo(0, 0);
   };
 
@@ -674,7 +679,10 @@ export default function TrainerOnboardingPage() {
                 <Button
                   type="button"
                     variant="outline"
-                    onClick={() => router.push("/trainer/dashboard")}
+                    onClick={() => {
+                      setNeedsAccount(true);
+                      setStep(5); // Go to account creation
+                    }}
                     className="flex items-center gap-2"
                 >
                     Skip for now

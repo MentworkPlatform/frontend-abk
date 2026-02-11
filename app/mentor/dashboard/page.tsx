@@ -4,6 +4,7 @@ import { CardFooter } from "@/components/ui/card"
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Calendar, Users, Plus, Target, Clock, Star, CheckCircle, Eye } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 // Mock data for active programs
 const activePrograms = [
@@ -149,23 +153,38 @@ const upcomingSessions = [
 
 // 6 Focus Area Pillars data
 const focusAreas = [
-  { name: "Leadership & People", taught: true, color: "bg-blue-500" },
-  { name: "Strategy & Planning", taught: false, color: "bg-green-500" },
-  { name: "Branding/Marketing/Sales", taught: false, color: "bg-purple-500" },
-  { name: "Finance & Funding", taught: true, color: "bg-orange-500" },
-  { name: "Operations & Innovation", taught: false, color: "bg-red-500" },
-  { name: "Governance & Impact", taught: false, color: "bg-teal-500" },
+  { name: "Leadership & People", taught: true, color: "bg-gray-700" },
+  { name: "Strategy & Planning", taught: false, color: "bg-gray-600" },
+  { name: "Branding/Marketing/Sales", taught: false, color: "bg-gray-500" },
+  { name: "Finance & Funding", taught: true, color: "bg-gray-700" },
+  { name: "Operations & Innovation", taught: false, color: "bg-gray-600" },
+  { name: "Governance & Impact", taught: false, color: "bg-gray-500" },
 ]
 
 export default function MentorDashboardPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("opportunities")
+  const [showRequestModal, setShowRequestModal] = useState(false)
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null)
 
   // Calculate progress across pillars
   const taughtAreas = focusAreas.filter((area) => area.taught).length
   const progressPercentage = (taughtAreas / focusAreas.length) * 100
 
+  const handleRequestToTeach = (opportunity: any) => {
+    setSelectedOpportunity(opportunity)
+    setShowRequestModal(true)
+  }
+
+  const handleSubmitRequest = () => {
+    // In real app, this would submit request to backend
+    console.log("Request submitted for:", selectedOpportunity?.title)
+    setShowRequestModal(false)
+    setSelectedOpportunity(null)
+  }
+
   return (
-    <div className="space-y-8 p-4 md:p-8">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
@@ -214,7 +233,7 @@ export default function MentorDashboardPage() {
                   <Button
                     size="sm"
                     onClick={() => window.open(session.meetingLink, "_blank")}
-                    className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
+                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] whitespace-nowrap"
                   >
                     Join Meeting
                   </Button>
@@ -236,8 +255,8 @@ export default function MentorDashboardPage() {
               </CardTitle>
               <CardDescription>Programs you are currently teaching</CardDescription>
             </div>
-            <Button variant="outline" asChild>
-              <Link href="/programs">Explore Programs</Link>
+            <Button variant="outline" onClick={() => router.push("/programs?view=mentor")}>
+              Explore Programs
             </Button>
           </div>
         </CardHeader>
@@ -251,7 +270,7 @@ export default function MentorDashboardPage() {
                       <CardTitle className="text-lg">{program.title}</CardTitle>
                       <CardDescription>{program.focusArea}</CardDescription>
                     </div>
-                    <Badge className="bg-green-600">{program.status}</Badge>
+                    <Badge className="bg-[#FFD500] text-black">{program.status}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -305,28 +324,32 @@ export default function MentorDashboardPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {suggestedOpportunities.map((opportunity) => (
-                <Card key={opportunity.id} className="border border-blue-200 bg-blue-50/50">
+                <Card key={opportunity.id} className="border border-gray-200 bg-gray-50/50">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-lg">{opportunity.title}</CardTitle>
                         <CardDescription>by {opportunity.creator}</CardDescription>
                       </div>
-                      <Badge className="bg-blue-600">{opportunity.matchScore}% match</Badge>
+                      <Badge className="bg-[#FFD500] text-black">{opportunity.matchScore}% match</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-sm text-muted-foreground">{opportunity.description}</p>
                     <div className="bg-white p-2 rounded text-xs">
-                      <p className="font-medium text-blue-900 mb-1">Why recommended:</p>
-                      <p className="text-blue-700">{opportunity.whyRecommended}</p>
+                      <p className="font-medium text-gray-900 mb-1">Why recommended:</p>
+                      <p className="text-gray-700">{opportunity.whyRecommended}</p>
                     </div>
                     <div className="flex items-center justify-between pt-2">
                       <div>
                         <p className="text-xs text-muted-foreground">Compensation</p>
                         <p className="text-sm font-medium">{opportunity.compensation}</p>
                       </div>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button 
+                        size="sm" 
+                        className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                        onClick={() => handleRequestToTeach(opportunity)}
+                      >
                         Request to Teach
                       </Button>
                     </div>
@@ -351,8 +374,8 @@ export default function MentorDashboardPage() {
               Programs created by trainers and organizations looking for mentors
               </CardDescription>
             </div>
-            <Button variant="outline" asChild>
-              <Link href="/programs">Explore Programs</Link>
+            <Button variant="outline" onClick={() => router.push("/programs?view=mentor")}>
+              Explore Programs
             </Button>
           </div>
         </CardHeader>
@@ -391,16 +414,16 @@ export default function MentorDashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div>
-                    <p className="text-sm font-medium text-green-900">Total Compensation</p>
-                    <p className="text-lg font-bold text-green-700">
+                    <p className="text-sm font-medium text-gray-900">Total Compensation</p>
+                    <p className="text-lg font-bold text-gray-900">
                       ${opportunity.totalCompensation.toLocaleString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-green-700">{opportunity.compensation}</p>
-                    <p className="text-xs text-green-600">{opportunity.estimatedMentees} mentees</p>
+                    <p className="text-sm text-gray-900">{opportunity.compensation}</p>
+                    <p className="text-xs text-gray-600">{opportunity.estimatedMentees} mentees</p>
                   </div>
                 </div>
 
@@ -417,11 +440,20 @@ export default function MentorDashboardPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex gap-2">
-                <Button variant="outline" className="flex-1 bg-transparent">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 bg-transparent"
+                  onClick={() => router.push(`/programs/${opportunity.id}?view=mentor`)}
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Request to Join</Button>
+                <Button 
+                  className="flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                  onClick={() => handleRequestToTeach(opportunity)}
+                >
+                  Request to Join
+                </Button>
               </CardFooter>
             </Card>
           ))}
@@ -437,6 +469,69 @@ export default function MentorDashboardPage() {
       </Tabs>
         </CardContent>
       </Card>
+
+      {/* Request to Teach Modal */}
+      <Dialog open={showRequestModal} onOpenChange={setShowRequestModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Request to Teach</DialogTitle>
+            <DialogDescription>
+              Express your interest in teaching "{selectedOpportunity?.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="mentor-name">Full Name</Label>
+              <Input
+                id="mentor-name"
+                placeholder="Your full name"
+                defaultValue="Sarah Johnson"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mentor-email">Email</Label>
+              <Input
+                id="mentor-email"
+                type="email"
+                placeholder="your.email@example.com"
+                defaultValue="sarah.johnson@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mentor-expertise">Relevant Expertise</Label>
+              <Input
+                id="mentor-expertise"
+                placeholder="e.g., 10+ years in business strategy"
+                defaultValue=""
+              />
+            </div>
+            {selectedOpportunity && (
+              <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+                <p className="text-sm font-medium">Program Details:</p>
+                <p className="text-sm text-gray-600">Duration: {selectedOpportunity.duration}</p>
+                <p className="text-sm text-gray-600">Type: {selectedOpportunity.type}</p>
+                <p className="text-sm font-semibold text-gray-900">Compensation: {selectedOpportunity.compensation}</p>
+              </div>
+            )}
+            <div className="p-4 bg-gray-100 rounded-lg">
+              <p className="text-sm text-gray-900">
+                <strong>Next steps:</strong> The program facilitator will review your request and contact you within 2-3 business days.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRequestModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              onClick={handleSubmitRequest}
+            >
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,8 +8,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Upload } from "lucide-react"
+import { MultiSelect } from "@/components/ui/multi-select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SECTORS, SKILLS_CAPABILITIES } from "@/lib/constants/onboarding"
 
 export default function MentorProfilePage() {
+  const [selectedSector, setSelectedSector] = useState("")
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   return (
     <div className="space-y-6">
       <div>
@@ -63,6 +69,39 @@ export default function MentorProfilePage() {
           <div className="space-y-2">
             <Label htmlFor="achievements">Key Achievements</Label>
             <Textarea id="achievements" rows={4} defaultValue="Scaled 3 businesses to 7-figures..." />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Sector & Skills</CardTitle>
+          <CardDescription>Select your sector and key skills/capabilities</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="sector">Sector</Label>
+            <Select value={selectedSector} onValueChange={setSelectedSector}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your sector" />
+              </SelectTrigger>
+              <SelectContent>
+                {SECTORS.map((sector) => (
+                  <SelectItem key={sector.id} value={sector.id}>
+                    {sector.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Skills & Capabilities</Label>
+            <MultiSelect
+              options={SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }))}
+              selected={selectedSkills}
+              onSelectionChange={setSelectedSkills}
+              placeholder="Select your skills"
+            />
           </div>
         </CardContent>
       </Card>

@@ -604,15 +604,24 @@ export default function OnboardingPage() {
                       </Button>
                     </CardContent>
                   </Card>
-                </div>
+                  </div>
 
                 <div className="pt-6 border-t">
-                  <Button
-                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                    onClick={() => router.push("/mentee/dashboard")}
-                  >
-                    Go to Dashboard
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      className="w-[20%] flex items-center gap-2"
+                      onClick={() => setStep(4)}
+                    >
+                      <ArrowLeft className="h-4 w-4" /> Back
+                    </Button>
+                    <Button
+                      className="w-[80%] bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      onClick={() => router.push("/mentee/dashboard")}
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -624,7 +633,14 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={prevStep}
+                  onClick={() => {
+                    // If on step 4 and came from skip, go back to step 2
+                    if (step === 4 && !selectedProgram) {
+                      setStep(2);
+                    } else {
+                      prevStep();
+                    }
+                  }}
                   className="flex items-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
@@ -649,12 +665,12 @@ export default function OnboardingPage() {
                   type="button"
                     variant="outline"
                     onClick={() => {
-                      // Skip to next steps without selecting a program
-                      setNeedsAccount(false);
-                      setStep(5);
+                      // Skip to account creation step
+                      setNeedsAccount(true);
+                      setStep(4);
                     }}
                     className="flex items-center gap-2"
-                  >
+                >
                     Skip for now
                 </Button>
               )}

@@ -76,6 +76,7 @@ const trainingPrograms = [
     level: "Beginner",
     description: "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp.",
     skills: ["SEO", "Social Media", "PPC", "Analytics"],
+    freeSessionsIncluded: 1,
   },
   {
     id: 4,
@@ -143,6 +144,7 @@ const groupPrograms = [
     category: "Entrepreneurship",
     level: "Intermediate",
     description: "Join a cohort of entrepreneurs to build, validate, and launch your startup idea.",
+    freeSessionsIncluded: 2,
   },
 ]
 
@@ -151,6 +153,7 @@ const allPrograms = [...mentorshipPrograms, ...trainingPrograms, ...groupProgram
 export default function ProgramsPage() {
   const searchParams = useSearchParams()
   const fromOnboarding = searchParams.get("from") === "onboarding"
+  const viewAsMentor = searchParams.get("view") === "mentor"
   
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -197,7 +200,7 @@ export default function ProgramsPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/">
@@ -213,7 +216,9 @@ export default function ProgramsPage() {
       <div className="container mx-auto px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Discover Learning Programs</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            {viewAsMentor ? "Mentor Opportunities" : "Discover Learning Programs"}
+          </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Choose from mentorship programs, comprehensive training courses, or group learning experiences designed by
             industry experts
@@ -286,7 +291,7 @@ export default function ProgramsPage() {
             <p className="text-gray-600 mb-6">
               Based on your profile, here are programs that match your goals and interests
             </p>
-            <ProgramGrid programs={filteredRecommended} />
+            <ProgramGrid programs={filteredRecommended} viewAsMentor={viewAsMentor} />
           </div>
         )}
 
@@ -300,7 +305,7 @@ export default function ProgramsPage() {
           )}
 
         {/* All Programs */}
-        <ProgramGrid programs={filteredPrograms} />
+        <ProgramGrid programs={filteredPrograms} viewAsMentor={viewAsMentor} />
         </div>
 
         {/* Featured Training Programs Section */}
@@ -317,7 +322,11 @@ export default function ProgramsPage() {
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <Play className="h-12 w-12 text-white" />
                   </div>
-                  <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black">{program.format}</Badge>
+                  {program.freeSessionsIncluded && program.freeSessionsIncluded > 0 && (
+                    <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black font-semibold">
+                      Free Trial Available
+                    </Badge>
+                  )}
                   <Badge className="absolute top-3 right-3 bg-green-500 text-white">{program.level}</Badge>
                 </div>
                 <CardContent className="p-6">
@@ -393,7 +402,7 @@ export default function ProgramsPage() {
 }
 
 // Program Grid Component
-function ProgramGrid({ programs }: { programs: any[] }) {
+function ProgramGrid({ programs, viewAsMentor = false }: { programs: any[]; viewAsMentor?: boolean }) {
   if (programs.length === 0) {
     return (
       <div className="text-center py-12">
@@ -407,14 +416,14 @@ function ProgramGrid({ programs }: { programs: any[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {programs.map((program) => (
-        <ProgramCard key={program.id} program={program} />
+        <ProgramCard key={program.id} program={program} viewAsMentor={viewAsMentor} />
       ))}
     </div>
   )
 }
 
 // Program Card Component
-function ProgramCard({ program }: { program: any }) {
+function ProgramCard({ program, viewAsMentor = false }: { program: any; viewAsMentor?: boolean }) {
   const isTraining = program.type === "training"
   const isMentorship = program.type === "mentorship"
   const isGroup = program.type === "group"
@@ -435,7 +444,11 @@ function ProgramCard({ program }: { program: any }) {
             <GraduationCap className="h-12 w-12 text-white" />
           </div>
         )}
-        <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black">{program.format}</Badge>
+        {program.freeSessionsIncluded && program.freeSessionsIncluded > 0 && (
+          <Badge className="absolute top-3 left-3 bg-[#FFD500] text-black font-semibold">
+            Free Trial Available
+          </Badge>
+        )}
         <Badge className="absolute top-3 right-3 bg-green-500 text-white">{program.level}</Badge>
       </div>
       <CardContent className="p-6">
@@ -505,8 +518,11 @@ function ProgramCard({ program }: { program: any }) {
         <div className="flex justify-between items-center">
           <span className="font-bold text-lg">₦{(program.price * 1500).toLocaleString()}</span>
           <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
-            <Link href={`/programs/${program.id}`}>
-              {isTraining ? "View Course" : isMentorship ? "View Program" : "Join Cohort"}
+            <Link href={`/programs/${program.id}${viewAsMentor ? '?view=mentor' : ''}`}>
+              {viewAsMentor 
+                ? "Apply to Mentor" 
+                : (isTraining ? "View Course" : isMentorship ? "View Program" : "Join Cohort")
+              }
             </Link>
           </Button>
         </div>

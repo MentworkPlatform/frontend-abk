@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Star,
@@ -23,10 +24,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function ProgramDetailPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const programId = params.id as string
+  const viewAsMentor = searchParams.get("view") === "mentor"
+  const [showMentorModal, setShowMentorModal] = useState(false)
 
   // Mock program data - in real app, this would be fetched based on programId
   const program = {
@@ -51,6 +59,9 @@ export default function ProgramDetailPage() {
     language: "English",
     lastUpdated: "December 2023",
     certificateIncluded: true,
+    freeSessionsIncluded: 1,
+    sessions: 8,
+    mentorCompensation: "₦225,000/session",
     trainer: {
       id: "trainer-1",
       name: "Emily Rodriguez",
@@ -208,22 +219,32 @@ export default function ProgramDetailPage() {
   }
 
   const handleEnroll = () => {
-    // Navigate to join/enrollment page
-    window.location.href = `/programs/${programId}/join`
+    if (viewAsMentor) {
+      // Show mentor interest modal
+      setShowMentorModal(true)
+    } else {
+      // Navigate to join/enrollment page
+      window.location.href = `/programs/${programId}/join`
+    }
+  }
+
+  const handleMentorInterest = () => {
+    // In real app, this would submit mentor interest to backend
+    console.log("Mentor interest submitted for program:", programId)
+    setShowMentorModal(false)
+    // Could show success message or redirect to mentor dashboard
   }
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/programs">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Programs
-                </Link>
+              <Button variant="ghost" size="sm" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Programs
               </Button>
               <Link href="/">
                 <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
@@ -280,12 +301,12 @@ export default function ProgramDetailPage() {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
-                {/* What You'll Learn */}
+                {/* What You'll Learn / Teach */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-[#FFD500]" />
-                      What You'll Learn
+                      {viewAsMentor ? "What You'll Be Teaching" : "What You'll Learn"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -493,21 +514,42 @@ export default function ProgramDetailPage() {
             {/* Enrollment Card */}
             <Card className="sticky top-6">
               <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <div className="flex flex-col items-center gap-2 mb-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-3xl font-bold">₦{(program.price * 1500).toLocaleString()}</span>
-                      {program.originalPrice && (
-                        <span className="text-lg text-gray-500 line-through">₦{(program.originalPrice * 1500).toLocaleString()}</span>
-                      )}
-                    </div>
+                {!viewAsMentor && program.freeSessionsIncluded > 0 && (
+                  <div className="mb-4 p-3 bg-green-50 border-2 border-green-200 rounded-lg text-center">
+                    <Badge className="bg-[#FFD500] text-black font-semibold mb-2">
+                      Free Trial Available
+                    </Badge>
+                    <p className="text-sm text-green-800 font-medium">
+                      Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
-                </div>
+                )}
+
+                {!viewAsMentor && (
+                  <div className="text-center mb-6">
+                    <div className="flex flex-col items-center gap-2 mb-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-3xl font-bold">₦{(program.price * 1500).toLocaleString()}</span>
+                        {program.originalPrice && (
+                          <span className="text-lg text-gray-500 line-through">₦{(program.originalPrice * 1500).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
+                  </div>
+                )}
+
+                {viewAsMentor && (
+                  <div className="text-center mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Mentor Compensation</p>
+                    <p className="text-2xl font-bold text-gray-900">{program.mentorCompensation}</p>
+                    <p className="text-xs text-gray-500 mt-1">{program.sessions} sessions total</p>
+                  </div>
+                )}
 
                   <div className="space-y-4">
                     <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
-                      Enroll Now
+                      {viewAsMentor ? "Express Interest as Mentor" : "Enroll Now"}
                     </Button>
                   </div>
 
@@ -581,6 +623,61 @@ export default function ProgramDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Mentor Interest Modal */}
+      <Dialog open={showMentorModal} onOpenChange={setShowMentorModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Express Interest as Mentor</DialogTitle>
+            <DialogDescription>
+              Confirm your interest in mentoring for "{program.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="mentor-name">Full Name</Label>
+              <Input
+                id="mentor-name"
+                placeholder="Your full name"
+                defaultValue=""
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mentor-email">Email</Label>
+              <Input
+                id="mentor-email"
+                type="email"
+                placeholder="your.email@example.com"
+                defaultValue=""
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mentor-expertise">Relevant Expertise</Label>
+              <Input
+                id="mentor-expertise"
+                placeholder="e.g., 5 years in digital marketing"
+                defaultValue=""
+              />
+            </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>Next steps:</strong> The program facilitator will review your application and contact you within 2-3 business days.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMentorModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              onClick={handleMentorInterest}
+            >
+              Submit Interest
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

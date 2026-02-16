@@ -186,8 +186,8 @@ export default function JoinProgramPage() {
 
                     {enrollmentType === "full-program" && (
                       <>
-                        <div>
-                          <h3 className="text-lg font-bold mb-4">Payment Method</h3>
+                    <div>
+                      <h3 className="text-lg font-bold mb-4">Payment Method</h3>
                       <RadioGroup
                         value={paymentMethod}
                         onValueChange={setPaymentMethod}
@@ -281,43 +281,43 @@ export default function JoinProgramPage() {
                       </div>
                     )}
 
-                        <div className="flex items-center p-4 bg-[#FFFBEB] rounded-lg border border-[#FFD500]">
-                          <Lock className="h-5 w-5 text-[#FFD500] mr-3" />
-                          <p className="text-sm">
-                            Your payment information is secure. We use industry-standard encryption to protect your data.
-                          </p>
-                        </div>
+                    <div className="flex items-center p-4 bg-[#FFFBEB] rounded-lg border border-[#FFD500]">
+                      <Lock className="h-5 w-5 text-[#FFD500] mr-3" />
+                      <p className="text-sm">
+                        Your payment information is secure. We use industry-standard encryption to protect your data.
+                      </p>
+                    </div>
 
-                        <Button
-                          type="submit"
-                          className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                          disabled={isProcessing}
-                        >
-                          {isProcessing ? (
-                            <>
-                              <svg
-                                className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                              </svg>
-                              Processing...
-                            </>
-                          ) : (
+                    <Button
+                      type="submit"
+                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Processing...
+                        </>
+                      ) : (
                             `Pay ₦${(program.price * 1500).toLocaleString()} and Enroll`
                           )}
                         </Button>
@@ -380,8 +380,8 @@ export default function JoinProgramPage() {
                             </>
                           ) : (
                             "Start Free Trial - No Payment Required"
-                          )}
-                        </Button>
+                      )}
+                    </Button>
 
                         <p className="text-xs text-center text-gray-500">
                           You can upgrade to the full program at any time during or after the trial
@@ -440,21 +440,21 @@ export default function JoinProgramPage() {
 
                   {enrollmentType === "full-program" ? (
                     <>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Program Price</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Program Price</span>
                           <span>₦{(program.price * 1500).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-green-600">
-                          <span>Free Sessions</span>
-                          <span>{program.freeSessionsIncluded} included</span>
-                        </div>
-                      </div>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>Free Sessions</span>
+                      <span>{program.freeSessionsIncluded} included</span>
+                    </div>
+                  </div>
 
-                      <Separator />
+                  <Separator />
 
-                      <div className="flex justify-between font-bold">
-                        <span>Total</span>
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
                         <span>₦{(program.price * 1500).toLocaleString()}</span>
                       </div>
                     </>
@@ -476,7 +476,7 @@ export default function JoinProgramPage() {
                       <div className="flex justify-between font-bold">
                         <span>Total</span>
                         <span className="text-green-600">₦0</span>
-                      </div>
+                  </div>
 
                       <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="text-xs text-blue-800">

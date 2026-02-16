@@ -190,7 +190,7 @@ export default function TrainerOnboardingPage() {
     if (step === 5 && !selectedDemand && !formData.programTitle) {
       setStep(1);
     } else {
-      setStep((prev) => prev - 1);
+    setStep((prev) => prev - 1);
     }
     window.scrollTo(0, 0);
   };

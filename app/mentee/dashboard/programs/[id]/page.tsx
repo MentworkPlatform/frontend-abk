@@ -187,7 +187,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
         <Card className="border-none shadow-none bg-transparent">
           <CardContent className="space-y-3 p-0">
             <div className="flex items-center justify-between">
-              <Badge variant="secondary">{programData.focusArea}</Badge>
+                <Badge variant="secondary">{programData.focusArea}</Badge>
               <div className="text-right">
                 <div className="text-2xl font-semibold text-[#FFD500]">{programData.progress}%</div>
                 <p className="text-sm text-gray-600 font-medium">Overall Progress</p>
@@ -198,7 +198,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
         </Card>
 
         <div className="space-y-6 pt-6">
-          <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Topics Timeline */}
           <div className="lg:col-span-2">
             <Card>
@@ -367,9 +367,9 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                               <CardContent>
                                 {assessment.status === "completed" && assessment.score && (
                                   <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                      <Award className="h-4 w-4 text-yellow-500" />
-                                      <span className="font-semibold">{assessment.score}%</span>
+                                  <div className="flex items-center gap-2">
+                                    <Award className="h-4 w-4 text-yellow-500" />
+                                    <span className="font-semibold">{assessment.score}%</span>
                                     </div>
                                     <Button 
                                       size="sm" 
@@ -491,37 +491,37 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
                             <div className="space-y-4">
                               <h4 className="font-medium text-sm text-gray-700">Feedback from Mentor</h4>
                               {topic.feedback.map((feedback) => (
-                                <Card key={feedback.id}>
-                                  <CardHeader className="pb-3">
-                                    <div className="flex items-center gap-3">
-                                      <Avatar className="h-8 w-8">
-                                        <AvatarImage src="/placeholder-avatar.jpg" />
-                                        <AvatarFallback>
-                                          {feedback.from
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .join("")}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <div>
-                                        <p className="font-medium text-sm">{feedback.from}</p>
-                                        <div className="flex items-center gap-1">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`h-3 w-3 ${
-                                                i < feedback.rating ? "text-yellow-500 fill-current" : "text-gray-300"
-                                              }`}
-                                            />
-                                          ))}
-                                        </div>
+                              <Card key={feedback.id}>
+                                <CardHeader className="pb-3">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src="/placeholder-avatar.jpg" />
+                                      <AvatarFallback>
+                                        {feedback.from
+                                          .split(" ")
+                                          .map((n) => n[0])
+                                          .join("")}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-medium text-sm">{feedback.from}</p>
+                                      <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-3 w-3 ${
+                                              i < feedback.rating ? "text-yellow-500 fill-current" : "text-gray-300"
+                                            }`}
+                                          />
+                                        ))}
                                       </div>
                                     </div>
-                                  </CardHeader>
-                                  <CardContent>
-                                    <p className="text-sm text-gray-600">{feedback.comment}</p>
-                                  </CardContent>
-                                </Card>
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-sm text-gray-600">{feedback.comment}</p>
+                                </CardContent>
+                              </Card>
                               ))}
                             </div>
                           )}
@@ -540,7 +540,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
               </Card>
             )}
           </div>
-        </div>
+          </div>
         </div>
       </div>
     </div>

@@ -341,10 +341,10 @@ export default function ProgramManagementPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center gap-3 py-4">
             <Button variant="ghost" size="icon" className="h-9 w-9 -ml-2" asChild>
-              <Link href="/trainer/dashboard">
+                <Link href="/trainer/dashboard">
                 <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
+                </Link>
+              </Button>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex-1 min-w-0">
@@ -357,8 +357,8 @@ export default function ProgramManagementPage() {
                       {program.status}
                     </Badge>
                     <span className="text-sm text-gray-600 font-medium">
-                      {program.participants}/{program.maxParticipants} participants
-                    </span>
+                    {program.participants}/{program.maxParticipants} participants
+                  </span>
                   </div>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export default function ProgramManagementPage() {
             {selectedTopic ? (
               // Topic Detail View
               <div className="space-y-6">
-                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                   <Button variant="ghost" size="icon" className="h-9 w-9 -ml-2" onClick={() => setSelectedTopic(null)}>
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
@@ -833,8 +833,8 @@ export default function ProgramManagementPage() {
                           <Dialog open={showAssignMentorDialog} onOpenChange={setShowAssignMentorDialog}>
                             <DialogTrigger asChild>
                               <Button variant="outline" size="sm" className="mt-2 bg-transparent font-medium">
-                                Assign Mentor
-                              </Button>
+                            Assign Mentor
+                          </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
@@ -887,27 +887,27 @@ export default function ProgramManagementPage() {
                     </CardContent>
                   </Card>
 
-              {/* Assessments */}
-              <Card>
-                <CardHeader>
+                  {/* Assessments */}
+                  <Card>
+                    <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                    <Award className="h-5 w-5" />
-                    Assessments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedTopic.assessments.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedTopic.assessments.map((assessment) => (
-                        <div key={assessment.id} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
+                        <Award className="h-5 w-5" />
+                        Assessments
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedTopic.assessments.length > 0 ? (
+                        <div className="space-y-3">
+                          {selectedTopic.assessments.map((assessment) => (
+                            <div key={assessment.id} className="p-3 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
                             <h4 className="font-semibold text-gray-900">{assessment.title}</h4>
-                            <Badge variant="outline">{assessment.type}</Badge>
-                          </div>
+                                <Badge variant="outline">{assessment.type}</Badge>
+                              </div>
                           <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                            <span>{assessment.submissions} submissions</span>
-                            <span>Avg: {assessment.avgScore || "Not graded"}</span>
-                          </div>
+                                <span>{assessment.submissions} submissions</span>
+                                <span>Avg: {assessment.avgScore || "Not graded"}</span>
+                              </div>
                           {(assessment as any).link && typeof (assessment as any).link === "string" && (
                             <div className="mt-2">
                               <a
@@ -921,20 +921,20 @@ export default function ProgramManagementPage() {
                               </a>
                             </div>
                           )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Award className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>No assessments created</p>
-                      <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                        Create Assessment
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <Award className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p>No assessments created</p>
+                          <Button variant="outline" size="sm" className="mt-2 bg-transparent">
+                            Create Assessment
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Feedback Section */}
@@ -1080,15 +1080,15 @@ export default function ProgramManagementPage() {
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between gap-2">
-                                    <div>
+                                <div>
                                       <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{topic.title}</CardTitle>
                                       <p className="text-sm text-gray-600 mt-0.5">{topic.description}</p>
-                                    </div>
+                                </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
-                                      <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
+                                <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
                                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <Eye className="h-4 w-4" />
-                                      </Button>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
                                     </div>
                                   </div>
                                 </div>
@@ -1098,13 +1098,13 @@ export default function ProgramManagementPage() {
 
                           <CardContent className="pt-0 space-y-4">
                             {/* Progress Bar */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-sm">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600 font-medium">Progress</span>
                                 <span className="font-semibold text-gray-900">{topic.completionRate}%</span>
+                                </div>
+                                <Progress value={topic.completionRate} className="h-2" />
                               </div>
-                              <Progress value={topic.completionRate} className="h-2" />
-                            </div>
 
                             {/* Metrics Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

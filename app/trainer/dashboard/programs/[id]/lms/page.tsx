@@ -575,37 +575,37 @@ export default function ProgramLMSPage() {
 
                         <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                           <p className="text-sm text-blue-800 font-medium mb-3">
-                            ℹ️ Session confirmations are provided by students after the session to verify attendance
+                            Session confirmations are provided by students after the session to verify attendance
                           </p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* Trainer Confirmation */}
+                          {/* Trainer Confirmation */}
                             <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                              <div className="flex items-center gap-2">
-                                <UserCheck className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm font-medium">Trainer Confirmation</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {session.trainerConfirmed ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <XCircle className="h-4 w-4 text-orange-500" />
-                                )}
-                                <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Awaiting"}</span>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <UserCheck className="h-4 w-4 text-gray-500" />
+                              <span className="text-sm font-medium">Trainer Confirmation</span>
                             </div>
-
-                            {/* Mentor Confirmation */}
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                              <div className="flex items-center gap-2">
-                                <UserCheck className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm font-medium">Mentor Confirmation</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {session.mentorConfirmed ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
+                            <div className="flex items-center gap-2">
+                              {session.trainerConfirmed ? (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : (
                                   <XCircle className="h-4 w-4 text-orange-500" />
-                                )}
+                              )}
+                                <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Awaiting"}</span>
+                            </div>
+                          </div>
+
+                          {/* Mentor Confirmation */}
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                            <div className="flex items-center gap-2">
+                              <UserCheck className="h-4 w-4 text-gray-500" />
+                              <span className="text-sm font-medium">Mentor Confirmation</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {session.mentorConfirmed ? (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : (
+                                  <XCircle className="h-4 w-4 text-orange-500" />
+                              )}
                                 <span className="text-sm">{session.mentorConfirmed ? "Confirmed" : "Awaiting"}</span>
                               </div>
                             </div>
@@ -616,9 +616,9 @@ export default function ProgramLMSPage() {
                         <div className="mb-4 p-2 bg-blue-50 rounded text-sm text-blue-700">
                           {session.trainerConfirmed && session.mentorConfirmed
                             ? session.paymentStatus === "paid"
-                              ? "✅ Payment processed successfully"
-                              : "⏳ Payment will be processed within 24 hours"
-                            : "⚠️ Both trainer and mentor confirmation required for payment processing"}
+                              ? "Payment processed successfully"
+                              : "Payment will be processed within 24 hours"
+                            : "Both trainer and mentor confirmation required for payment processing"}
                         </div>
 
                         <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
@@ -793,8 +793,8 @@ export default function ProgramLMSPage() {
                       <Dialog open={showAssignMentorDialog} onOpenChange={setShowAssignMentorDialog}>
                         <DialogTrigger asChild>
                           <Button variant="outline" size="sm" className="mt-2 bg-transparent font-medium">
-                            Assign Mentor
-                          </Button>
+                        Assign Mentor
+                      </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
@@ -875,7 +875,7 @@ export default function ProgramLMSPage() {
                           {/* Student Submitted Links */}
                           <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
                             <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                              📎 Student Submitted Links
+                              Student Submitted Links
                             </p>
                             <div className="space-y-2">
                               {/* Example student submissions */}
@@ -945,8 +945,8 @@ export default function ProgramLMSPage() {
                       <Dialog open={showAssessmentDialog} onOpenChange={setShowAssessmentDialog}>
                         <DialogTrigger asChild>
                           <Button variant="outline" size="sm" className="mt-2 bg-transparent font-medium">
-                            Create Assessment
-                          </Button>
+                        Create Assessment
+                      </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
@@ -1252,15 +1252,15 @@ export default function ProgramLMSPage() {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-start justify-between gap-2">
-                                <div>
+                            <div>
                                   <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{topic.title}</CardTitle>
                                   <p className="text-sm text-gray-600 mt-0.5">{topic.description}</p>
-                                </div>
+                            </div>
                                 <div className="flex items-center gap-2 flex-shrink-0">
-                                  <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
+                            <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
                                   <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
+                              <Eye className="h-4 w-4" />
+                            </Button>
                                 </div>
                               </div>
                             </div>
@@ -1270,13 +1270,13 @@ export default function ProgramLMSPage() {
 
                       <CardContent className="pt-0 space-y-4">
                         {/* Progress Bar */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600 font-medium">Progress</span>
                             <span className="font-semibold text-gray-900">{topic.completionRate}%</span>
+                            </div>
+                            <Progress value={topic.completionRate} className="h-2" />
                           </div>
-                          <Progress value={topic.completionRate} className="h-2" />
-                        </div>
 
                         {/* Metrics Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1311,10 +1311,10 @@ export default function ProgramLMSPage() {
                               <p className="text-sm font-semibold text-gray-900">
                                 {topic.sessions && topic.sessions.length > 0
                                   ? topic.sessions.every((s) => s.paymentStatus === "paid")
-                                    ? "✅ Paid"
+                                    ? "Paid"
                                     : topic.sessions.some((s) => s.paymentStatus === "pending")
-                                      ? "⏳ Pending"
-                                      : "📅 Scheduled"
+                                      ? "Pending"
+                                      : "Scheduled"
                                   : "N/A"}
                               </p>
                             </div>

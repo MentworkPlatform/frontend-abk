@@ -306,7 +306,7 @@ export default function ProgramsPage() {
 
         {/* All Programs */}
         <ProgramGrid programs={filteredPrograms} viewAsMentor={viewAsMentor} />
-        </div>
+            </div>
 
         {/* Featured Training Programs Section */}
         <div className="mt-16 mb-12">
@@ -319,7 +319,7 @@ export default function ProgramsPage() {
             {trainingPrograms.slice(0, 3).map((program) => (
               <Card key={program.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <div className="h-48 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
                     <Play className="h-12 w-12 text-white" />
                   </div>
                   {program.freeSessionsIncluded && program.freeSessionsIncluded > 0 && (
@@ -432,15 +432,15 @@ function ProgramCard({ program, viewAsMentor = false }: { program: any; viewAsMe
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
         {isTraining ? (
-          <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="h-48 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
             <Play className="h-12 w-12 text-white" />
           </div>
         ) : isMentorship ? (
-          <div className="h-48 bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+          <div className="h-48 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
             <Users className="h-12 w-12 text-white" />
           </div>
         ) : (
-          <div className="h-48 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+          <div className="h-48 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
             <GraduationCap className="h-12 w-12 text-white" />
           </div>
         )}

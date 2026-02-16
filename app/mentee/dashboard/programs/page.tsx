@@ -108,7 +108,7 @@ export default function ProgramsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+              </Link>
           ))}
         </div>
 

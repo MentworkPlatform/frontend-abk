@@ -592,14 +592,14 @@ function Step1BasicInfo({
           <CardDescription>Tell us about your training program</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Program Title *</Label>
-            <Input
-              id="title"
-              placeholder="e.g., Digital Marketing Bootcamp"
-              value={programData.title}
-              onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="title">Program Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Digital Marketing Bootcamp"
+                value={programData.title}
+                onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
+              />
           </div>
 
           <div className="space-y-2">
@@ -711,7 +711,7 @@ function Step2WhoIsThisFor({
           <CardDescription>Describe your program and define your target audience</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
+            <div className="space-y-2">
             <Label>Sector *</Label>
             <MultiSelect
               options={sectorsOptions}

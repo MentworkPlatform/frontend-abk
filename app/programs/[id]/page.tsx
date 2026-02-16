@@ -236,245 +236,255 @@ export default function ProgramDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => router.back()}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Programs
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - Dark Background */}
+      <section className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 text-white relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 right-20 w-64 h-64 bg-yellow-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-6 py-12 relative z-10">
+          {/* Back button and category */}
+          <div className="flex items-center gap-3 mb-8">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => router.back()}
+              className="text-white hover:bg-white/10 gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <Badge className="bg-[#FFD500] text-black font-medium hover:bg-[#FFD500]">
+              {program.category}
+            </Badge>
+          </div>
+
+          {/* Title and Description */}
+          <div className="max-w-4xl mb-8">
+            {!viewAsMentor && program.freeSessionsIncluded > 0 && (
+              <div className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full mb-4">
+                <span className="text-sm font-medium">
+                  Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing
+                </span>
+              </div>
+            )}
+            <h1 className="text-5xl font-bold mb-6 leading-tight">
+              {program.title}
+            </h1>
+            <p className="text-xl text-gray-200 leading-relaxed">
+              {program.description}
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="mb-12">
+            <div className="flex flex-wrap gap-4 mb-3">
+              <Button 
+                size="lg"
+                className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-semibold text-lg px-8"
+                onClick={handleEnroll}
+              >
+                {viewAsMentor ? `Express Interest • ${program.mentorCompensation}` : `Enroll Now • $${program.price}`}
               </Button>
-              <Link href="/">
-                <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
-              </Link>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="border-white bg-white text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8"
+              >
+                Watch Trailer
+              </Button>
             </div>
+            {!viewAsMentor && (
+              <p className="text-gray-300 text-sm">
+                One-time payment • Lifetime access • {program.freeSessionsIncluded > 0 && 'Free trial included'}
+              </p>
+            )}
+          </div>
+
+          {/* Info Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Clock className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Duration</p>
+                <p className="text-lg font-bold text-white">{program.duration}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Target className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Level</p>
+                <p className="text-lg font-bold text-white">{program.level}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Award className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Price</p>
+                <p className="text-lg font-bold text-white">${program.price}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Globe className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Language</p>
+                <p className="text-lg font-bold text-white">{program.language}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Users className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Students</p>
+                <p className="text-lg font-bold text-white">{program.students.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6 text-center">
+                <Star className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
+                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Rating</p>
+                <p className="text-lg font-bold text-white">{program.rating}</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
+      {/* Main Content Section */}
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Main Content - Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Program Header */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Badge variant="outline">{program.category}</Badge>
-                <Badge className="bg-green-100 text-green-800">{program.level}</Badge>
-                {program.format !== "Self-paced" && (
-                  <Badge className="bg-blue-100 text-blue-800">{program.format}</Badge>
-                )}
-              </div>
-              <h1 className="text-3xl font-bold mb-4">{program.title}</h1>
-              <p className="text-lg text-gray-600 mb-6">{program.description}</p>
 
-              <div className="flex items-center gap-6 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-[#FFD500] text-[#FFD500]" />
-                  <span className="font-medium">{program.rating}</span>
-                  <span>({program.reviews.toLocaleString()} reviews)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>{program.students.toLocaleString()} students</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{program.totalHours} hours</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Globe className="h-4 w-4" />
-                  <span>{program.language}</span>
+            {/* About This Course */}
+            <section>
+              <h2 className="text-3xl font-bold mb-6">About This Course</h2>
+              <p className="text-gray-700 text-lg leading-relaxed mb-8">{program.longDescription}</p>
+
+              {/* What You'll Learn */}
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-6">
+                  {viewAsMentor ? "What You'll Be Teaching" : "What You'll Learn"}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {program.learningOutcomes.map((outcome, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                      <span className="text-gray-700">{outcome}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* Tabs */}
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-                <TabsTrigger value="instructor">Mentors</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              {/* Mentor Compensation (Mentor View Only) */}
+              {viewAsMentor && (
+                <div className="border-t border-gray-200 pt-8">
+                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
+                    <h3 className="text-xl font-bold mb-2">💰 Mentor Compensation</h3>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">{program.mentorCompensation}</p>
+                    <p className="text-gray-600">
+                      {program.sessions} sessions total • Paid per session upon completion
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* What's Included */}
+              <div className="border-t border-gray-200 pt-8">
+                <h3 className="text-2xl font-bold mb-6">This course includes:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {program.includes.map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-[#FFD500] mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{item}</span>
+                </div>
+                  ))}
+                  {!viewAsMentor && program.freeSessionsIncluded > 0 && (
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 font-semibold">
+                        {program.freeSessionsIncluded} free trial session{program.freeSessionsIncluded > 1 ? 's' : ''} before committing
+                      </span>
+                </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Tabs for detailed content */}
+            <Tabs defaultValue="curriculum" className="w-full">
+              <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+                <TabsTrigger 
+                  value="curriculum"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD500] data-[state=active]:bg-transparent"
+                >
+                  Curriculum
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD500] data-[state=active]:bg-transparent"
+                >
+                  Reviews
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
-                {/* What You'll Learn / Teach */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-[#FFD500]" />
-                      {viewAsMentor ? "What You'll Be Teaching" : "What You'll Learn"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {program.learningOutcomes.map((outcome, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{outcome}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Skills You'll Gain */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Skills You'll Gain</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {program.skills.map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Course Description */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>About This Course</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 leading-relaxed">{program.longDescription}</p>
-                  </CardContent>
-                </Card>
-
-                {/* Prerequisites */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Prerequisites</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {program.prerequisites.map((prereq, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{prereq}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="curriculum" className="space-y-4">
+              <TabsContent value="curriculum" className="space-y-4 mt-6">
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-2">Course Curriculum</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-lg">
                     {program.modules} modules • {program.totalHours} hours total length
                   </p>
                 </div>
 
+                <div className="space-y-3">
                 {program.curriculum.map((module, index) => (
-                  <Card key={module.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-lg">
+                    <div key={module.id} className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-lg mb-1">
                             Module {index + 1}: {module.title}
-                          </CardTitle>
-                          <CardDescription>
+                          </h4>
+                          <p className="text-sm text-gray-600">
                             {module.lessons} lessons • {module.duration}
-                          </CardDescription>
+                          </p>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <Play className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" className="text-gray-400">
+                          <Play className="h-5 w-5" />
                         </Button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
+                      <ul className="space-y-2 mt-4">
                         {module.topics.map((topic, topicIndex) => (
-                          <li key={topicIndex} className="flex items-center gap-2 text-sm">
-                            <Play className="h-3 w-3 text-gray-400" />
+                          <li key={topicIndex} className="flex items-center gap-3 text-sm text-gray-700">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                             <span>{topic}</span>
                           </li>
                         ))}
                       </ul>
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-
-              <TabsContent value="instructor" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-20 w-20">
-                        <AvatarImage src={program.trainer.image || "/placeholder.svg"} alt={program.trainer.name} />
-                        <AvatarFallback>
-                          {program.trainer.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">{program.trainer.name}</CardTitle>
-                        <CardDescription className="text-base">{program.trainer.title}</CardDescription>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-[#FFD500] text-[#FFD500]" />
-                            <span>{program.trainer.rating} rating</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span>{program.trainer.totalStudents.toLocaleString()} students</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <BookOpen className="h-4 w-4" />
-                            <span>{program.trainer.totalCourses} courses</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 mb-4">{program.trainer.bio}</p>
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="font-medium mb-2">Expertise</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {program.trainer.expertise.map((skill) => (
-                            <Badge key={skill} variant="outline">
-                              {skill}
-                            </Badge>
                           ))}
                         </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
-              <TabsContent value="reviews" className="space-y-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold">Student Reviews</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-5 w-5 fill-[#FFD500] text-[#FFD500]" />
-                        <span className="font-medium text-lg">{program.rating}</span>
-                      </div>
-                      <span className="text-gray-600">({program.reviews.toLocaleString()} reviews)</span>
-                    </div>
+              <TabsContent value="reviews" className="mt-6">
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Star className="h-6 w-6 fill-[#FFD500] text-[#FFD500]" />
+                    <span className="font-bold text-3xl">{program.rating}</span>
                   </div>
+                  <p className="text-gray-600">Based on {program.reviews.toLocaleString()} reviews</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {program.reviewList.map((review) => (
-                    <Card key={review.id}>
-                      <CardContent className="p-6">
+                    <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
                         <div className="flex items-start gap-4">
-                          <Avatar className="h-10 w-10">
+                        <Avatar className="h-12 w-12">
                             <AvatarImage src={review.avatar || "/placeholder.svg"} alt={review.student} />
                             <AvatarFallback>
                               {review.student
@@ -485,10 +495,10 @@ export default function ProgramDetailPage() {
                           </Avatar>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium">{review.student}</h4>
+                            <h4 className="font-bold">{review.student}</h4>
                               <span className="text-sm text-gray-500">{review.date}</span>
                             </div>
-                            <div className="flex items-center gap-1 mb-2">
+                          <div className="flex items-center gap-1 mb-3">
                               {[...Array(5)].map((_, i) => (
                                 <Star
                                   key={i}
@@ -498,122 +508,111 @@ export default function ProgramDetailPage() {
                                 />
                               ))}
                             </div>
-                            <p className="text-gray-700">{review.comment}</p>
-                          </div>
+                          <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </TabsContent>
             </Tabs>
           </div>
 
-          {/* Sidebar */}
+          {/* Right Sidebar */}
           <div className="space-y-6">
-            {/* Enrollment Card */}
-            <Card className="sticky top-6">
+            {/* Enrolled Students Card */}
+            <Card className="border-t-4 border-t-[#FFD500]">
+              <CardHeader className="border-b bg-gradient-to-r from-yellow-50 to-white">
+                <CardTitle className="text-xl">Enrolled Students</CardTitle>
+              </CardHeader>
               <CardContent className="p-6">
-                {!viewAsMentor && program.freeSessionsIncluded > 0 && (
-                  <div className="mb-4 p-3 bg-green-50 border-2 border-green-200 rounded-lg text-center">
-                    <Badge className="bg-[#FFD500] text-black font-semibold mb-2">
-                      Free Trial Available
-                    </Badge>
-                    <p className="text-sm text-green-800 font-medium">
-                      Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing
-                    </p>
-                  </div>
-                )}
-
-                {!viewAsMentor && (
-                  <div className="text-center mb-6">
-                    <div className="flex flex-col items-center gap-2 mb-2">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-3xl font-bold">₦{(program.price * 1500).toLocaleString()}</span>
-                        {program.originalPrice && (
-                          <span className="text-lg text-gray-500 line-through">₦{(program.originalPrice * 1500).toLocaleString()}</span>
-                        )}
-                      </div>
+                <div className="flex items-center gap-2 mb-4">
+                  {/* Student avatars */}
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Avatar key={i} className="h-10 w-10 border-2 border-white">
+                        <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${i}`} />
+                        <AvatarFallback>{i}</AvatarFallback>
+                      </Avatar>
+                    ))}
+                    <div className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
+                      <span className="text-xs font-medium text-gray-600">+{program.students - 5}</span>
                     </div>
-                    <p className="text-sm text-gray-600">One-time payment • Lifetime access</p>
                   </div>
-                )}
+                </div>
+                <p className="text-gray-700 text-sm">
+                  Join <span className="font-bold text-black">{program.students.toLocaleString()}</span> other students in this transformative journey.
+                </p>
+              </CardContent>
+            </Card>
 
-                {viewAsMentor && (
-                  <div className="text-center mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">Mentor Compensation</p>
-                    <p className="text-2xl font-bold text-gray-900">{program.mentorCompensation}</p>
-                    <p className="text-xs text-gray-500 mt-1">{program.sessions} sessions total</p>
+            {/* Instructor Card */}
+            <Card>
+              <CardHeader className="border-b">
+                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Instructor</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center text-center mb-6">
+                  <Avatar className="h-24 w-24 mb-4">
+                    <AvatarImage src={program.trainer.image || "/placeholder.svg"} alt={program.trainer.name} />
+                    <AvatarFallback className="text-2xl">
+                      {program.trainer.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-bold text-xl mb-1">{program.trainer.name}</h3>
+                  <p className="text-gray-600 mb-4">{program.trainer.title}</p>
+                  
+                  {/* Stats */}
+                  <div className="flex items-center justify-center gap-4 text-xs text-gray-600 mb-4 w-full">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5 fill-[#FFD500] text-[#FFD500]" />
+                      <span className="font-medium">{program.trainer.rating}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" />
+                      <span>{program.trainer.totalStudents.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>{program.trainer.totalCourses}</span>
+                    </div>
                   </div>
-                )}
 
-                  <div className="space-y-4">
-                    <Button className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]" onClick={handleEnroll}>
-                      {viewAsMentor ? "Express Interest as Mentor" : "Enroll Now"}
+                  <Button className="w-full bg-black text-white hover:bg-gray-800 mb-4">
+                    View Profile
                     </Button>
                   </div>
 
-                <Separator className="my-6" />
-
-                <div className="space-y-4">
-                  <h4 className="font-medium">This course includes:</h4>
-                  <ul className="space-y-2">
-                    {program.includes.map((item, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Bio */}
+                <div className="text-left mb-4">
+                  <p className="text-sm text-gray-700 leading-relaxed">{program.trainer.bio}</p>
                 </div>
 
-                <Separator className="my-6" />
-
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-center justify-between">
-                    <span>Duration:</span>
-                    <span className="font-medium">{program.duration}</span>
+                {/* Expertise */}
+                <div className="text-left">
+                  <h4 className="font-bold text-sm mb-3">Expertise</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {program.trainer.expertise.map((skill) => (
+                      <Badge key={skill} variant="secondary" className="text-xs px-2 py-1">
+                        {skill}
+                      </Badge>
+                    ))}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span>Total hours:</span>
-                    <span className="font-medium">{program.totalHours} hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Modules:</span>
-                    <span className="font-medium">{program.modules}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Language:</span>
-                    <span className="font-medium">{program.language}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Last updated:</span>
-                    <span className="font-medium">{program.lastUpdated}</span>
-                  </div>
-                  {program.certificateIncluded && (
-                    <div className="flex items-center justify-between">
-                      <span>Certificate:</span>
-                      <div className="flex items-center gap-1">
-                        <Award className="h-4 w-4 text-[#FFD500]" />
-                        <span className="font-medium">Included</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Share Card */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Share this course</CardTitle>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="p-4">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                  <Button variant="outline" size="sm" className="flex-1">
                     Share
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                  <Button variant="outline" size="sm" className="flex-1">
                     <Download className="h-4 w-4 mr-2" />
                     Save
                   </Button>

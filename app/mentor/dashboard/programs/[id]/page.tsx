@@ -357,7 +357,7 @@ export default function MentorProgramDashboard({ params }: Props) {
                           <p className="text-xs text-gray-500 font-medium">Earned</p>
                           <p className="text-sm font-semibold text-gray-900">
                             ₦{(topic.sessions
-                              .filter((s) => s.paymentStatus === "paid")
+                            .filter((s) => s.paymentStatus === "paid")
                               .reduce((sum, s) => sum + s.amount, 0) * 1500).toLocaleString()}
                           </p>
                         </div>

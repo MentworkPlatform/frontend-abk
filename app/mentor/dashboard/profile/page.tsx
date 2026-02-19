@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload } from "lucide-react"
+import { Upload, Target, TrendingUp } from "lucide-react"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SECTORS, SKILLS_CAPABILITIES } from "@/lib/constants/onboarding"
@@ -15,6 +15,8 @@ import { SECTORS, SKILLS_CAPABILITIES } from "@/lib/constants/onboarding"
 export default function MentorProfilePage() {
   const [selectedSector, setSelectedSector] = useState("")
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  const [revenueGoal, setRevenueGoal] = useState("")
+  const [impactGoal, setImpactGoal] = useState("")
   return (
     <div className="space-y-6">
       <div>
@@ -102,6 +104,52 @@ export default function MentorProfilePage() {
               onSelectionChange={setSelectedSkills}
               placeholder="Select your skills"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Goals
+          </CardTitle>
+          <CardDescription>Set your revenue and impact goals</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="revenue-goal" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Revenue Goal
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₦</span>
+                <Input
+                  id="revenue-goal"
+                  type="number"
+                  value={revenueGoal}
+                  onChange={(e) => setRevenueGoal(e.target.value)}
+                  placeholder="0"
+                  className="pl-8"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">How much revenue do you plan on making?</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="impact-goal" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Impact Goal
+              </Label>
+              <Input
+                id="impact-goal"
+                type="number"
+                value={impactGoal}
+                onChange={(e) => setImpactGoal(e.target.value)}
+                placeholder="0"
+              />
+              <p className="text-xs text-muted-foreground">How many people do you want to train?</p>
+            </div>
           </div>
         </CardContent>
       </Card>

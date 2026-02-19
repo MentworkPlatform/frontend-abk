@@ -639,7 +639,7 @@ export default function TrainerOnboardingPage() {
                       <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => router.push("/trainer/dashboard/profile")}
+                        onClick={() => router.push("/trainer/profile")}
                       >
                         Go to Profile
                       </Button>

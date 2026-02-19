@@ -36,8 +36,8 @@ export default function TrainerLayout({
       />
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 overflow-y-auto h-[calc(100vh-64px)] lg:h-screen bg-gray-50">
-        <div className="w-full min-w-0">{children}</div>
+      <main className="flex-1 min-w-0 overflow-hidden h-[calc(100vh-64px)] lg:h-screen bg-gray-50">
+        <div className="w-full min-w-0 h-full overflow-y-auto md:p-8 p-4 pt-16 md:pt-8">{children}</div>
       </main>
     </div>
   );

@@ -202,7 +202,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 bg-gray-50/50">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Module Title *</Label>
@@ -210,6 +210,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                     placeholder="e.g., Introduction to Digital Marketing"
                     value={module.title}
                     onChange={(e) => updateModule(module.id, { title: e.target.value })}
+                    className="bg-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -221,6 +222,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                     onChange={(e) =>
                       updateModule(module.id, { duration: (Number.parseFloat(e.target.value) || 0) * 60 })
                     }
+                    className="bg-white"
                   />
                 </div>
               </div>
@@ -232,6 +234,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                   value={module.description}
                   onChange={(e) => updateModule(module.id, { description: e.target.value })}
                   rows={2}
+                  className="bg-white"
                 />
               </div>
 
@@ -244,6 +247,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                       placeholder={`Learning objective ${index + 1}`}
                       value={objective}
                       onChange={(e) => updateLearningObjective(module.id, index, e.target.value)}
+                      className="bg-white"
                     />
                     {module.learningObjectives.length > 1 && (
                       <Button
@@ -323,7 +327,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 placeholder="e.g., SEO Fundamentals"
                                 value={topic.title}
                                 onChange={(e) => updateTopic(module.id, topic.id, { title: e.target.value })}
-                                className="h-8 text-sm"
+                                className="h-8 text-sm bg-white"
                               />
                             </div>
                             <div className="space-y-1">
@@ -335,7 +339,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 onChange={(e) =>
                                   updateTopic(module.id, topic.id, { duration: Number.parseInt(e.target.value) || 60 })
                                 }
-                                className="h-8 text-sm"
+                                className="h-8 text-sm bg-white"
                               />
                             </div>
                             <div className="space-y-1">
@@ -344,7 +348,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                                 value={topic.type}
                                 onValueChange={(value) => updateTopic(module.id, topic.id, { type: value as any })}
                               >
-                                <SelectTrigger className="h-8 text-sm">
+                                <SelectTrigger className="h-8 text-sm bg-white">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -367,7 +371,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                               value={topic.description}
                               onChange={(e) => updateTopic(module.id, topic.id, { description: e.target.value })}
                               rows={2}
-                              className="text-sm"
+                              className="text-sm bg-white"
                             />
                           </div>
 

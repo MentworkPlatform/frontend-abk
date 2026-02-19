@@ -15,6 +15,7 @@ import {
   Download,
   Globe,
   Target,
+  Share2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +28,7 @@ import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ProgramDetailPage() {
   const params = useParams()
@@ -35,11 +37,13 @@ export default function ProgramDetailPage() {
   const programId = params.id as string
   const viewAsMentor = searchParams.get("view") === "mentor"
   const [showMentorModal, setShowMentorModal] = useState(false)
+  const { toast } = useToast()
 
   // Mock program data - in real app, this would be fetched based on programId
   const program = {
     id: programId,
     title: "Complete Digital Marketing Bootcamp",
+    tagline: "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp",
     description:
       "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp. Learn from industry experts and build real-world campaigns.",
     longDescription:
@@ -49,8 +53,8 @@ export default function ProgramDetailPage() {
     level: "Beginner",
     format: "Self-paced",
     duration: "12 weeks",
-    price: 299,
-    originalPrice: 399,
+    price: 299000,
+    originalPrice: 399000,
     rating: 4.7,
     reviews: 1247,
     students: 2847,
@@ -216,6 +220,35 @@ export default function ProgramDetailPage() {
           "Great comprehensive course. Emily knows her stuff and explains complex concepts in an easy-to-understand way. The only thing I'd like to see is more advanced topics.",
       },
     ],
+    mentors: [
+      {
+        id: "mentor-1",
+        name: "David Okonkwo",
+        title: "Marketing Strategy Consultant",
+        bio: "David specializes in helping startups build effective marketing strategies.",
+        image: "/placeholder.svg?height=80&width=80",
+        rating: 4.9,
+        expertise: ["Strategy", "Growth Marketing", "Brand Development"],
+      },
+      {
+        id: "mentor-2",
+        name: "Amina Bello",
+        title: "Social Media Expert",
+        bio: "Amina has managed social media campaigns for leading Nigerian brands.",
+        image: "/placeholder.svg?height=80&width=80",
+        rating: 4.7,
+        expertise: ["Social Media", "Content Creation", "Community Building"],
+      },
+      {
+        id: "mentor-3",
+        name: "Chidi Eze",
+        title: "SEO Specialist",
+        bio: "Chidi has over 7 years of experience in search engine optimization.",
+        image: "/placeholder.svg?height=80&width=80",
+        rating: 4.8,
+        expertise: ["SEO", "Technical SEO", "Analytics"],
+      },
+    ],
   }
 
   const handleEnroll = () => {
@@ -225,6 +258,37 @@ export default function ProgramDetailPage() {
     } else {
       // Navigate to join/enrollment page
       window.location.href = `/programs/${programId}/join`
+    }
+  }
+
+  const handleShare = async () => {
+    const shareData = {
+      title: program.title,
+      text: `Check out this program: ${program.title}`,
+      url: window.location.href,
+    }
+
+    try {
+      // Check if Web Share API is available (mobile devices)
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: Copy link to clipboard
+        await navigator.clipboard.writeText(window.location.href)
+        toast({
+          title: "Link copied!",
+          description: "Program link has been copied to clipboard",
+        })
+      }
+    } catch (error) {
+      // User cancelled share or clipboard failed
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast({
+          title: "Share failed",
+          description: "Unable to share. Please try again.",
+          variant: "destructive",
+        })
+      }
     }
   }
 
@@ -275,7 +339,7 @@ export default function ProgramDetailPage() {
               {program.title}
             </h1>
             <p className="text-xl text-gray-200 leading-relaxed">
-              {program.description}
+              {program.tagline || program.description}
             </p>
           </div>
 
@@ -287,14 +351,16 @@ export default function ProgramDetailPage() {
                 className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-semibold text-lg px-8"
                 onClick={handleEnroll}
               >
-                {viewAsMentor ? `Express Interest • ${program.mentorCompensation}` : `Enroll Now • $${program.price}`}
+                {viewAsMentor ? `Express Interest • ${program.mentorCompensation}` : `Enroll Now • ₦${program.price.toLocaleString()}`}
               </Button>
               <Button 
                 size="lg"
                 variant="outline"
                 className="border-white bg-white text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8"
+                onClick={handleShare}
               >
-                Watch Trailer
+                <Share2 className="h-5 w-5 mr-2" />
+                Share
               </Button>
             </div>
             {!viewAsMentor && (
@@ -305,7 +371,7 @@ export default function ProgramDetailPage() {
           </div>
 
           {/* Info Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-6 text-center">
                 <Clock className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
@@ -326,23 +392,7 @@ export default function ProgramDetailPage() {
               <CardContent className="p-6 text-center">
                 <Award className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
                 <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Price</p>
-                <p className="text-lg font-bold text-white">${program.price}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Globe className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Language</p>
-                <p className="text-lg font-bold text-white">{program.language}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Users className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Students</p>
-                <p className="text-lg font-bold text-white">{program.students.toLocaleString()}</p>
+                <p className="text-lg font-bold text-white">₦{program.price.toLocaleString()}</p>
               </CardContent>
             </Card>
 
@@ -363,9 +413,9 @@ export default function ProgramDetailPage() {
           {/* Main Content - Left Column */}
           <div className="lg:col-span-2 space-y-8">
 
-            {/* About This Course */}
+            {/* About This Program */}
             <section>
-              <h2 className="text-3xl font-bold mb-6">About This Course</h2>
+              <h2 className="text-3xl font-bold mb-6">About This Program</h2>
               <p className="text-gray-700 text-lg leading-relaxed mb-8">{program.longDescription}</p>
 
               {/* What You'll Learn */}
@@ -396,24 +446,16 @@ export default function ProgramDetailPage() {
                 </div>
               )}
 
-              {/* What's Included */}
+              {/* Prerequisites */}
               <div className="border-t border-gray-200 pt-8">
-                <h3 className="text-2xl font-bold mb-6">This course includes:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {program.includes.map((item, index) => (
+                <h3 className="text-2xl font-bold mb-6">Prerequisites:</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {program.prerequisites.map((item, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-[#FFD500] mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{item}</span>
                 </div>
                   ))}
-                  {!viewAsMentor && program.freeSessionsIncluded > 0 && (
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 font-semibold">
-                        {program.freeSessionsIncluded} free trial session{program.freeSessionsIncluded > 1 ? 's' : ''} before committing
-                      </span>
-                </div>
-                  )}
                 </div>
               </div>
             </section>
@@ -520,36 +562,10 @@ export default function ProgramDetailPage() {
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-            {/* Enrolled Students Card */}
-            <Card className="border-t-4 border-t-[#FFD500]">
-              <CardHeader className="border-b bg-gradient-to-r from-yellow-50 to-white">
-                <CardTitle className="text-xl">Enrolled Students</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  {/* Student avatars */}
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Avatar key={i} className="h-10 w-10 border-2 border-white">
-                        <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${i}`} />
-                        <AvatarFallback>{i}</AvatarFallback>
-                      </Avatar>
-                    ))}
-                    <div className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-600">+{program.students - 5}</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm">
-                  Join <span className="font-bold text-black">{program.students.toLocaleString()}</span> other students in this transformative journey.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Instructor Card */}
+            {/* Trainer Card */}
             <Card>
               <CardHeader className="border-b">
-                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Instructor</CardTitle>
+                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Trainer</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center mb-6">
@@ -580,11 +596,7 @@ export default function ProgramDetailPage() {
                       <span>{program.trainer.totalCourses}</span>
                     </div>
                   </div>
-
-                  <Button className="w-full bg-black text-white hover:bg-gray-800 mb-4">
-                    View Profile
-                    </Button>
-                  </div>
+                </div>
 
                 {/* Bio */}
                 <div className="text-left mb-4">
@@ -605,18 +617,43 @@ export default function ProgramDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Share Card */}
+            {/* Mentors Card */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Share
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Download className="h-4 w-4 mr-2" />
-                    Save
-                  </Button>
-                </div>
+              <CardHeader className="border-b">
+                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Program Mentors</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                {program.mentors.map((mentor) => (
+                  <div key={mentor.id} className="flex gap-4">
+                    <Avatar className="h-16 w-16 flex-shrink-0">
+                      <AvatarImage src={mentor.image} alt={mentor.name} />
+                      <AvatarFallback>
+                        {mentor.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-base mb-0.5">{mentor.name}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{mentor.title}</p>
+                      <p className="text-xs text-gray-700 mb-2 line-clamp-2">{mentor.bio}</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-[#FFD500] text-[#FFD500]" />
+                          <span className="text-xs font-medium">{mentor.rating}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {mentor.expertise.slice(0, 3).map((skill) => (
+                          <Badge key={skill} variant="secondary" className="text-xs px-2 py-0.5">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>

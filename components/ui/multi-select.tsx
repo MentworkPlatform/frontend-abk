@@ -61,6 +61,7 @@ export function MultiSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -83,8 +84,10 @@ export function MultiSelect({
                     className="flex items-center gap-1 bg-[#FFD500] text-black px-2 py-1 rounded-md text-sm"
                   >
                     {option?.label || item}
-                    <button
-                      className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           handleUnselect(item);
@@ -94,18 +97,24 @@ export function MultiSelect({
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      onClick={() => handleUnselect(item)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleUnselect(item);
+                      }}
                     >
                       <X className="h-3 w-3 text-black" />
-                    </button>
+                    </span>
                   </div>
                 );
               })
             ) : selected.length > 2 ? (
               <div className="flex items-center gap-1 bg-[#FFD500] text-black px-2 py-1 rounded-md text-sm">
                 {selected.length} selected
-                <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       onSelectionChange([]);
@@ -115,10 +124,14 @@ export function MultiSelect({
                     e.preventDefault();
                     e.stopPropagation();
                   }}
-                  onClick={() => onSelectionChange([])}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectionChange([]);
+                  }}
                 >
                   <X className="h-3 w-3 text-black" />
-                </button>
+                </span>
               </div>
             ) : null}
           </div>
@@ -194,6 +207,7 @@ export function MultiSelect({
         {selected.length > 0 && (
           <div className="p-2 border-t">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               className="w-full"

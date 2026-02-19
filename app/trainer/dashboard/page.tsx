@@ -120,17 +120,19 @@ export default function TrainerDashboard() {
 
   return (
     <div className="flex-1 space-y-6">
-      <DashboardHeader
-        title="Trainer Dashboard"
-        description="Manage your programs, sessions, and mentors"
-        actionButton={{
-          label: "Create Program",
-          href: "/trainer/dashboard/programs/create",
-          icon: Plus,
-        }}
-      />
+      <div className="-mx-4 md:-mx-8 -mt-4 md:-mt-8">
+        <DashboardHeader
+          title="Trainer Dashboard"
+          description="Manage your programs, sessions, and mentors"
+          actionButton={{
+            label: "Create Program",
+            href: "/trainer/dashboard/programs/create",
+            icon: Plus,
+          }}
+        />
+      </div>
 
-      <div className="w-full space-y-6 p-8">
+      <div className="w-full space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">Your Programs</h2>
           <p className="text-gray-600">

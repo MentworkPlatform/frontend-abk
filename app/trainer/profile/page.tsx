@@ -106,12 +106,14 @@ export default function TrainerProfilePage() {
 
   return (
     <div className="flex-1 space-y-6">
-      <DashboardHeader
-        title="Profile Settings"
-        description="Update your profile information and expertise"
-      />
+      <div className="-mx-4 md:-mx-8 -mt-4 md:-mt-8">
+        <DashboardHeader
+          title="Profile Settings"
+          description="Update your profile information and expertise"
+        />
+      </div>
 
-      <div className="w-full space-y-6 p-8">
+      <div className="w-full space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <Card>

@@ -241,10 +241,10 @@ export default function TrainerOnboardingPage() {
   const totalSteps = 6;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] py-12">
-      <div className="container max-w-4xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-8">
+    <div className="min-h-screen bg-[#F5F5F5] py-4 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8">
+      <div className="container max-w-4xl mx-auto p-0">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6 md:mb-8">
             <Link href="/">
               <img
                 src="/images/mentwork-logo.png"
@@ -254,8 +254,8 @@ export default function TrainerOnboardingPage() {
             </Link>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold">
+          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight pr-2">
               {step === 1 && "Here are problems people want help with"}
               {step === 2 && "Create a program for this"}
               {step === 3 && "Build your program"}
@@ -263,12 +263,12 @@ export default function TrainerOnboardingPage() {
               {step === 5 && "Create your account"}
               {step === 6 && "What's next?"}
             </h1>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-gray-600 shrink-0">
               {step === 4 ? "Program draft – Step 1 of 3" : `Step ${step} of ${totalSteps}`}
             </div>
           </div>
 
-          <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+          <div className="w-full bg-gray-200 h-2 rounded-full mb-4 sm:mb-6 md:mb-8">
             <div
               className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
@@ -276,25 +276,25 @@ export default function TrainerOnboardingPage() {
           </div>
         </div>
 
-        <Card className="border-none shadow-lg rounded-xl">
-          <CardContent className="p-6 md:p-8">
+        <Card className="border-none shadow-lg rounded-xl overflow-hidden">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             {/* Step 1: Demand Snapshot */}
             {step === 1 && (
-              <div className="space-y-6">
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Based on system signals and market data, here are problems people want help with
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {mockDemandSignals.map((demand) => (
                     <Card
                       key={demand.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-[#FFD500]"
+                      className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-[#FFD500] active:border-[#FFD500]"
                       onClick={() => handleSelectDemand(demand)}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <CardTitle className="text-lg">{demand.goal}</CardTitle>
+                      <CardHeader className="pb-2 sm:pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-base sm:text-lg leading-tight break-words">{demand.goal}</CardTitle>
                           <Badge
                             variant={
                               demand.demandLevel === "Very High"
@@ -308,12 +308,12 @@ export default function TrainerOnboardingPage() {
                             {demand.demandLevel} Demand
                           </Badge>
                         </div>
-                        <CardDescription>{demand.description}</CardDescription>
+                        <CardDescription className="text-xs sm:text-sm line-clamp-2">{demand.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
                           <div className="flex items-center gap-2 text-gray-600">
-                            <Target className="h-4 w-4" />
+                            <Target className="h-4 w-4 shrink-0" />
                             <span>{demand.stage}</span>
                           </div>
                           <div className="flex items-center gap-2 text-gray-600">
@@ -322,7 +322,7 @@ export default function TrainerOnboardingPage() {
                           </div>
                         </div>
                         <Button
-                          className="w-full mt-4 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                          className="w-full mt-3 sm:mt-4 bg-[#FFD500] text-black hover:bg-[#e6c000] text-sm sm:text-base"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelectDemand(demand);
@@ -339,15 +339,15 @@ export default function TrainerOnboardingPage() {
 
             {/* Step 2: Problem Selection */}
             {step === 2 && selectedDemand && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="text-center">
-                  <Target className="h-12 w-12 mx-auto mb-4 text-[#FFD500]" />
-                  <h2 className="text-xl font-bold mb-2">You're creating a program for:</h2>
+                  <Target className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-4 text-[#FFD500]" />
+                  <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">You're creating a program for:</h2>
                   <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-bold mb-2">{selectedDemand.goal}</h3>
-                      <p className="text-gray-700 mb-4">{selectedDemand.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <CardContent className="p-4 sm:p-6">
+                      <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 leading-tight">{selectedDemand.goal}</h3>
+                      <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">{selectedDemand.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                         <Badge variant="outline">{selectedDemand.stage}</Badge>
                         <span>{selectedDemand.estimatedParticipants} people interested</span>
                       </div>
@@ -356,7 +356,7 @@ export default function TrainerOnboardingPage() {
                     </div>
 
                 <Button
-                  className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14 text-lg"
+                  className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-12 sm:h-14 text-sm sm:text-lg"
                   onClick={handleStartProgram}
                 >
                   Start Program
@@ -366,38 +366,38 @@ export default function TrainerOnboardingPage() {
 
             {/* Step 3: Program Creation (Scaffolded) */}
             {step === 3 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-bold mb-2">Build your program</h2>
-                  <p className="text-gray-600">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Build your program</h2>
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Choose a template to get started quickly, or build from scratch
                   </p>
                     </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {/* Template Option */}
-                  <Card className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500] cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-center gap-3 mb-2">
-                        <BookOpen className="h-8 w-8 text-[#FFD500]" />
-                        <CardTitle>Start from Template</CardTitle>
+                  <Card className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500] cursor-pointer active:border-[#FFD500]">
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                        <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-[#FFD500] shrink-0" />
+                        <CardTitle className="text-base sm:text-lg">Start from Template</CardTitle>
                       </div>
-                      <CardDescription>
+                      <CardDescription className="text-sm">
                         Recommended: Use a proven curriculum structure
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {mockTemplates.map((template) => (
                           <div
                             key={template.id}
                             onClick={() => handleSelectTemplate(template)}
-                            className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-all"
+                            className="p-2.5 sm:p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-all"
                           >
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <p className="font-medium text-sm">{template.name}</p>
-                                <p className="text-xs text-gray-500 mt-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-xs sm:text-sm break-words">{template.name}</p>
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                                   {template.description}
                                 </p>
                               </div>
@@ -419,20 +419,20 @@ export default function TrainerOnboardingPage() {
                   </Card>
 
                   {/* Scratch Option */}
-                  <Card className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500] cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-center gap-3 mb-2">
-                        <Plus className="h-8 w-8 text-[#FFD500]" />
-                        <CardTitle>Start from Scratch</CardTitle>
+                  <Card className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500] cursor-pointer active:border-[#FFD500]">
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                        <Plus className="h-6 w-6 sm:h-8 sm:w-8 text-[#FFD500] shrink-0" />
+                        <CardTitle className="text-base sm:text-lg">Start from Scratch</CardTitle>
                       </div>
-                      <CardDescription>
+                      <CardDescription className="text-sm">
                         Build a custom program tailored to your needs
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <Button
                         variant="outline"
-                        className="w-full h-20"
+                        className="w-full h-14 sm:h-20 text-sm sm:text-base"
                         onClick={handleStartFromScratch}
                       >
                         <FileText className="h-5 w-5 mr-2" />
@@ -446,17 +446,17 @@ export default function TrainerOnboardingPage() {
 
             {/* Step 4: Minimum Program Structure */}
             {step === 4 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <p className="text-gray-600">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Add the essential details to save your program draft
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
                     Program draft – Step 1 of 3
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="programTitle">Program Title *</Label>
                     <Input
@@ -539,17 +539,17 @@ export default function TrainerOnboardingPage() {
 
             {/* Step 5: Account Creation */}
             {step === 5 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <p className="text-gray-600">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Create an account to save your program draft and continue building
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
                     After creating your account, you'll continue to Step 2: Build Curriculum
                   </p>
                 </div>
 
-                <form onSubmit={handleCreateAccount} className="space-y-4">
+                <form onSubmit={handleCreateAccount} className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
@@ -603,20 +603,20 @@ export default function TrainerOnboardingPage() {
 
             {/* Step 6: Post-Onboarding Next Actions */}
             {step === 6 && (
-              <div className="space-y-6 text-center">
-                <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Account Created!</h2>
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6 text-center">
+                <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-green-500 mb-2 sm:mb-4" />
+                <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Account Created!</h2>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   What would you like to do next?
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <Card className="bg-yellow-50 border-2 border-[#FFD500] hover:shadow-md transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Complete Program</CardTitle>
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <CardTitle className="text-base sm:text-lg">Complete Program</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-700 mb-4">
+                      <p className="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-4">
                         Continue building your program draft and add curriculum modules
                       </p>
                       <Button
@@ -629,11 +629,11 @@ export default function TrainerOnboardingPage() {
                   </Card>
 
                   <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Complete Profile</CardTitle>
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <CardTitle className="text-base sm:text-lg">Complete Profile</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                         Add your expertise, experience, and profile details
                       </p>
                       <Button
@@ -647,7 +647,7 @@ export default function TrainerOnboardingPage() {
                   </Card>
                   </div>
 
-                <div className="pt-4">
+                <div className="pt-4 sm:pt-6">
                   <Button
                     variant="ghost"
                     className="w-full"
@@ -661,18 +661,18 @@ export default function TrainerOnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 6 && (
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
               {step > 1 ? (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={prevStep}
-                    className="flex items-center gap-2"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
               ) : (
-                <div></div>
+                <div className="hidden sm:block" />
               )}
 
                 {step === 1 && (
@@ -683,7 +683,7 @@ export default function TrainerOnboardingPage() {
                       setNeedsAccount(true);
                       setStep(5); // Go to account creation
                     }}
-                    className="flex items-center gap-2"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                     Skip for now
                 </Button>

@@ -8,7 +8,8 @@ interface DashboardHeaderProps {
   description: string;
   actionButton?: {
     label: string;
-    href: string;
+    href?: string;
+    onClick?: () => void;
     icon?: LucideIcon;
   };
 }
@@ -21,22 +22,34 @@ export function DashboardHeader({
   const ActionIcon = actionButton?.icon;
 
   return (
-    <div className="bg-white border-b w-full px-4 md:px-8 py-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{title}</h1>
-          <p className="text-gray-600">{description}</p>
+    <div className="bg-white border-b w-full px-0 py-4 sm:py-5 md:py-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">{title}</h1>
+          <p className="text-sm sm:text-base text-gray-600 line-clamp-2 sm:line-clamp-none">{description}</p>
         </div>
         {actionButton && (
-          <Button
-            asChild
-            className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
-          >
-            <Link href={actionButton.href}>
+          actionButton.onClick ? (
+            <Button
+              size="sm"
+              onClick={actionButton.onClick}
+              className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] shrink-0"
+            >
               {ActionIcon && <ActionIcon className="mr-2 h-4 w-4" />}
               {actionButton.label}
-            </Link>
-          </Button>
+            </Button>
+          ) : actionButton.href ? (
+            <Button
+              asChild
+              size="sm"
+              className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] shrink-0"
+            >
+              <Link href={actionButton.href}>
+                {ActionIcon && <ActionIcon className="mr-2 h-4 w-4" />}
+                {actionButton.label}
+              </Link>
+            </Button>
+          ) : null
         )}
       </div>
     </div>

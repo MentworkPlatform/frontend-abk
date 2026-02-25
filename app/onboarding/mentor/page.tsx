@@ -140,10 +140,10 @@ export default function MentorOnboardingPage() {
   const totalSteps = 5;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] py-12">
-      <div className="container max-w-4xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-8">
+    <div className="min-h-screen bg-[#F5F5F5] py-4 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8">
+      <div className="container max-w-4xl mx-auto p-0">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6 md:mb-8">
             <Link href="/">
               <img
                 src="/images/mentwork-logo.png"
@@ -153,20 +153,20 @@ export default function MentorOnboardingPage() {
             </Link>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold">
+          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight pr-2">
               {step === 1 && "Let's understand your expertise"}
               {step === 2 && "Programs looking for mentors like you"}
               {step === 3 && "Save your interest"}
               {step === 4 && "Create your account"}
               {step === 5 && "What's next?"}
             </h1>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-gray-600 shrink-0">
               Step {step} of {totalSteps}
             </div>
           </div>
 
-          <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+          <div className="w-full bg-gray-200 h-2 rounded-full mb-4 sm:mb-6 md:mb-8">
             <div
               className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
@@ -174,18 +174,18 @@ export default function MentorOnboardingPage() {
           </div>
         </div>
 
-        <Card className="border-none shadow-lg rounded-xl">
-          <CardContent className="p-6 md:p-8">
+        <Card className="border-none shadow-lg rounded-xl overflow-hidden">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             {/* Step 1: Expertise Snapshot */}
             {step === 1 && (
-              <div className="space-y-6">
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Help us match you with the right teaching opportunities (takes 30 seconds)
                 </p>
 
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       Which areas can you teach confidently? (Select up to 3)
                     </Label>
                     <MultiSelect
@@ -206,8 +206,8 @@ export default function MentorOnboardingPage() {
                     )}
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       Which stage do you prefer teaching?
                     </Label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -237,20 +237,20 @@ export default function MentorOnboardingPage() {
 
             {/* Step 2: Opportunity Preview */}
             {step === 2 && (
-              <div className="space-y-6">
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Based on your expertise, here are programs looking for mentors
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {relevantOpportunities.map((opportunity) => (
                     <Card
                       key={opportunity.id}
-                      className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500]"
+                      className="hover:shadow-md transition-shadow border-2 hover:border-[#FFD500] active:border-[#FFD500]"
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <CardTitle className="text-lg leading-tight">
+                      <CardHeader className="pb-2 sm:pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-base sm:text-lg leading-tight break-words">
                             {opportunity.programTitle}
                           </CardTitle>
                           <Button
@@ -265,24 +265,24 @@ export default function MentorOnboardingPage() {
                             <Heart className="h-4 w-4" />
                           </Button>
                         </div>
-                        <CardDescription className="text-sm min-h-[3rem]">
+                        <CardDescription className="text-xs sm:text-sm min-h-[2.5rem] sm:min-h-[3rem] line-clamp-2">
                           {opportunity.programOutcome}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <BookOpen className="h-4 w-4 text-gray-500" />
+                          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                            <BookOpen className="h-4 w-4 text-gray-500 shrink-0" />
                             <span className="font-medium">Topic:</span>
                             <span className="text-gray-600">{opportunity.topic}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-gray-500" />
+                          <div className="flex items-center gap-2 text-xs sm:text-sm">
+                            <Clock className="h-4 w-4 text-gray-500 shrink-0" />
                             <span className="font-medium">Time:</span>
                             <span className="text-gray-600">{opportunity.timeCommitment}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Users className="h-4 w-4 text-gray-500" />
+                          <div className="flex items-center gap-2 text-xs sm:text-sm">
+                            <Users className="h-4 w-4 text-gray-500 shrink-0" />
                             <span className="font-medium">Cohort:</span>
                             <span className="text-gray-600">{opportunity.cohortTiming}</span>
                           </div>
@@ -300,16 +300,16 @@ export default function MentorOnboardingPage() {
                             </Badge>
                           </div>
                         </div>
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-col sm:flex-row gap-2 pt-2">
                           <Button
-                            className="flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                            className="w-full sm:flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
                             onClick={() => handleExpressInterest(opportunity.id)}
                           >
                             I'm Interested
                           </Button>
                           <Button
                             variant="outline"
-                            className="flex-1"
+                            className="w-full sm:flex-1"
                             onClick={() => {
                               // Skip this opportunity
                             }}
@@ -336,20 +336,20 @@ export default function MentorOnboardingPage() {
 
             {/* Step 3: Micro-Commitment */}
             {step === 3 && selectedOpportunity && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="text-center">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-[#FFD500]" />
-                  <h2 className="text-xl font-bold mb-2">
+                  <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-4 text-[#FFD500]" />
+                  <h2 className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2 leading-tight px-1">
                     {relevantOpportunities.find((o) => o.id === selectedOpportunity)?.programTitle}
                   </h2>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4">
                     {relevantOpportunities.find((o) => o.id === selectedOpportunity)?.topic}
                   </p>
                 </div>
 
                 <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-4">
-                    <div className="space-y-2 text-sm">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-blue-600" />
                         <span className="font-medium">Time Commitment:</span>
@@ -370,12 +370,12 @@ export default function MentorOnboardingPage() {
                   </CardContent>
                 </Card>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <Button
-                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14"
+                    className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-12 sm:h-14 text-sm sm:text-base"
                     onClick={handleSaveInterest}
                   >
-                    <CheckCircle className="h-5 w-5 mr-2" />
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                     Save Interest
                   </Button>
                 </div>
@@ -388,14 +388,14 @@ export default function MentorOnboardingPage() {
 
             {/* Step 4: Lightweight Account Creation */}
             {step === 4 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <p className="text-gray-600">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Create an account to save your interest
                   </p>
                 </div>
 
-                <form onSubmit={handleCreateAccount} className="space-y-4">
+                <form onSubmit={handleCreateAccount} className="space-y-3 sm:space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <Input
@@ -449,19 +449,19 @@ export default function MentorOnboardingPage() {
 
             {/* Step 5: Clear Next Step - Done Page */}
             {step === 5 && (
-              <div className="space-y-6 text-center">
-                <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">All Set!</h2>
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6 text-center">
+                <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-green-500 mb-2 sm:mb-4" />
+                <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">All Set!</h2>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   You'll be notified when facilitators confirm teaching slots
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <Card className="bg-blue-50 border-blue-200 hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-6">
-                      <Bell className="h-8 w-8 mx-auto mb-3 text-blue-600" />
-                      <h3 className="font-semibold mb-2">Explore More Opportunities</h3>
-                      <p className="text-sm text-gray-700 mb-4">
+                    <CardContent className="p-4 sm:p-6">
+                      <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 sm:mb-3 text-blue-600" />
+                      <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">Explore More Opportunities</h3>
+                      <p className="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-4">
                         Browse all available programs looking for mentors
                       </p>
                       <Button
@@ -475,10 +475,10 @@ export default function MentorOnboardingPage() {
                   </Card>
 
                   <Card className="bg-yellow-50 border-2 border-[#FFD500] hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-6">
-                      <Users className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                      <h3 className="font-semibold mb-2">Improve Recommendations</h3>
-                      <p className="text-sm text-gray-700 mb-4">
+                    <CardContent className="p-4 sm:p-6">
+                      <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 sm:mb-3 text-[#FFD500]" />
+                      <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">Improve Recommendations</h3>
+                      <p className="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-4">
                         Complete your profile to get better matched with opportunities
                       </p>
                       <Button
@@ -505,18 +505,18 @@ export default function MentorOnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 5 && (
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
               {step > 1 ? (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={prevStep}
-                  className="flex items-center gap-2"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
               ) : (
-                <div></div>
+                <div className="hidden sm:block" />
               )}
 
                 {step === 1 && (
@@ -524,7 +524,7 @@ export default function MentorOnboardingPage() {
                   type="button"
                   onClick={nextStep}
                     disabled={formData.selectedSectors.length === 0 || !formData.preferredStage}
-                  className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
+                  className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center justify-center gap-2"
                 >
                     See Opportunities <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -538,7 +538,7 @@ export default function MentorOnboardingPage() {
                       setNeedsAccount(true);
                       setStep(4); // Go to account creation
                     }}
-                    className="flex items-center gap-2"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                     Skip for now
                 </Button>

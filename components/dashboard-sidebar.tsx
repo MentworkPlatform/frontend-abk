@@ -60,7 +60,7 @@ export function DashboardSidebar({
         customMobileHeader
       ) : (
         <header className="lg:hidden sticky top-0 z-40 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between px-3 py-2.5">
             {logoContent || defaultLogo}
             <Button
               variant="ghost"
@@ -80,15 +80,15 @@ export function DashboardSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r transform transition-transform lg:translate-x-0 lg:static lg:h-screen z-30 flex-shrink-0 flex flex-col ${
+        className={`fixed left-0 top-0 h-screen w-56 bg-white border-r transform transition-transform lg:translate-x-0 lg:static lg:h-screen z-30 flex-shrink-0 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-6 border-b flex-shrink-0">
-          <div className="hidden lg:block">{logoContent || defaultLogo}</div>
+        <div className="p-4 border-b flex-shrink-0">
+          <div className="hidden lg:block [&_img]:h-8">{logoContent || defaultLogo}</div>
         </div>
 
-        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item);
@@ -96,12 +96,13 @@ export function DashboardSidebar({
               <Link key={item.href} href={item.href}>
                 <Button
                   variant={active ? "default" : "ghost"}
-                  className={`w-full justify-start ${
+                  size="sm"
+                  className={`w-full justify-start h-9 text-sm font-medium ${
                     active ? "bg-[#FFD500] text-black hover:bg-[#e6c000]" : ""
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <Icon className="h-4 w-4 mr-2" />
+                  <Icon className="h-4 w-4 mr-2 shrink-0" />
                   {item.label}
                 </Button>
               </Link>
@@ -110,15 +111,16 @@ export function DashboardSidebar({
         </nav>
 
         {(footerContent || showLogout) && (
-          <div className="p-4 border-t flex-shrink-0">
+          <div className="p-3 border-t flex-shrink-0">
             {footerContent}
             {showLogout && (
               <Button
                 variant="outline"
-                className="w-full justify-start bg-transparent"
+                size="sm"
+                className="w-full justify-start h-9 text-sm bg-transparent"
                 onClick={onLogout}
               >
-                <LogOut className="h-4 w-4 mr-2" />
+                <LogOut className="h-4 w-4 mr-2 shrink-0" />
                 Logout
               </Button>
             )}

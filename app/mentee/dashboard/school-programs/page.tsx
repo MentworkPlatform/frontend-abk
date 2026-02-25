@@ -8,31 +8,31 @@ import { Badge } from "@/components/ui/badge"
 
 export default function SchoolProgramsPage() {
   return (
-    <div className="flex flex-col">
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">School & Organization Programs</h2>
+    <div className="flex flex-col w-full">
+      <div className="flex-1 space-y-4 pt-2">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">School & Organization Programs</h2>
         </div>
 
         <Tabs defaultValue="enrolled" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="enrolled">Enrolled Programs</TabsTrigger>
-            <TabsTrigger value="available">Available Programs</TabsTrigger>
-            <TabsTrigger value="completed">Completed Programs</TabsTrigger>
+          <TabsList className="w-full flex-wrap h-auto gap-1 p-1 sm:w-auto">
+            <TabsTrigger value="enrolled" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Enrolled</TabsTrigger>
+            <TabsTrigger value="available" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Available</TabsTrigger>
+            <TabsTrigger value="completed" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Completed</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="enrolled" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <TabsContent value="enrolled" className="space-y-4 mt-4">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="p-4 pb-2 sm:p-6">
                   <div className="flex justify-between items-center">
                     <Badge className="mb-2">In Progress</Badge>
                     <GraduationCap className="h-5 w-5 text-primary" />
                   </div>
-                  <CardTitle className="text-xl">TechStart Entrepreneurship Program</CardTitle>
-                  <CardDescription>Silicon Valley High School</CardDescription>
+                  <CardTitle className="text-base sm:text-xl leading-tight">TechStart Entrepreneurship Program</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Silicon Valley High School</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Progress</span>
@@ -51,31 +51,31 @@ export default function SchoolProgramsPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <Link href="/mentee/dashboard/school-programs/1" className="w-full">
-                    <Button className="w-full">Continue Learning</Button>
+                    <Button className="w-full" size="sm">Continue Learning</Button>
                   </Link>
                 </CardFooter>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="available" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <TabsContent value="available" className="space-y-4 mt-4">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="p-4 pb-2 sm:p-6">
                   <div className="flex justify-between items-center">
                     <Badge variant="outline" className="mb-2">
                       Invitation
                     </Badge>
                     <Building className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <CardTitle className="text-xl">Youth Business Accelerator</CardTitle>
-                  <CardDescription>Entrepreneurship Foundation</CardDescription>
+                  <CardTitle className="text-base sm:text-xl leading-tight">Youth Business Accelerator</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Entrepreneurship Foundation</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                       A 10-week program designed to help young entrepreneurs develop their business ideas from concept
                       to launch.
                     </p>
@@ -85,28 +85,26 @@ export default function SchoolProgramsPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between gap-2">
-                  <Button variant="outline" className="w-full">
-                    Decline
-                  </Button>
-                  <Button className="w-full">Accept Invitation</Button>
+                <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 p-4 pt-0 sm:p-6 sm:pt-0">
+                  <Button variant="outline" className="w-full" size="sm">Decline</Button>
+                  <Button className="w-full" size="sm">Accept Invitation</Button>
                 </CardFooter>
               </Card>
 
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="p-4 pb-2 sm:p-6">
                   <div className="flex justify-between items-center">
                     <Badge variant="outline" className="mb-2">
                       Open Enrollment
                     </Badge>
                     <School className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <CardTitle className="text-xl">Social Entrepreneurship Workshop</CardTitle>
-                  <CardDescription>Community Impact Network</CardDescription>
+                  <CardTitle className="text-base sm:text-xl leading-tight">Social Entrepreneurship Workshop</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Community Impact Network</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
                       Learn how to create businesses that address social and environmental challenges while generating
                       sustainable revenue.
                     </p>
@@ -116,29 +114,27 @@ export default function SchoolProgramsPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full">
-                    Apply Now
-                  </Button>
+                <CardFooter className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <Button variant="outline" className="w-full" size="sm">Apply Now</Button>
                 </CardFooter>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="completed" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <TabsContent value="completed" className="space-y-4 mt-4">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="p-4 pb-2 sm:p-6">
                   <div className="flex justify-between items-center">
                     <Badge variant="secondary" className="mb-2">
                       Completed
                     </Badge>
                     <GraduationCap className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <CardTitle className="text-xl">Intro to Business Fundamentals</CardTitle>
-                  <CardDescription>Westside High School</CardDescription>
+                  <CardTitle className="text-base sm:text-xl leading-tight">Intro to Business Fundamentals</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Westside High School</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Final Grade</span>
@@ -153,13 +149,9 @@ export default function SchoolProgramsPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between gap-2">
-                  <Button variant="outline" className="w-full">
-                    View Certificate
-                  </Button>
-                  <Button variant="secondary" className="w-full">
-                    Review Materials
-                  </Button>
+                <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 p-4 pt-0 sm:p-6 sm:pt-0">
+                  <Button variant="outline" className="w-full" size="sm">View Certificate</Button>
+                  <Button variant="secondary" className="w-full" size="sm">Review Materials</Button>
                 </CardFooter>
               </Card>
             </div>

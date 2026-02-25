@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, BookOpen, CheckCircle, Clock, Download, FileText, PlayCircle, Upload } from "lucide-react"
 
@@ -152,28 +153,30 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
   }
 
   const activeWeekData = program.weeks.find((week) => week.id === activeWeek)
+  const router = useRouter()
 
   return (
-    <div className="flex flex-col">
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Link href="/dashboard/school-programs">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Programs
-            </Button>
-          </Link>
+    <div className="flex flex-col w-full">
+      <div className="flex-1 space-y-4 pt-2">
+        <div className="space-y-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </button>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
           {/* Left sidebar */}
           <div className="w-full md:w-1/3 space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>{program.title}</CardTitle>
-                <CardDescription>{program.organization}</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg leading-tight">{program.title}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">{program.organization}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Overall Progress</span>
@@ -224,13 +227,13 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 p-4 sm:p-6">
                 <CardTitle className="text-base">Program Curriculum</CardTitle>
               </CardHeader>
               <CardContent className="px-0 pb-0">
                 <Accordion type="single" collapsible className="w-full">
                   {program.weeks.map((week) => (
-                    <AccordionItem key={week.id} value={week.id} className="border-b-0 px-6">
+                    <AccordionItem key={week.id} value={week.id} className="border-b-0 px-4 sm:px-6">
                       <AccordionTrigger
                         onClick={() => week.status !== "locked" && setActiveWeek(week.id)}
                         className={`hover:no-underline ${week.status === "locked" ? "text-muted-foreground" : ""}`}
@@ -250,7 +253,7 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="pl-6 space-y-2 text-sm">
+                        <div className="pl-4 sm:pl-6 pr-4 sm:pr-6 space-y-2 text-xs sm:text-sm">
                           {week.materials.map((material, index) => (
                             <div key={index} className="flex items-center">
                               {material.type === "video" && (
@@ -279,12 +282,12 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
           </div>
 
           {/* Main content */}
-          <div className="w-full md:w-2/3 space-y-4">
+          <div className="w-full md:w-2/3 space-y-4 min-w-0">
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>
+              <CardHeader className="p-4 pb-3 sm:p-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
+                  <div className="min-w-0">
+                    <CardTitle className="text-base sm:text-lg leading-tight">
                       Week {program.weeks.indexOf(activeWeekData!) + 1}: {activeWeekData?.title}
                     </CardTitle>
                     <CardDescription>
@@ -308,54 +311,52 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-0">
                 <Tabs defaultValue="materials">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="materials">Learning Materials</TabsTrigger>
-                    <TabsTrigger value="assignments">Assignments</TabsTrigger>
-                    <TabsTrigger value="discussion">Discussion</TabsTrigger>
+                  <TabsList className="w-full flex-wrap h-auto gap-1 p-1 mb-4 sm:w-auto">
+                    <TabsTrigger value="materials" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Materials</TabsTrigger>
+                    <TabsTrigger value="assignments" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Assignments</TabsTrigger>
+                    <TabsTrigger value="discussion" className="flex-1 min-w-0 text-xs sm:text-sm sm:flex-initial">Discussion</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="materials" className="space-y-4">
-                    <div className="space-y-4">
+                  <TabsContent value="materials" className="space-y-3 sm:space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {activeWeekData?.materials.map((material, index) => (
                         <Card key={index}>
-                          <CardHeader className="py-3">
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center">
-                                {material.type === "video" && <PlayCircle className="h-5 w-5 mr-2 text-primary" />}
-                                {material.type === "reading" && <BookOpen className="h-5 w-5 mr-2 text-primary" />}
-                                {material.type === "quiz" && <FileText className="h-5 w-5 mr-2 text-primary" />}
-                                <CardTitle className="text-base">{material.title}</CardTitle>
+                          <CardHeader className="py-3 px-4 sm:px-6">
+                            <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center">
+                              <div className="flex items-center min-w-0">
+                                {material.type === "video" && <PlayCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0 text-primary" />}
+                                {material.type === "reading" && <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0 text-primary" />}
+                                {material.type === "quiz" && <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0 text-primary" />}
+                                <CardTitle className="text-sm sm:text-base truncate">{material.title}</CardTitle>
                               </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs sm:text-sm text-muted-foreground shrink-0">
                                 {material.duration && material.duration}
                                 {material.pages && material.pages}
                                 {material.questions && `${material.questions} questions`}
                               </div>
                             </div>
                           </CardHeader>
-                          <CardContent className="py-2">
+                          <CardContent className="py-2 px-4 sm:px-6">
                             {material.type === "video" && (
                               <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
                                 <PlayCircle className="h-12 w-12 text-primary/70" />
                               </div>
                             )}
                             {material.type === "reading" && (
-                              <div className="flex justify-between items-center">
-                                <p className="text-sm">
-                                  Essential reading material for understanding {activeWeekData.title.toLowerCase()}.
-                                </p>
-                                <Button variant="outline" size="sm">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+                                <p className="text-xs sm:text-sm">Essential reading material for understanding {activeWeekData.title.toLowerCase()}.</p>
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto shrink-0">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download PDF
                                 </Button>
                               </div>
                             )}
                             {material.type === "quiz" && (
-                              <div className="flex justify-between items-center">
-                                <p className="text-sm">Test your knowledge of this week's material.</p>
-                                <Button size="sm">Start Quiz</Button>
+                              <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+                                <p className="text-xs sm:text-sm">Test your knowledge of this week's material.</p>
+                                <Button size="sm" className="w-full sm:w-auto shrink-0">Start Quiz</Button>
                               </div>
                             )}
                           </CardContent>
@@ -364,12 +365,12 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="assignments" className="space-y-4">
+                  <TabsContent value="assignments" className="space-y-3 sm:space-y-4">
                     {activeWeekData?.assignments.map((assignment, index) => (
                       <Card key={index}>
-                        <CardHeader>
-                          <div className="flex justify-between items-center">
-                            <CardTitle className="text-base">{assignment.title}</CardTitle>
+                        <CardHeader className="p-4 sm:p-6">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
+                            <CardTitle className="text-sm sm:text-base leading-tight">{assignment.title}</CardTitle>
                             <Badge
                               variant={
                                 assignment.status === "submitted"
@@ -384,9 +385,9 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                               {assignment.status === "locked" && "Locked"}
                             </Badge>
                           </div>
-                          {assignment.dueDate && <CardDescription>Due: {assignment.dueDate}</CardDescription>}
+                          {assignment.dueDate && <CardDescription className="text-xs sm:text-sm">Due: {assignment.dueDate}</CardDescription>}
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-4 sm:p-6 pt-0">
                           <div className="space-y-4">
                             <p className="text-sm">
                               {assignment.status === "submitted" ? (
@@ -403,14 +404,14 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
 
                             {assignment.status === "in-progress" && (
                               <div className="flex justify-end">
-                                <Button>Submit Assignment</Button>
+                                <Button size="sm" className="w-full sm:w-auto">Submit Assignment</Button>
                               </div>
                             )}
 
                             {assignment.status === "submitted" && (
-                              <div className="flex justify-end space-x-2">
-                                <Button variant="outline">View Feedback</Button>
-                                <Button variant="outline">View Submission</Button>
+                              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:space-x-2">
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto">View Feedback</Button>
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto">View Submission</Button>
                               </div>
                             )}
                           </div>
@@ -421,8 +422,8 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
 
                   <TabsContent value="discussion" className="space-y-4">
                     <Card>
-                      <CardContent className="pt-6">
-                        <p className="text-center text-muted-foreground">
+                      <CardContent className="pt-6 p-4 sm:p-6">
+                        <p className="text-center text-xs sm:text-sm text-muted-foreground">
                           Discussion board for Week {program.weeks.indexOf(activeWeekData!) + 1} will be available soon.
                         </p>
                       </CardContent>

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -37,13 +37,10 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
       <SheetContent side="left" className="p-0">
         <div className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pr-10">
               <Link href="/" onClick={() => setOpen(false)}>
                 <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close menu">
-                <X className="h-5 w-5" />
-              </Button>
             </div>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">

@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -184,38 +185,37 @@ export default function MentorDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
-          <p className="text-muted-foreground">Manage your teaching programs and sessions</p>
-        </div>
-      </div>
+    <div className="w-full">
+      <DashboardHeader
+        title="Welcome back"
+        description="Manage your teaching programs and sessions"
+      />
 
+      <div className="w-full pt-2 space-y-6 sm:space-y-8 md:px-6 md:pt-8 md:pb-8">
       {/* Upcoming Sessions Schedule */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
             Your Upcoming Sessions
           </CardTitle>
-          <CardDescription>Next sessions scheduled with meeting links</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Next sessions scheduled with meeting links</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="space-y-3 sm:space-y-4">
             {upcomingSessions.map((session) => (
               <div
                 key={session.id}
-                className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4"
+                className="flex flex-col md:flex-row md:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-gray-50 gap-3 sm:gap-4"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium">{session.programTitle}</h4>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h4 className="font-medium text-sm sm:text-base">{session.programTitle}</h4>
                     <Badge variant="outline" className="text-xs">
                       {session.topic}
                     </Badge>
                   </div>
-                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       {session.time} ({session.duration})
@@ -226,14 +226,14 @@ export default function MentorDashboardPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-right text-sm">
-                    <p className="font-mono text-xs text-muted-foreground">ID: {session.meetingId}</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right text-xs sm:text-sm hidden sm:block">
+                    <p className="font-mono text-muted-foreground">ID: {session.meetingId}</p>
                   </div>
                   <Button
                     size="sm"
                     onClick={() => window.open(session.meetingLink, "_blank")}
-                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] whitespace-nowrap"
+                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] whitespace-nowrap w-full sm:w-auto"
                   >
                     Join Meeting
                   </Button>
@@ -246,35 +246,35 @@ export default function MentorDashboardPage() {
 
       {/* Active Programs */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5" />
                 Active Programs
               </CardTitle>
-              <CardDescription>Programs you are currently teaching</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Programs you are currently teaching</CardDescription>
             </div>
-            <Button variant="outline" onClick={() => router.push("/programs?view=mentor")}>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => router.push("/programs?view=mentor")}>
               Explore Programs
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {activePrograms.map((program) => (
               <Card key={program.id} className="border">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{program.title}</CardTitle>
-                      <CardDescription>{program.focusArea}</CardDescription>
+                <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base sm:text-lg leading-tight">{program.title}</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">{program.focusArea}</CardDescription>
                     </div>
-                    <Badge className="bg-[#FFD500] text-black">{program.status}</Badge>
+                    <Badge className="bg-[#FFD500] text-black shrink-0">{program.status}</Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                     <div>
                       <p className="text-muted-foreground">Mentees</p>
                       <p className="font-medium">{program.mentees}</p>
@@ -293,12 +293,12 @@ export default function MentorDashboardPage() {
                     </div>
                     <Progress value={(program.completedSessions / program.totalSessions) * 100} />
                   </div>
-                  <div className="flex items-center justify-between pt-2">
-                    <div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-2">
+                    <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">Next Session</p>
-                      <p className="text-sm font-medium">{program.nextSession}</p>
+                      <p className="text-xs sm:text-sm font-medium truncate">{program.nextSession}</p>
                     </div>
-                    <Button size="sm" variant="outline" asChild>
+                    <Button size="sm" variant="outline" className="w-full sm:w-auto" asChild>
                       <Link href={`/mentor/dashboard/programs/${program.id}`}>View Program</Link>
                     </Button>
                   </div>
@@ -312,42 +312,42 @@ export default function MentorDashboardPage() {
       {/* Recommended Programs to Teach */}
       {suggestedOpportunities.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Star className="h-4 w-4 sm:h-5 sm:w-5" />
               Recommended Programs to Teach
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Based on your skills and goals, these programs match your expertise
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {suggestedOpportunities.map((opportunity) => (
                 <Card key={opportunity.id} className="border border-gray-200 bg-gray-50/50">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                        <CardDescription>by {opportunity.creator}</CardDescription>
+                  <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base sm:text-lg leading-tight">{opportunity.title}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">by {opportunity.creator}</CardDescription>
                       </div>
-                      <Badge className="bg-[#FFD500] text-black">{opportunity.matchScore}% match</Badge>
+                      <Badge className="bg-[#FFD500] text-black shrink-0">{opportunity.matchScore}% match</Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm text-muted-foreground">{opportunity.description}</p>
+                  <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">{opportunity.description}</p>
                     <div className="bg-white p-2 rounded text-xs">
                       <p className="font-medium text-gray-900 mb-1">Why recommended:</p>
                       <p className="text-gray-700">{opportunity.whyRecommended}</p>
                     </div>
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-2">
                       <div>
                         <p className="text-xs text-muted-foreground">Compensation</p>
-                        <p className="text-sm font-medium">{opportunity.compensation}</p>
+                        <p className="text-xs sm:text-sm font-medium">{opportunity.compensation}</p>
                       </div>
                       <Button 
                         size="sm" 
-                        className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                        className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]"
                         onClick={() => handleRequestToTeach(opportunity)}
                       >
                         Request to Teach
@@ -363,47 +363,46 @@ export default function MentorDashboardPage() {
 
       {/* Program Teaching Invitations */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-          <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                 Program Teaching Invitations
               </CardTitle>
-              <CardDescription>
-              Programs created by trainers and organizations looking for mentors
+              <CardDescription className="text-xs sm:text-sm">
+                Programs created by trainers and organizations looking for mentors
               </CardDescription>
             </div>
-            <Button variant="outline" onClick={() => router.push("/programs?view=mentor")}>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => router.push("/programs?view=mentor")}>
               Explore Programs
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="opportunities">All Opportunities</TabsTrigger>
-              <TabsTrigger value="invitations">My Invitations</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4 h-auto p-1 gap-1">
+              <TabsTrigger value="opportunities" className="text-xs sm:text-sm">All Opportunities</TabsTrigger>
+              <TabsTrigger value="invitations" className="text-xs sm:text-sm">My Invitations</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="opportunities">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TabsContent value="opportunities" className="mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {teachingOpportunities.map((opportunity) => (
             <Card key={opportunity.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                    <CardDescription>by {opportunity.creator}</CardDescription>
+              <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-base sm:text-lg leading-tight">{opportunity.title}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">by {opportunity.creator}</CardDescription>
                   </div>
-                  <Badge variant="outline">{opportunity.focusArea}</Badge>
+                  <Badge variant="outline" className="text-xs shrink-0">{opportunity.focusArea}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{opportunity.description}</p>
+              <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">{opportunity.description}</p>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Duration</p>
                     <p className="font-medium">{opportunity.duration}</p>
@@ -414,10 +413,10 @@ export default function MentorDashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Total Compensation</p>
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900">Total Compensation</p>
+                    <p className="text-base sm:text-lg font-bold text-gray-900">
                       ${opportunity.totalCompensation.toLocaleString()}
                     </p>
                   </div>
@@ -439,17 +438,19 @@ export default function MentorDashboardPage() {
                   </ul>
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-2">
+              <CardFooter className="flex flex-col sm:flex-row gap-2 p-4 sm:p-6 pt-0">
                 <Button 
                   variant="outline" 
-                  className="flex-1 bg-transparent"
+                  size="sm"
+                  className="w-full sm:flex-1 bg-transparent"
                   onClick={() => router.push(`/programs/${opportunity.id}?view=mentor`)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
                 <Button 
-                  className="flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                  size="sm"
+                  className="w-full sm:flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
                   onClick={() => handleRequestToTeach(opportunity)}
                 >
                   Request to Join
@@ -460,28 +461,29 @@ export default function MentorDashboardPage() {
         </div>
             </TabsContent>
 
-            <TabsContent value="invitations">
-              <div className="text-center py-8 text-muted-foreground">
+            <TabsContent value="invitations" className="mt-4">
+              <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
                 <p>No pending invitations at this time.</p>
-                <p className="text-sm mt-2">Check back later for new teaching opportunities.</p>
+                <p className="text-xs sm:text-sm mt-2">Check back later for new teaching opportunities.</p>
               </div>
             </TabsContent>
       </Tabs>
         </CardContent>
       </Card>
+      </div>
 
       {/* Request to Teach Modal */}
       <Dialog open={showRequestModal} onOpenChange={setShowRequestModal}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Request to Teach</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[calc(100vw-3rem)] max-w-[500px] sm:w-full mx-auto my-4 sm:my-0 max-h-[calc(100vh-2rem)] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 gap-4">
+          <DialogHeader className="space-y-1.5 pr-8">
+            <DialogTitle className="text-base sm:text-lg">Request to Teach</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Express your interest in teaching "{selectedOpportunity?.title}"
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2 sm:py-4">
             <div className="space-y-2">
-              <Label htmlFor="mentor-name">Full Name</Label>
+              <Label htmlFor="mentor-name" className="text-sm">Full Name</Label>
               <Input
                 id="mentor-name"
                 placeholder="Your full name"
@@ -489,7 +491,7 @@ export default function MentorDashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mentor-email">Email</Label>
+              <Label htmlFor="mentor-email" className="text-sm">Email</Label>
               <Input
                 id="mentor-email"
                 type="email"
@@ -498,7 +500,7 @@ export default function MentorDashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mentor-expertise">Relevant Expertise</Label>
+              <Label htmlFor="mentor-expertise" className="text-sm">Relevant Expertise</Label>
               <Input
                 id="mentor-expertise"
                 placeholder="e.g., 10+ years in business strategy"
@@ -506,25 +508,26 @@ export default function MentorDashboardPage() {
               />
             </div>
             {selectedOpportunity && (
-              <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-                <p className="text-sm font-medium">Program Details:</p>
-                <p className="text-sm text-gray-600">Duration: {selectedOpportunity.duration}</p>
-                <p className="text-sm text-gray-600">Type: {selectedOpportunity.type}</p>
-                <p className="text-sm font-semibold text-gray-900">Compensation: {selectedOpportunity.compensation}</p>
+              <div className="p-3 sm:p-4 bg-gray-50 rounded-lg space-y-1.5 sm:space-y-2">
+                <p className="text-xs sm:text-sm font-medium">Program Details:</p>
+                <p className="text-xs sm:text-sm text-gray-600">Duration: {selectedOpportunity.duration}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Type: {selectedOpportunity.type}</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-900">Compensation: {selectedOpportunity.compensation}</p>
               </div>
             )}
-            <div className="p-4 bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-900">
+            <div className="p-3 sm:p-4 bg-gray-100 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-900">
                 <strong>Next steps:</strong> The program facilitator will review your request and contact you within 2-3 business days.
               </p>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRequestModal(false)}>
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setShowRequestModal(false)}>
               Cancel
             </Button>
             <Button 
-              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              size="sm"
+              className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]"
               onClick={handleSubmitRequest}
             >
               Submit Request

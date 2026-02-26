@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function SchoolProgramsPage() {
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full md:px-6 md:pt-8 md:pb-8">
       <div className="flex-1 space-y-4 pt-2">
         <div>
           <h2 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">School & Organization Programs</h2>

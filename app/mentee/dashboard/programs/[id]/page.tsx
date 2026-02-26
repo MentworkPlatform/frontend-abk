@@ -440,7 +440,7 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
   const router = useRouter()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:px-6 md:pt-8 md:pb-8">
       <div className="space-y-1">
         <button
           type="button"

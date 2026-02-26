@@ -11,6 +11,7 @@ import { Upload, Target, TrendingUp } from "lucide-react"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SECTORS, SKILLS_CAPABILITIES } from "@/lib/constants/onboarding"
+import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function MentorProfilePage() {
   const [selectedSector, setSelectedSector] = useState("")
@@ -18,19 +19,20 @@ export default function MentorProfilePage() {
   const [revenueGoal, setRevenueGoal] = useState("")
   const [impactGoal, setImpactGoal] = useState("")
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">Manage your profile information</p>
-      </div>
+    <div className="w-full">
+      <DashboardHeader
+        title="Profile"
+        description="Manage your profile information"
+      />
 
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your personal details</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Personal Information</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Update your personal details</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Avatar className="h-24 w-24">
               <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
               <AvatarFallback>P</AvatarFallback>
@@ -41,7 +43,7 @@ export default function MentorProfilePage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input id="name" defaultValue="Sarah Johnson" />
@@ -50,7 +52,7 @@ export default function MentorProfilePage() {
               <Label htmlFor="company">Company Name</Label>
               <Input id="company" defaultValue="Business Growth Inc." />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="email">Email Address</Label>
               <Input id="email" type="email" defaultValue="sarah@example.com" />
             </div>
@@ -59,11 +61,11 @@ export default function MentorProfilePage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Professional Bio</CardTitle>
-          <CardDescription>Tell others about your professional background</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Professional Bio</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Tell others about your professional background</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           <div className="space-y-2">
             <Label htmlFor="bio">Bio</Label>
             <Textarea id="bio" rows={6} defaultValue="Experienced business mentor with 15+ years..." />
@@ -76,11 +78,11 @@ export default function MentorProfilePage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Sector & Skills</CardTitle>
-          <CardDescription>Select your sector and key skills/capabilities</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Sector & Skills</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Select your sector and key skills/capabilities</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           <div className="space-y-2">
             <Label htmlFor="sector">Sector</Label>
             <Select value={selectedSector} onValueChange={setSelectedSector}>
@@ -109,15 +111,15 @@ export default function MentorProfilePage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Target className="h-4 w-4 sm:h-5 sm:w-5" />
             Goals
           </CardTitle>
-          <CardDescription>Set your revenue and impact goals</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Set your revenue and impact goals</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="revenue-goal" className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
@@ -155,11 +157,11 @@ export default function MentorProfilePage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Social Media & Website</CardTitle>
-          <CardDescription>Add your social media profiles and website</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Social Media & Website</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Add your social media profiles and website</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           <div className="space-y-2">
             <Label htmlFor="linkedin">LinkedIn</Label>
             <Input id="linkedin" type="url" placeholder="https://linkedin.com/in/yourprofile" />
@@ -175,9 +177,10 @@ export default function MentorProfilePage() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline">Cancel</Button>
-        <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Save Changes</Button>
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+        <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+        <Button className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]">Save Changes</Button>
+      </div>
       </div>
     </div>
   )

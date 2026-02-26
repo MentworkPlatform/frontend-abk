@@ -54,7 +54,7 @@ const programs = [
 
 export default function ProgramsPage() {
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full">
       <DashboardHeader
         title="My Programs"
         description="View and manage all your enrolled programs"
@@ -65,7 +65,7 @@ export default function ProgramsPage() {
         }}
       />
 
-      <div className="w-full pt-2 space-y-4 sm:space-y-6">
+      <div className="w-full pt-2 space-y-4 sm:space-y-6 md:px-6 md:pt-8 md:pb-8">
         {programs.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {programs.map((program) => (

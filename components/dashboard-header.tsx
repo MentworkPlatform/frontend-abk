@@ -22,7 +22,7 @@ export function DashboardHeader({
   const ActionIcon = actionButton?.icon;
 
   return (
-    <div className="bg-white border-b w-full px-0 py-4 sm:py-5 md:py-6">
+    <div className="bg-white border-b w-full px-4 py-4 sm:py-5 md:py-6 md:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold truncate">{title}</h1>

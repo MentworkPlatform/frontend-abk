@@ -60,7 +60,7 @@ export function DashboardSidebar({
         customMobileHeader
       ) : (
         <header className="lg:hidden sticky top-0 z-40 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-          <div className="flex items-center justify-between px-3 py-2.5">
+          <div className="flex items-center justify-between px-4 py-2.5">
             {logoContent || defaultLogo}
             <Button
               variant="ghost"

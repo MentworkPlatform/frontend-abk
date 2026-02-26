@@ -155,13 +155,13 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="w-full">
       <DashboardHeader
         title="Settings"
         description="Manage your account settings and preferences"
       />
 
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList className="w-full md:w-auto flex-wrap h-auto">
             <TabsTrigger value="profile" className="flex-1 md:flex-initial">

@@ -156,7 +156,7 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
   const router = useRouter()
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full md:px-6 md:pt-8 md:pb-8">
       <div className="flex-1 space-y-4 pt-2">
         <div className="space-y-1">
           <button
@@ -385,7 +385,9 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                               {assignment.status === "locked" && "Locked"}
                             </Badge>
                           </div>
-                          {assignment.dueDate && <CardDescription className="text-xs sm:text-sm">Due: {assignment.dueDate}</CardDescription>}
+                          {"dueDate" in assignment && assignment.dueDate && (
+                            <CardDescription className="text-xs sm:text-sm">Due: {assignment.dueDate}</CardDescription>
+                          )}
                         </CardHeader>
                         <CardContent className="p-4 sm:p-6 pt-0">
                           <div className="space-y-4">
@@ -393,7 +395,7 @@ export default function SchoolProgramDetailPage({ params }: { params: { id: stri
                               {assignment.status === "submitted" ? (
                                 <>
                                   Your submission has been graded. Grade:{" "}
-                                  <span className="font-medium">{assignment.grade}</span>
+                                  <span className="font-medium">{"grade" in assignment ? assignment.grade : "—"}</span>
                                 </>
                               ) : assignment.status === "in-progress" ? (
                                 "Complete and submit your assignment before the due date."

@@ -95,7 +95,7 @@ export default function DashboardPage() {
         }}
       />
 
-      <div className="w-full pt-4 sm:pt-6 space-y-6 sm:space-y-8">
+      <div className="w-full pt-4 sm:pt-6 space-y-6 sm:space-y-8 md:px-6 md:pt-8 md:pb-8">
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between">
             <div className="min-w-0">

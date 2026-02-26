@@ -10,17 +10,15 @@ import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function MentorSettingsPage() {
   return (
-    <div className="flex-1 space-y-6">
-      <div className="-mx-4 md:-mx-8 -mt-4 md:-mt-8">
-        <DashboardHeader
-          title="Settings"
-          description="Manage your account settings and preferences"
-        />
-      </div>
+    <div className="w-full">
+      <DashboardHeader
+        title="Settings"
+        description="Manage your account settings and preferences"
+      />
 
-      <div className="w-full space-y-6">
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
         <Tabs defaultValue="payment" className="space-y-4">
-          <TabsList className="w-full md:w-auto flex-wrap h-auto">
+          <TabsList className="w-full md:w-auto flex-wrap h-auto p-1 gap-1">
             <TabsTrigger value="payment" className="flex-1 md:flex-initial">
               <DollarSign className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Payment Details</span>
@@ -38,15 +36,15 @@ export default function MentorSettingsPage() {
             </TabsTrigger>
           </TabsList>
 
-        <TabsContent value="payment">
+        <TabsContent value="payment" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Payment Details</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Payment Details</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 Add your payment details to receive payments for teaching sessions
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-700">
                   Payment details are required to receive payments. You can add bank account, mobile money, or other payment methods.
@@ -78,19 +76,19 @@ export default function MentorSettingsPage() {
                   <Input id="account-number" placeholder="Enter account number" />
                 </div>
 
-                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full md:w-auto">Save Payment Details</Button>
+                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto" size="sm">Save Payment Details</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications">
+        <TabsContent value="notifications" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Manage how you receive notifications</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Notification Preferences</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Manage how you receive notifications</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -122,13 +120,13 @@ export default function MentorSettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="security">
+        <TabsContent value="security" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Manage your password and security preferences</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Security Settings</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Manage your password and security preferences</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
                 <Label htmlFor="current-password">Current Password</Label>
                 <Input id="current-password" type="password" />
@@ -141,7 +139,7 @@ export default function MentorSettingsPage() {
                 <Label htmlFor="confirm-password">Confirm New Password</Label>
                 <Input id="confirm-password" type="password" />
               </div>
-              <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full md:w-auto">Update Password</Button>
+              <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto" size="sm">Update Password</Button>
             </CardContent>
           </Card>
         </TabsContent>

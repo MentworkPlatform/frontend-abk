@@ -157,20 +157,20 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Curriculum Builder</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-base sm:text-lg">Curriculum Builder</CardTitle>
+              <CardDescription className="text-sm">
                 {initialTemplate
                   ? `Building from template: ${initialTemplate.name}`
                   : "Create your custom curriculum from scratch"}
               </CardDescription>
             </div>
-            <div className="text-right text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground sm:text-right">
               <div>Total Duration: {Math.round(getTotalDuration() / 60)} hours</div>
               <div>
                 {modules.length} modules, {modules.reduce((total, m) => total + m.topics.length, 0)} topics
@@ -183,11 +183,11 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
       {/* Modules */}
       <div className="space-y-4">
         {modules.map((module, moduleIndex) => (
-          <Card key={module.id} className="border-l-4 border-l-[#FFD500]">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+          <Card key={module.id} className="overflow-hidden border-l-4 border-l-[#FFD500]">
+            <CardHeader className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground cursor-move" />
                   <Badge variant="outline">Module {moduleIndex + 1}</Badge>
                 </div>
                 {modules.length > 1 && (
@@ -195,14 +195,14 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                     variant="ghost"
                     size="sm"
                     onClick={() => removeModule(module.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="shrink-0 text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 bg-gray-50/50">
+            <CardContent className="space-y-4 bg-gray-50/50 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Module Title *</Label>
@@ -242,18 +242,19 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
               <div className="space-y-3">
                 <Label className="text-base font-medium">Learning Objectives</Label>
                 {module.learningObjectives.map((objective, index) => (
-                  <div key={index} className="flex items-center space-x-2">
+                  <div key={index} className="flex items-center gap-2">
                     <Input
                       placeholder={`Learning objective ${index + 1}`}
                       value={objective}
                       onChange={(e) => updateLearningObjective(module.id, index, e.target.value)}
-                      className="bg-white"
+                      className="min-w-0 flex-1 bg-white"
                     />
                     {module.learningObjectives.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
+                        className="shrink-0"
                         onClick={() => removeLearningObjective(module.id, index)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -265,7 +266,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                   type="button"
                   variant="outline"
                   onClick={() => addLearningObjective(module.id)}
-                  className="w-full bg-transparent"
+                  className="w-full min-h-10 bg-transparent"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Learning Objective
@@ -274,24 +275,24 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
 
               {/* Topics */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <Label className="text-base font-medium">Topics</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={() => addTopic(module.id)}>
+                  <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto min-h-9" onClick={() => addTopic(module.id)}>
                     <Plus className="h-4 w-4 mr-1" />
                     Add Topic
                   </Button>
                 </div>
 
                 {module.topics.length === 0 ? (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div className="text-center py-6 sm:py-8 border-2 border-dashed border-gray-200 rounded-lg px-4">
                     <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-muted-foreground">No topics yet</p>
+                    <p className="text-muted-foreground text-sm sm:text-base">No topics yet</p>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => addTopic(module.id)}
-                      className="mt-2"
+                      className="mt-2 min-h-9"
                     >
                       Add First Topic
                     </Button>
@@ -299,10 +300,10 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                 ) : (
                   <div className="space-y-3">
                     {module.topics.map((topic, topicIndex) => (
-                      <Card key={topic.id} className="bg-gray-50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
+                      <Card key={topic.id} className="bg-gray-50 overflow-hidden">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2 min-w-0">
                               <div
                                 className={`w-8 h-8 rounded flex items-center justify-center ${getTopicColor(topic.type)}`}
                               >
@@ -314,13 +315,13 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                               variant="ghost"
                               size="sm"
                               onClick={() => removeTopic(module.id, topic.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="shrink-0 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                             <div className="space-y-1">
                               <Label className="text-xs">Topic Title *</Label>
                               <Input
@@ -375,15 +376,15 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                             />
                           </div>
 
-                          <div className="flex items-center space-x-2 pt-2">
+                          <div className="flex items-center gap-2 pt-2">
                             <input
                               type="checkbox"
                               id={`free-${topic.id}`}
                               checked={topic.isFree || false}
                               onChange={(e) => updateTopic(module.id, topic.id, { isFree: e.target.checked })}
-                              className="h-4 w-4 rounded border-gray-300 text-[#FFD500] focus:ring-[#FFD500]"
+                              className="h-4 w-4 shrink-0 rounded border-gray-300 text-[#FFD500] focus:ring-[#FFD500]"
                             />
-                            <Label htmlFor={`free-${topic.id}`} className="text-sm font-normal cursor-pointer">
+                            <Label htmlFor={`free-${topic.id}`} className="text-sm font-normal cursor-pointer min-w-0">
                               Free Trial Session {topic.isFree && <Badge className="ml-2 bg-green-500 text-white text-xs">FREE</Badge>}
                             </Label>
                           </div>
@@ -401,7 +402,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
           type="button"
           variant="outline"
           onClick={addModule}
-          className="w-full border-dashed h-12 bg-transparent"
+          className="w-full border-dashed min-h-12 bg-transparent"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Module

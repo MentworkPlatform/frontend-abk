@@ -379,89 +379,54 @@ export default function CreateProgram() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-4xl py-8">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      <div className="container max-w-4xl px-0 py-4 sm:px-0 sm:py-6 md:px-6 md:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-4 p-0">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        <div className="mb-6 sm:mb-8">
+          <Button variant="ghost" onClick={() => router.back()} className="mb-3 p-0 h-auto text-sm text-muted-foreground hover:text-foreground sm:mb-4">
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
             Back to Programs
           </Button>
 
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Create New Training Program</h1>
-            <p className="text-muted-foreground">
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-2xl font-bold sm:text-3xl">Create New Training Program</h1>
+            <p className="text-sm text-muted-foreground sm:text-base">
               Build a comprehensive training program and invite expert mentors to teach
             </p>
           </div>
 
           {/* Progress Bar */}
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Step {currentStep} of 4</span>
-              <span className="text-sm text-muted-foreground">{Math.round(getStepProgress())}% Complete</span>
+              <span className="text-xs font-medium sm:text-sm">Step {currentStep} of 4</span>
+              <span className="text-xs text-muted-foreground sm:text-sm">{Math.round(getStepProgress())}% Complete</span>
             </div>
             <Progress value={getStepProgress()} className="h-2" />
           </div>
 
-          {/* Step Indicators */}
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex items-center space-x-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 1 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                {currentStep > 1 ? <Check className="h-4 w-4" /> : "1"}
-              </div>
-              <span className={`text-sm ${currentStep >= 1 ? "font-medium" : "text-muted-foreground"}`}>
-                Basic Info
-              </span>
-            </div>
-
-            <div className="flex-1 h-px bg-gray-200 mx-2" />
-
-            <div className="flex items-center space-x-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 2 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                {currentStep > 2 ? <Check className="h-4 w-4" /> : "2"}
-              </div>
-              <span className={`text-sm ${currentStep >= 2 ? "font-medium" : "text-muted-foreground"}`}>
-                Who is this for?
-              </span>
-            </div>
-
-            <div className="flex-1 h-px bg-gray-200 mx-2" />
-
-            <div className="flex items-center space-x-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 3 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                {currentStep > 3 ? <Check className="h-4 w-4" /> : "3"}
-              </div>
-              <span className={`text-sm ${currentStep >= 3 ? "font-medium" : "text-muted-foreground"}`}>
-                Curriculum
-              </span>
-            </div>
-
-            <div className="flex-1 h-px bg-gray-200 mx-2" />
-
-            <div className="flex items-center space-x-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 4 ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                4
-              </div>
-              <span className={`text-sm ${currentStep >= 4 ? "font-medium" : "text-muted-foreground"}`}>
-                Assign Mentors
-              </span>
+          {/* Step Indicators - 2x2 grid on mobile, single row on desktop */}
+          <div className="mt-4 sm:mt-6">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-between sm:gap-1">
+              {[
+                { step: 1, label: "Basic Info" },
+                { step: 2, label: "Who" },
+                { step: 3, label: "Curriculum" },
+                { step: 4, label: "Mentors" },
+              ].map(({ step, label }, i) => (
+                <div key={step} className="flex items-center gap-2 sm:flex-1 sm:gap-1.5">
+                  <div
+                    className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-xs font-medium sm:h-8 sm:w-8 sm:text-sm ${
+                      currentStep >= step ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {currentStep > step ? <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : step}
+                  </div>
+                  <span className={`text-xs sm:text-sm truncate ${currentStep >= step ? "font-medium" : "text-muted-foreground"}`}>
+                    {label}
+                  </span>
+                  {i < 3 && <div className="hidden flex-1 h-px bg-gray-200 mx-1 sm:block min-w-[8px]" />}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -616,13 +581,13 @@ function Step1BasicInfo({
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Tell us about your training program</CardDescription>
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Basic Information</CardTitle>
+          <CardDescription className="text-sm">Tell us about your training program</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-2">
               <Label htmlFor="title">Program Title *</Label>
               <Input
@@ -630,6 +595,7 @@ function Step1BasicInfo({
                 placeholder="e.g., Digital Marketing Bootcamp"
                 value={programData.title}
                 onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
+                className="text-sm h-9 sm:h-10"
               />
           </div>
 
@@ -640,6 +606,7 @@ function Step1BasicInfo({
               placeholder="e.g., Master digital marketing from SEO to social media advertising"
               value={programData.tagline}
               onChange={(e) => setProgramData({ ...programData, tagline: e.target.value })}
+              className="text-sm h-9 sm:h-10"
             />
             <p className="text-xs text-muted-foreground">A short, compelling tagline that will be displayed on the program page</p>
           </div>
@@ -652,23 +619,25 @@ function Step1BasicInfo({
               rows={4}
               value={programData.description}
               onChange={(e) => setProgramData({ ...programData, description: e.target.value })}
+              className="text-sm min-h-[72px] sm:min-h-[80px]"
             />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Learning Outcomes</CardTitle>
-          <CardDescription>What will participants achieve by completing this program?</CardDescription>
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Learning Outcomes</CardTitle>
+          <CardDescription className="text-sm">What will participants achieve by completing this program?</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
           {programData.learningOutcomes.map((outcome: string, index: number) => (
-            <div key={index} className="flex items-center space-x-2">
+            <div key={index} className="flex items-center gap-2">
               <Input
                 placeholder={`Learning outcome ${index + 1}`}
                 value={outcome}
                 onChange={(e) => updateLearningOutcome(index, e.target.value)}
+                className="text-sm h-9 sm:h-10"
               />
               {programData.learningOutcomes.length > 1 && (
                 <Button type="button" variant="outline" size="icon" onClick={() => removeLearningOutcome(index)}>
@@ -677,25 +646,26 @@ function Step1BasicInfo({
               )}
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={addLearningOutcome} className="w-full bg-transparent">
+          <Button type="button" variant="outline" onClick={addLearningOutcome} className="w-full bg-transparent min-h-10">
             <Plus className="h-4 w-4 mr-2" />
             Add Learning Outcome
           </Button>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Prerequisites</CardTitle>
-          <CardDescription>What should participants know or have before starting?</CardDescription>
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Prerequisites</CardTitle>
+          <CardDescription className="text-sm">What should participants know or have before starting?</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
           {programData.prerequisites.map((prerequisite: string, index: number) => (
-            <div key={index} className="flex items-center space-x-2">
+            <div key={index} className="flex items-center gap-2">
               <Input
                 placeholder={`Prerequisite ${index + 1}`}
                 value={prerequisite}
                 onChange={(e) => updatePrerequisite(index, e.target.value)}
+                className="text-sm h-9 sm:h-10"
               />
               {programData.prerequisites.length > 1 && (
                 <Button type="button" variant="outline" size="icon" onClick={() => removePrerequisite(index)}>
@@ -704,7 +674,7 @@ function Step1BasicInfo({
               )}
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={addPrerequisite} className="w-full bg-transparent">
+          <Button type="button" variant="outline" onClick={addPrerequisite} className="w-full bg-transparent min-h-10">
             <Plus className="h-4 w-4 mr-2" />
             Add Prerequisite
           </Button>
@@ -712,7 +682,7 @@ function Step1BasicInfo({
       </Card>
 
       {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
           <p className="text-sm font-medium text-red-800 mb-2">Please complete the following required fields:</p>
           <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
             {errors.map((error, index) => (
@@ -723,7 +693,7 @@ function Step1BasicInfo({
       )}
 
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
           Next: Who is this for?
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -759,13 +729,13 @@ function Step2WhoIsThisFor({
   skillsCapabilitiesOptions,
 }: Step2WhoIsThisForProps) {
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Who is this for?</CardTitle>
-          <CardDescription>Describe your program and define your target audience</CardDescription>
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Who is this for?</CardTitle>
+          <CardDescription className="text-sm">Describe your program and define your target audience</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-2">
             <Label>Sector *</Label>
             <MultiSelect
@@ -897,7 +867,7 @@ function Step2WhoIsThisFor({
       </Card>
 
       {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
           <p className="text-sm font-medium text-red-800 mb-2">Please complete the following required fields:</p>
           <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
             {errors.map((error, index) => (
@@ -907,12 +877,12 @@ function Step2WhoIsThisFor({
         </div>
       )}
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
           Next: Build Curriculum
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -949,15 +919,15 @@ function Step2Curriculum({
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Program Curriculum</CardTitle>
-              <CardDescription>Structure your program into modules and topics</CardDescription>
+              <CardTitle className="text-base sm:text-lg">Program Curriculum</CardTitle>
+              <CardDescription className="text-sm">Structure your program into modules and topics</CardDescription>
             </div>
-            <div className="text-right text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground sm:text-right">
               <div>Total Duration: {Math.round(getTotalDuration() / 60)} hours</div>
               <div>
                 {curriculum.length} modules, {curriculum.reduce((total, m) => total + m.topics.length, 0)} topics
@@ -965,7 +935,7 @@ function Step2Curriculum({
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           {curriculum.length === 0 && !selectedTemplate ? (
             <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
               <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
@@ -973,13 +943,14 @@ function Step2Curriculum({
               <p className="text-sm text-muted-foreground mb-4">
                 Choose a template to get started or build from scratch.
               </p>
-              <div className="flex justify-center gap-2">
-                <Button onClick={onShowTemplateSelector} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button onClick={onShowTemplateSelector} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Browse Templates
                 </Button>
                 <Button
                   variant="outline"
+                  className="w-full sm:w-auto min-h-10"
                   onClick={() =>
                     setCurriculum([
                       {
@@ -1011,12 +982,12 @@ function Step2Curriculum({
         </CardContent>
       </Card>
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
           Next: Assign Mentors
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -1059,17 +1030,17 @@ function Step3AssignMentors({
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Assign Platform Mentors</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-base sm:text-lg">Assign Platform Mentors</CardTitle>
+              <CardDescription className="text-sm">
                 Browse and invite expert mentors from our platform to teach specific topics
               </CardDescription>
             </div>
-            <div className="text-right text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground sm:text-right">
               <div>
                 {getAssignedTopicsCount()} of {getTotalTopicsCount()} topics assigned
               </div>
@@ -1080,22 +1051,22 @@ function Step3AssignMentors({
       </Card>
 
       {/* Curriculum Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Curriculum Overview</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Curriculum Overview</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="space-y-4">
             {curriculum.map((module, moduleIndex) => (
-              <div key={module.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
+              <div key={module.id} className="border rounded-lg p-3 sm:p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
                   <div>
-                    <h4 className="font-medium">
+                    <h4 className="font-medium text-sm sm:text-base">
                       Module {moduleIndex + 1}: {module.title}
                     </h4>
-                    <p className="text-sm text-muted-foreground">{module.topics.length} topics</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{module.topics.length} topics</p>
                   </div>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="w-fit">
                     {Math.round(module.topics.reduce((total, topic) => total + topic.duration, 0) / 60)}h
                   </Badge>
                 </div>
@@ -1108,11 +1079,11 @@ function Step3AssignMentors({
                     return (
                       <div
                         key={topic.id}
-                        className={`flex items-center justify-between p-2 rounded ${
+                        className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-2 rounded ${
                           isAssigned ? "bg-green-50 border border-green-200" : "bg-gray-50"
                         }`}
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center gap-2 sm:space-x-3">
                           <Badge variant="secondary" className="text-xs">
                             {topicIndex + 1}
                           </Badge>
@@ -1289,14 +1260,14 @@ function Step3AssignMentors({
         </CardContent>
       </Card>
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <div className="space-x-2">
-          <Button variant="outline">Save as Draft</Button>
-          <Button onClick={onSubmit} disabled={isLoading} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:space-x-2">
+          <Button variant="outline" className="w-full sm:w-auto min-h-10">Save as Draft</Button>
+          <Button onClick={onSubmit} disabled={isLoading} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
             {isLoading ? "Creating Program..." : "Create Program"}
             {!isLoading && <Check className="h-4 w-4 ml-2" />}
           </Button>
@@ -1336,7 +1307,7 @@ function MentorBrowserModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[min(100%,36rem)] sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Search className="mr-2 h-5 w-5" />
@@ -1580,7 +1551,7 @@ function MentorAssignmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[min(100%,28rem)] sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Users className="mr-2 h-5 w-5" />

@@ -152,7 +152,7 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[min(100%,36rem)] sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Choose a Curriculum Template</DialogTitle>
           <DialogDescription>
@@ -316,7 +316,7 @@ interface TemplatePreviewProps {
 function TemplatePreview({ template, onClose, onSelect }: TemplatePreviewProps) {
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[min(100%,24rem)] sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {template.name}

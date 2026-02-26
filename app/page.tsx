@@ -1,151 +1,259 @@
 "use client"
 
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
-import { BookOpen, Users, Building, ArrowRight } from "lucide-react"
+import Image from "next/image"
+import { ChevronDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel"
+
+const ROLES = [
+  {
+    title: "Become a Mentor",
+    description: "Teach flexibly and guide others with your expertise.",
+    cta: "Start Your Mentor Journey",
+    href: "/onboarding/mentor",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop&q=80",
+    imageAlt: "Mentor on video call",
+  },
+  {
+    title: "Become a Trainer",
+    description: "Design impactful programs and lead the way in skill development.",
+    cta: "Start Your Trainer Journey",
+    href: "/onboarding/trainer",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop&q=80",
+    imageAlt: "Trainer leading workshop",
+  },
+  {
+    title: "Become a Mentee",
+    description: "Grow your business and accelerate your career with guidance.",
+    cta: "Start Your Mentee Journey",
+    href: "/onboarding",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop&q=80",
+    imageAlt: "Mentee learning",
+  },
+]
+
+const TRUSTED_LOGOS = [
+  { name: "Innovate Global", icon: "🌐" },
+  { name: "Synergy Corp", icon: "◆" },
+  { name: "Future Builders", icon: "F" },
+  { name: "Pinnacle Edu", icon: "▲" },
+  { name: "Growth Labs", icon: "▣" },
+]
+
+function RoleCard({
+  role,
+}: {
+  role: (typeof ROLES)[0]
+}) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+      <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-100">
+        <Image
+          src={role.image}
+          alt={role.imageAlt}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          unoptimized
+        />
+      </div>
+      <div className="p-4 sm:p-5">
+        <h3 className="text-lg font-bold text-gray-900 sm:text-xl">{role.title}</h3>
+        <p className="mt-2 text-sm text-gray-600">{role.description}</p>
+        <Button
+          asChild
+          className="mt-4 w-full bg-[#FFD500] text-black hover:bg-[#e6c000] sm:mt-5"
+        >
+          <Link href={role.href}>{role.cta}</Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  const updateCurrent = useCallback((api: CarouselApi) => {
+    setCurrent(api.selectedScrollSnap())
+  }, [])
+
+  useEffect(() => {
+    if (!carouselApi) return
+    updateCurrent(carouselApi)
+    carouselApi.on("select", () => updateCurrent(carouselApi))
+  }, [carouselApi, updateCurrent])
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white">
       {/* Header */}
-      <nav className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
+      <nav className="sticky top-0 z-50 border-b border-gray-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/95">
+        <div className="container flex h-14 sm:h-16 items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-1.5 shrink-0">
             <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8 w-auto" />
           </Link>
-          <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                  Resource
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/programs">Programs</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/get-started">Get Started</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link
+              href="/programs"
+              className="hidden sm:inline-flex rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
+              Pricing
             </Link>
-            <Link href="/get-started">
-              <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Get Started</Button>
+            <Link
+              href="/#contact"
+              className="hidden sm:inline-flex rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
+              Contact
             </Link>
+            <Link
+              href="/login"
+              className="rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
+              Log in
+            </Link>
+            <Button asChild className="bg-[#FFD500] text-black hover:bg-[#e6c000] shrink-0">
+              <Link href="/get-started">Explore Now</Link>
+            </Button>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <section className="flex-1 flex items-center justify-center py-20 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container px-4 text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-balance">Connect. Learn. Grow.</h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto text-balance">
-            The simplest way to find mentors, create programs, and build meaningful learning relationships.
+      {/* Hero */}
+      <section className="w-full bg-gray-900 px-4 py-16 sm:py-20 md:py-24">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+            Build a Sector, Build a
+            <br />
+            Business, Build Yourself.
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-300 sm:text-lg">
+            Empowering trainers, mentors, and mentees to achieve growth through Mentwork&apos;s
+            dedicated pathways. Join our community and unlock your potential.
           </p>
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+          >
+            <Link href="/get-started">Explore Your Journey</Link>
+          </Button>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <Link href="/get-started">
-              <Card className="h-full hover:shadow-lg transition-all cursor-pointer group border-2 hover:border-[#FFD500] overflow-hidden">
-                <div className="h-1 bg-[#FFD500]" />
-                <CardHeader className="text-center pb-4">
-                  <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&q=80"
-                      alt="Learning and growth"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = "none"
-                        const parent = target.parentElement
-                        if (parent) {
-                          parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-12 h-12 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>'
-                        }
-                      }}
-                    />
-                  </div>
-                  <CardTitle className="text-xl">I Want to Learn</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-gray-600">Find mentors and join training programs to accelerate your growth</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/get-started">
-              <Card className="h-full hover:shadow-lg transition-all cursor-pointer group border-2 hover:border-[#FFD500] overflow-hidden">
-                <div className="h-1 bg-[#FFD500]" />
-                <CardHeader className="text-center pb-4">
-                  <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop&q=80"
-                      alt="Teaching and mentoring"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = "none"
-                        const parent = target.parentElement
-                        if (parent) {
-                          parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-12 h-12 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>'
-                        }
-                      }}
-                    />
-                  </div>
-                  <CardTitle className="text-xl">I Want to Teach</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-gray-600">Share your expertise and mentor learners one-on-one</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/get-started">
-              <Card className="h-full hover:shadow-lg transition-all cursor-pointer group border-2 hover:border-[#FFD500] overflow-hidden">
-                <div className="h-1 bg-[#FFD500]" />
-                <CardHeader className="text-center pb-4">
-                  <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&q=80"
-                      alt="Program hosting and management"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = "none"
-                        const parent = target.parentElement
-                        if (parent) {
-                          parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-[#FFD500]/10"><svg class="w-12 h-12 text-[#FFD500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>'
-                        }
-                      }}
-                    />
-                  </div>
-                  <CardTitle className="text-xl">I Want to Host</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-gray-600">Create and manage comprehensive training programs</p>
-                </CardContent>
-              </Card>
-            </Link>
+      {/* Role cards - carousel on mobile, grid on desktop */}
+      <section className="relative z-10 -mt-8 sm:-mt-12 px-4 pb-12 sm:pb-16">
+        <div className="container mx-auto max-w-5xl">
+          {/* Mobile/tablet: carousel */}
+          <div className="md:hidden">
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{ align: "center", loop: true }}
+              className="relative w-full"
+            >
+              <CarouselContent className="-ml-2 sm:-ml-4">
+                {ROLES.map((role) => (
+                  <CarouselItem key={role.title} className="pl-2 sm:pl-4">
+                    <div className="p-1">
+                      <RoleCard role={role} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="-left-2 top-1/2 h-9 w-9 -translate-y-1/2 border-gray-200 bg-white shadow-md hover:bg-gray-50 sm:-left-4" />
+              <CarouselNext className="-right-2 top-1/2 h-9 w-9 -translate-y-1/2 border-gray-200 bg-white shadow-md hover:bg-gray-50 sm:-right-4" />
+              <div className="mt-6 flex justify-center gap-2">
+                {ROLES.map((_, index) => (
+                  <button
+                    key={index}
+                    aria-label={`Go to slide ${index + 1}`}
+                    onClick={() => carouselApi?.scrollTo(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      current === index ? "w-6 bg-[#FFD500]" : "w-2 bg-gray-300 hover:bg-gray-400"
+                    }`}
+                  />
+                ))}
+              </div>
+            </Carousel>
           </div>
+          {/* Desktop: 3-column grid */}
+          <div className="hidden md:grid md:grid-cols-3 md:gap-6">
+            {ROLES.map((role) => (
+              <RoleCard key={role.title} role={role} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-12">
-            <Button asChild size="lg" className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
-              <Link href="/get-started">
-                Start Your Journey <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+      {/* Trusted by */}
+      <section className="border-t border-gray-200 bg-white py-12 sm:py-16">
+        <div className="container mx-auto max-w-4xl px-4 text-center">
+          <h2 className="text-base font-medium uppercase tracking-wide text-gray-500 sm:text-sm">
+            Trusted by leading organizations
+          </h2>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+            {TRUSTED_LOGOS.map((company) => (
+              <div
+                key={company.name}
+                className="flex h-12 w-24 items-center justify-center rounded-lg border border-gray-200 bg-gray-50/80 text-lg font-semibold text-gray-600"
+                title={company.name}
+              >
+                {company.icon}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8">
-        <div className="container px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-6" />
-              <span className="text-gray-400">© 2025 Mentwork. All rights reserved.</span>
-            </div>
-            <div className="flex items-center space-x-6">
-              <Link href="/about" className="text-gray-400 hover:text-white">
-                About
-              </Link>
-              <Link href="/contact" className="text-gray-400 hover:text-white">
-                Contact
-              </Link>
-              <Link href="/help" className="text-gray-400 hover:text-white">
-                Help
-              </Link>
-            </div>
+      <footer className="mt-auto border-t border-gray-200 bg-white py-6">
+        <div className="container flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
+          <div className="flex items-center gap-2">
+            <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-6" />
+            <span className="text-sm text-gray-500">© 2025 Mentwork. All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="/programs" className="text-sm text-gray-500 hover:text-gray-900">
+              Pricing
+            </Link>
+            <Link href="/#contact" className="text-sm text-gray-500 hover:text-gray-900">
+              Contact
+            </Link>
+            <Link href="/login" className="text-sm text-gray-500 hover:text-gray-900">
+              Log in
+            </Link>
           </div>
         </div>
       </footer>

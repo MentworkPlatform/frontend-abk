@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Users,
@@ -77,6 +76,7 @@ type Topic = {
 
 export default function ProgramLMSPage() {
   const params = useParams()
+  const router = useRouter()
   const programId = params.id as string
 
   const [program] = useState({
@@ -332,6 +332,19 @@ export default function ProgramLMSPage() {
     }
   }
 
+  const getStepCircleColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-gray-700"
+      case "active":
+        return "bg-gray-600"
+      case "upcoming":
+        return "bg-gray-500"
+      default:
+        return "bg-gray-400"
+    }
+  }
+
   const getTopicStatusColor = (status: string) => {
     switch (status) {
       case "completed":
@@ -349,19 +362,22 @@ export default function ProgramLMSPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container mx-auto px-4 md:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/trainer/dashboard">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">{program.title}</h1>
+      <div className="flex flex-col">
+        {/* On mobile: back first. On desktop: header first, then back. */}
+        <header className="order-2 md:order-1 sticky top-0 z-20 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
+        <div className="container mx-auto px-0 py-0 md:px-6 md:py-4">
+          <div className="px-3 py-3 sm:px-4 md:px-0 md:py-0">
+            {selectedTopic ? (
+              <>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">{selectedTopic.title}</h1>
+                <p className="text-xs sm:text-sm text-gray-600 mt-0.5 line-clamp-2">{selectedTopic.description}</p>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <Badge className={getTopicStatusColor(selectedTopic.status)}>{selectedTopic.status}</Badge>
+                </div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">{program.title}</h1>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <Badge variant={program.status === "active" ? "default" : "secondary"} className="text-xs font-medium">
                     {program.status}
@@ -370,119 +386,116 @@ export default function ProgramLMSPage() {
                     {program.participants}/{program.maxParticipants} participants
                   </span>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 md:px-6 py-8">
+        {/* Back button: above header on mobile, below header on desktop */}
+        <div className="order-1 md:order-2 container mx-auto px-3 sm:px-4 md:px-6 pt-3 pb-0 md:pt-4 md:pb-2">
+          <button
+            type="button"
+            onClick={() => (selectedTopic ? setSelectedTopic(null) : router.back())}
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit mb-2"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </button>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-0 py-3 sm:py-6 md:px-6">
+        <div className="px-3 sm:px-4 md:px-0">
         {selectedTopic ? (
           // Topic Detail View
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => setSelectedTopic(null)}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Topics
-              </Button>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${getTopicStatusColor(selectedTopic.status)}`}>
-                  {getTopicIcon(selectedTopic.type)}
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">{selectedTopic.title}</h2>
-                  <p className="text-sm text-gray-600 mt-1">{selectedTopic.description}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Topic Overview Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Topic Overview Stats - 2-column grid */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 font-medium">Participants</p>
-                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.participants}</p>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">Participants</p>
+                      <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{selectedTopic.participants}</p>
                     </div>
-                    <Users className="h-6 w-6 text-blue-500" />
+                    <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 font-medium">Completion</p>
-                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.completionRate}%</p>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">Completion</p>
+                      <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{selectedTopic.completionRate}%</p>
                     </div>
-                    <CheckCircle className="h-6 w-6 text-green-500" />
+                    <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 font-medium">Duration</p>
-                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.duration}m</p>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">Duration</p>
+                      <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{selectedTopic.duration}m</p>
                     </div>
-                    <Clock className="h-6 w-6 text-purple-500" />
+                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 font-medium">Rating</p>
-                      <p className="text-2xl font-semibold text-gray-900 mt-1">{selectedTopic.feedback.rating || "N/A"}</p>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">Rating</p>
+                      <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{selectedTopic.feedback.rating || "N/A"}</p>
                     </div>
-                    <BarChart3 className="h-6 w-6 text-orange-500" />
+                    <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                      <Video className="h-5 w-5" />
-                      Online Sessions & Payment Tracking
+            <Card className="overflow-hidden">
+              <CardHeader className="p-3 sm:p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <div className="min-w-0">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-900 sm:text-lg">
+                      <Video className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                      <span className="line-clamp-2">Online Sessions & Payment Tracking</span>
                     </CardTitle>
-                    <CardDescription className="text-sm text-gray-600 mt-1.5">
+                    <CardDescription className="text-xs text-gray-600 mt-1 sm:text-sm line-clamp-2">
                       Schedule and manage online meetings for this topic. Confirmations will be provided by participants after sessions.
                     </CardDescription>
                   </div>
                   <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
                     <DialogTrigger asChild>
-                      <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto">
+                      <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto shrink-0">
                         <Plus className="h-4 w-4 mr-2" />
                         Schedule Session
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
                       <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold">Schedule Online Session</DialogTitle>
-                        <DialogDescription className="text-sm text-gray-600">
+                        <DialogTitle className="text-lg font-semibold sm:text-xl">Schedule Online Session</DialogTitle>
+                        <DialogDescription className="text-xs sm:text-sm text-gray-600">
                           Create a new online session for {selectedTopic.title}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="date" className="text-sm font-medium">Date</Label>
+                            <Label htmlFor="date" className="text-xs sm:text-sm font-medium">Date</Label>
                             <Input id="date" type="date" className="text-sm" />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="time" className="text-sm font-medium">Time</Label>
+                            <Label htmlFor="time" className="text-xs sm:text-sm font-medium">Time</Label>
                             <Input id="time" type="time" className="text-sm" />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="mentor" className="text-sm font-medium">Select Mentor</Label>
+                          <Label htmlFor="mentor" className="text-xs sm:text-sm font-medium">Select Mentor</Label>
                           <Select>
                             <SelectTrigger className="text-sm">
                               <SelectValue placeholder="Choose a mentor" />
@@ -497,14 +510,14 @@ export default function ProgramLMSPage() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="amount" className="text-sm font-medium">Payment Amount (₦)</Label>
+                          <Label htmlFor="amount" className="text-xs sm:text-sm font-medium">Payment Amount (₦)</Label>
                           <Input id="amount" type="number" placeholder="150" className="text-sm" />
                         </div>
-                        <div className="flex justify-end gap-2 pt-2">
-                          <Button variant="outline" onClick={() => setShowScheduleDialog(false)} className="font-medium">
+                        <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                          <Button variant="outline" onClick={() => setShowScheduleDialog(false)} className="font-medium w-full sm:w-auto">
                             Cancel
                           </Button>
-                          <Button onClick={() => handleScheduleSession({})} className="font-medium bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                          <Button onClick={() => handleScheduleSession({})} className="font-medium w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]">
                             Schedule Session
                           </Button>
                         </div>
@@ -513,17 +526,17 @@ export default function ProgramLMSPage() {
                   </Dialog>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-4">
                 {selectedTopic.sessions && selectedTopic.sessions.length > 0 ? (
                   <div className="space-y-4">
                     {selectedTopic.sessions.map((session) => (
-                      <div key={session.id} className="p-4 border rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-                          <div className="flex items-center gap-3">
-                            <Video className="h-5 w-5 text-blue-500" />
-                            <div>
-                              <h4 className="font-semibold text-gray-900">{session.mentor}</h4>
-                              <p className="text-sm text-gray-600 mt-0.5">
+                      <div key={session.id} className="p-3 border rounded-lg sm:p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Video className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 shrink-0" />
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-gray-900 truncate">{session.mentor}</h4>
+                              <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
                                 {new Date(session.date).toLocaleDateString()} at {session.time}
                               </p>
                               {session.meetingId && (
@@ -531,26 +544,26 @@ export default function ProgramLMSPage() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge className={getPaymentStatusColor(session.paymentStatus)}>
                               {session.paymentStatus}
                             </Badge>
-                            <span className="font-medium">₦{(session.amount * 1500).toLocaleString()}</span>
+                            <span className="font-medium text-sm">₦{(session.amount * 1500).toLocaleString()}</span>
                           </div>
                         </div>
 
-                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="mb-3 p-3 bg-blue-50 rounded-lg sm:mb-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
-                              <Video className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm font-medium text-blue-800">Online Meeting</span>
+                              <Video className="h-4 w-4 text-blue-600 shrink-0" />
+                              <span className="text-xs sm:text-sm font-medium text-blue-800">Online Meeting</span>
                             </div>
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
                               {session.meetingLink && (
                                 <Button
                                   size="sm"
                                   onClick={() => session.meetingLink && handleJoinMeeting(session.meetingLink)}
-                                  className="bg-blue-600 hover:bg-blue-700"
+                                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
                                 >
                                   <Video className="h-4 w-4 mr-1" />
                                   Join Meeting
@@ -560,60 +573,58 @@ export default function ProgramLMSPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
+                                  className="w-full sm:w-auto"
                                   onClick={() => window.open(session.recordingUrl, "_blank")}
                                 >
                                   <Play className="h-4 w-4 mr-1" />
                                   Recording
                                 </Button>
                               )}
-                              <Button size="sm" variant="ghost">
+                              <Button size="sm" variant="ghost" className="w-full sm:w-auto">
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
 
-                        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-sm text-blue-800 font-medium mb-3">
+                        <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200 sm:mb-4 sm:p-4">
+                          <p className="text-xs sm:text-sm text-blue-800 font-medium mb-3">
                             Session confirmations are provided by students after the session to verify attendance
                           </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {/* Trainer Confirmation */}
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                            <div className="flex items-center gap-2">
-                              <UserCheck className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm font-medium">Trainer Confirmation</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {session.trainerConfirmed ? (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                              ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                            <div className="flex items-center justify-between gap-2 p-2 sm:p-3 bg-white rounded-lg border">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <UserCheck className="h-4 w-4 text-gray-500 shrink-0" />
+                                <span className="text-xs sm:text-sm font-medium truncate">Trainer Confirmation</span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {session.trainerConfirmed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
                                   <XCircle className="h-4 w-4 text-orange-500" />
-                              )}
-                                <span className="text-sm">{session.trainerConfirmed ? "Confirmed" : "Awaiting"}</span>
+                                )}
+                                <span className="text-xs sm:text-sm">{session.trainerConfirmed ? "Confirmed" : "Awaiting"}</span>
+                              </div>
                             </div>
-                          </div>
-
-                          {/* Mentor Confirmation */}
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                            <div className="flex items-center gap-2">
-                              <UserCheck className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm font-medium">Mentor Confirmation</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {session.mentorConfirmed ? (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                              ) : (
+                            <div className="flex items-center justify-between gap-2 p-2 sm:p-3 bg-white rounded-lg border">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <UserCheck className="h-4 w-4 text-gray-500 shrink-0" />
+                                <span className="text-xs sm:text-sm font-medium truncate">Mentor Confirmation</span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {session.mentorConfirmed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
                                   <XCircle className="h-4 w-4 text-orange-500" />
-                              )}
-                                <span className="text-sm">{session.mentorConfirmed ? "Confirmed" : "Awaiting"}</span>
+                                )}
+                                <span className="text-xs sm:text-sm">{session.mentorConfirmed ? "Confirmed" : "Awaiting"}</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Payment Status Message */}
-                        <div className="mb-4 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                        <div className="mb-3 p-2 bg-blue-50 rounded text-xs sm:text-sm text-blue-700 sm:mb-4">
                           {session.trainerConfirmed && session.mentorConfirmed
                             ? session.paymentStatus === "paid"
                               ? "Payment processed successfully"
@@ -622,40 +633,38 @@ export default function ProgramLMSPage() {
                         </div>
 
                         <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div>
-                              <h5 className="font-medium text-sm text-purple-900">Session Feedback</h5>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0">
+                              <h5 className="font-medium text-xs sm:text-sm text-purple-900">Session Feedback</h5>
                               <p className="text-xs text-purple-700">
                                 {session.feedback.length > 0 || sessionsWithFeedback.has(session.id)
                                   ? `${session.feedback.length + (sessionsWithFeedback.has(session.id) ? 1 : 0)} feedback received`
                                   : "No feedback yet"}
                               </p>
                             </div>
-                            <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedSession(session)
-                                setShowFeedbackDialog(true)
-                              }}
-                              className="bg-white hover:bg-purple-50 w-full sm:w-auto"
-                            >
-                              <MessageSquare className="h-4 w-4 mr-1" />
+                            <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedSession(session)
+                                  setShowFeedbackDialog(true)
+                                }}
+                                className="w-full sm:w-auto bg-white hover:bg-purple-50"
+                              >
+                                <MessageSquare className="h-4 w-4 mr-1" />
                                 {session.feedback.length > 0 || sessionsWithFeedback.has(session.id) ? "View & Add" : "Add"} Feedback
-                            </Button>
+                              </Button>
                               {session.trainerConfirmed &&
                                 session.mentorConfirmed &&
                                 session.paymentStatus === "pending" &&
                                 (session.feedback.length > 0 || sessionsWithFeedback.has(session.id)) && (
                                   <Button
                                     size="sm"
-                                    className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto"
+                                    className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]"
                                     onClick={() => {
-                                      // In real app, trigger payment API call to pay the mentor
                                       console.log("Triggering payment to mentor for session:", session.id)
                                       alert(`Payment of ₦${(session.amount * 1500).toLocaleString()} will be processed for mentor: ${session.mentor}. Payment will be sent after verification.`)
-                                      // In real app, this would call payment API and update payment status
                                     }}
                                   >
                                     <DollarSign className="h-4 w-4 mr-1" />
@@ -704,16 +713,16 @@ export default function ProgramLMSPage() {
             </Card>
 
             {/* Topic Details Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Mentors Teaching */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                    <Users className="h-5 w-5" />
+                <CardHeader className="p-3 sm:p-4">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-900 sm:text-lg">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                     Mentors Teaching
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 sm:p-4 pt-0">
                   {selectedTopic.mentors.length > 0 ? (
                     <div className="space-y-3">
                       {selectedTopic.mentors.map((mentorName, index) => (
@@ -739,7 +748,7 @@ export default function ProgramLMSPage() {
                             Assign Another Mentor
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
                           <DialogHeader>
                             <DialogTitle className="text-xl font-semibold">Assign Mentor to {selectedTopic.title}</DialogTitle>
                             <DialogDescription className="text-sm text-gray-600">
@@ -796,7 +805,7 @@ export default function ProgramLMSPage() {
                         Assign Mentor
                       </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
                           <DialogHeader>
                             <DialogTitle className="text-xl font-semibold">Assign Mentor to {selectedTopic.title}</DialogTitle>
                             <DialogDescription className="text-sm text-gray-600">
@@ -849,20 +858,20 @@ export default function ProgramLMSPage() {
 
               {/* Assessments */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                    <Award className="h-5 w-5" />
+                <CardHeader className="p-3 sm:p-4">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-900 sm:text-lg">
+                    <Award className="h-4 w-4 sm:h-5 sm:w-5" />
                     Assessments
                   </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 mt-1">
+                  <CardDescription className="text-xs sm:text-sm text-gray-600 mt-1">
                     Students submit their assessment links here for review
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 sm:p-4 pt-0">
                   {selectedTopic.assessments.length > 0 ? (
                     <div className="space-y-4">
                       {selectedTopic.assessments.map((assessment) => (
-                        <div key={assessment.id} className="p-4 border rounded-lg bg-white">
+                        <div key={assessment.id} className="p-3 border rounded-lg bg-white sm:p-4">
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="font-semibold text-gray-900">{assessment.title}</h4>
                             <Badge variant="outline" className="text-xs font-medium">{assessment.type}</Badge>
@@ -948,7 +957,7 @@ export default function ProgramLMSPage() {
                         Create Assessment
                       </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
                           <DialogHeader>
                             <DialogTitle className="text-xl font-semibold">Create Assessment</DialogTitle>
                             <DialogDescription className="text-sm text-gray-600">
@@ -1023,10 +1032,10 @@ export default function ProgramLMSPage() {
 
             {/* External Resources Links */}
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                    <FileText className="h-5 w-5" />
+              <CardHeader className="p-3 sm:p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
                     External Resources
                   </CardTitle>
                   <Dialog open={showExternalResourceDialog} onOpenChange={setShowExternalResourceDialog}>
@@ -1036,7 +1045,7 @@ export default function ProgramLMSPage() {
                         Upload Link
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
                       <DialogHeader>
                         <DialogTitle className="text-xl font-semibold">Add External Resource</DialogTitle>
                         <DialogDescription className="text-sm text-gray-600">
@@ -1094,11 +1103,11 @@ export default function ProgramLMSPage() {
                     </DialogContent>
                   </Dialog>
                 </div>
-                <CardDescription className="text-sm text-gray-600 mt-2">
+                <CardDescription className="text-xs sm:text-sm text-gray-600 mt-2">
                   Upload links to external resources for this topic. Resources are accessible to mentees and viewable by both mentors and facilitators.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-4 pt-0">
                 <div className="space-y-3">
                   <div className="text-center py-8 text-gray-500">
                     <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -1111,13 +1120,13 @@ export default function ProgramLMSPage() {
 
             {/* Feedback Section */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <MessageSquare className="h-5 w-5" />
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-900 sm:text-lg">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
                   Student Feedback
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-4 pt-0">
                 {selectedTopic.feedback.reviews > 0 ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
@@ -1158,8 +1167,8 @@ export default function ProgramLMSPage() {
               </Button>
             </div>
 
-            {/* Quick Stats - Moved to Top */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Quick Stats - 2-column grid */}
+            <div className="grid grid-cols-2 gap-4">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -1211,64 +1220,65 @@ export default function ProgramLMSPage() {
               </Card>
             </div>
 
-            {/* Timeline Line */}
-            <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200 hidden md:block"></div>
-
-              <div className="space-y-6">
-                {topics.map((topic, index) => (
-                  <div key={topic.id} className="relative flex flex-col md:flex-row md:items-start md:gap-6">
-                    {/* Topic Number Circle */}
+            {/* Topics timeline: desktop = circles + line, mobile = left border + Step N in card */}
+            <div className="space-y-5 sm:space-y-4 md:space-y-6">
+              {topics.map((topic, index) => (
+                <div key={topic.id} className="flex flex-row items-stretch gap-0 sm:gap-4">
+                  {/* Desktop: circle + vertical line. Mobile: hidden (step lives inside card) */}
+                  <div className="hidden sm:flex flex-col items-center flex-shrink-0">
                     <div
-                      className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full font-semibold text-lg flex-shrink-0 text-white ${
-                        topic.status === "completed"
-                          ? "bg-gray-700"
-                          : topic.status === "active"
-                            ? "bg-gray-600"
-                            : topic.status === "upcoming"
-                              ? "bg-gray-500"
-                              : "bg-gray-400"
-                      }`}
+                      className={`w-12 h-12 rounded-full ${getStepCircleColor(topic.status)} flex items-center justify-center text-white font-semibold text-base shrink-0`}
                     >
                       {index + 1}
                     </div>
+                    {index < topics.length - 1 && (
+                      <div className="w-px h-12 md:h-16 bg-gray-200 mt-1 sm:mt-2 flex-shrink-0" />
+                    )}
+                  </div>
 
-                    {/* Topic Card */}
-                    <Card
-                      className="flex-1 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all duration-200 w-full"
-                      onClick={() => {
-                        // Always get the latest topic from topicsState
-                        const latestTopic = topicsState.find((t) => t.id === topic.id)
-                        if (latestTopic) {
-                          setSelectedTopic(latestTopic)
-                        }
-                      }}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3 flex-1">
-                            <div className={`p-3 rounded-lg ${getTopicStatusColor(topic.status)} flex-shrink-0`}>
-                              {getTopicIcon(topic.type)}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                            <div>
-                                  <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{topic.title}</CardTitle>
-                                  <p className="text-sm text-gray-600 mt-0.5">{topic.description}</p>
-                            </div>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                            <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                                </div>
+                  {/* Topic card: mobile = left border + Step N in card; desktop = normal border */}
+                  <Card
+                    className={`flex-1 min-w-0 cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200 border-l-4 sm:border-l sm:border-l-border ${
+                      topic.status === "completed"
+                        ? "border-l-green-500"
+                        : topic.status === "active"
+                          ? "border-l-blue-500"
+                          : "border-l-gray-400"
+                    }`}
+                    onClick={() => {
+                      const latestTopic = topicsState.find((t) => t.id === topic.id)
+                      if (latestTopic) setSelectedTopic(latestTopic)
+                    }}
+                  >
+                    <CardHeader className="pb-3">
+                      {/* Step label: mobile only, inside card */}
+                      <div className="flex items-center gap-2 mb-2 sm:hidden">
+                        <span className="text-xs font-medium text-muted-foreground">Step {index + 1}</span>
+                      </div>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className={`p-3 rounded-lg ${getTopicStatusColor(topic.status)} flex-shrink-0`}>
+                            {getTopicIcon(topic.type)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{topic.title}</CardTitle>
+                                <p className="text-sm text-gray-600 mt-0.5">{topic.description}</p>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Badge className={getTopicStatusColor(topic.status)}>{topic.status}</Badge>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </CardHeader>
+                      </div>
+                    </CardHeader>
 
-                      <CardContent className="pt-0 space-y-4">
+                    <CardContent className="pt-0 space-y-4">
                         {/* Progress Bar */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
@@ -1336,19 +1346,20 @@ export default function ProgramLMSPage() {
                             </div>
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
 
           </div>
         )}
+        </div>
+      </div>
 
         {/* Feedback Dialog */}
         <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-lg my-4 sm:my-0">
             <DialogHeader>
               <DialogTitle>Add Session Feedback</DialogTitle>
               <DialogDescription>Provide feedback for the session with {selectedSession?.mentor}</DialogDescription>
@@ -1390,7 +1401,6 @@ export default function ProgramLMSPage() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
     </div>
   )
 }

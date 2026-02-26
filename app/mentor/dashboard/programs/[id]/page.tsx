@@ -234,18 +234,21 @@ export default function MentorProgramDashboard({ params }: Props) {
 
   return (
     <div className="space-y-0 w-full md:px-6 md:pt-8 md:pb-8">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit mb-2"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back
-      </button>
-
-      {/* White header bar to match other dashboard pages */}
-      <div className="bg-white border-b w-full px-4 py-4 sm:py-5 md:py-6 md:px-6 -mx-0 md:-mx-6">
-        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">Startup Funding Masterclass</h1>
-        <p className="text-xs sm:text-sm text-gray-600 mt-0.5">Mentor LMS Dashboard</p>
+      <div className="flex flex-col">
+        {/* On mobile: back first. On desktop: header first, then back. */}
+        <div className="order-2 md:order-1 bg-white border-b w-full px-4 py-4 sm:py-5 md:py-6 md:px-6 -mx-0 md:-mx-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">Startup Funding Masterclass</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-0.5">Mentor LMS Dashboard</p>
+        </div>
+        <div className="order-1 md:order-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit mb-2 mt-2 md:mt-4"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4 sm:space-y-6 px-0 pt-4 sm:pt-6">

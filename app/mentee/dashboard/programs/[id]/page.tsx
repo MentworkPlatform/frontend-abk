@@ -441,18 +441,23 @@ export default function LearnerProgramPage({ params }: { params: { id: string } 
 
   return (
     <div className="space-y-6 md:px-6 md:pt-8 md:pb-8">
-      <div className="space-y-1">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back
-        </button>
-        <DashboardHeader
-        title={programData.title}
-        description={`with ${programData.mentor} • ${programData.completedTopics}/${programData.totalTopics} topics completed`}
-        />
+      <div className="flex flex-col">
+        {/* On mobile: back first. On desktop: header first, then back. */}
+        <div className="order-2 md:order-1">
+          <DashboardHeader
+            title={programData.title}
+            description={`with ${programData.mentor} • ${programData.completedTopics}/${programData.totalTopics} topics completed`}
+          />
+        </div>
+        <div className="order-1 md:order-2 space-y-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit mb-2 md:mt-4"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+          </button>
+        </div>
       </div>
 
       <div className="w-full">

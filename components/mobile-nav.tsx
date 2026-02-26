@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface MobileNavProps {
-  userType: "mentor" | "mentee"
+  userType: "mentor" | "mentee" | "trainer"
   userName: string
   userRole?: string
   userAvatar?: string
@@ -54,7 +54,7 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
               </Avatar>
               <div>
                 <p className="font-medium">{userName}</p>
-                <p className="text-xs text-gray-500">{userRole || (userType === "mentor" ? "Mentor" : "Mentee")}</p>
+                <p className="text-xs text-gray-500">{userRole || (userType === "mentor" ? "Mentor" : userType === "trainer" ? "Trainer" : "Mentee")}</p>
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
 
           <div className="border-t p-4">
             <Button variant="outline" className="w-full" asChild onClick={() => setOpen(false)}>
-              <Link href={`/${userType}/settings`}>Settings</Link>
+              <Link href={userType === "trainer" ? "/trainer/dashboard/settings" : `/${userType}/settings`}>Settings</Link>
             </Button>
           </div>
         </div>

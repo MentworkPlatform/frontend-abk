@@ -10,15 +10,12 @@ import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function TrainerSettingsPage() {
   return (
-    <div className="flex-1 space-y-6">
-      <div className="-mx-4 md:-mx-8 -mt-4 md:-mt-8">
-        <DashboardHeader
-          title="Settings"
-          description="Manage your account settings and preferences"
-        />
-      </div>
-
-      <div className="w-full space-y-6">
+    <>
+      <DashboardHeader
+        title="Settings"
+        description="Manage your account settings and preferences"
+      />
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
         <Tabs defaultValue="payment" className="space-y-4">
           <TabsList className="w-full md:w-auto flex-wrap h-auto">
             <TabsTrigger value="payment" className="flex-1 md:flex-initial">
@@ -167,7 +164,7 @@ export default function TrainerSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+  </>
   )
 }
 

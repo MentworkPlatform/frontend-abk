@@ -86,68 +86,69 @@ export default function MentorProgramsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full">
       <DashboardHeader
         title="My Programs"
         description="Manage all your teaching programs and track your progress"
       />
 
+      <div className="w-full pt-2 space-y-4 sm:space-y-6 md:px-6 md:pt-8 md:pb-8">
       {/* Overall Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 font-medium">Active Programs</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{activePrograms}</p>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">Active Programs</p>
+                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{activePrograms}</p>
               </div>
-              <TrendingUp className="h-6 w-6 text-blue-500" />
+              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 font-medium">Total Mentees</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{totalMentees}</p>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">Total Mentees</p>
+                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{totalMentees}</p>
               </div>
-              <Users className="h-6 w-6 text-green-500" />
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 font-medium">Total Earned</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">₦{totalEarned.toLocaleString()}</p>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">Total Earned</p>
+                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5 truncate">₦{totalEarned.toLocaleString()}</p>
               </div>
-              <DollarSign className="h-6 w-6 text-green-500" />
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 font-medium">Pending Payment</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">₦{totalPending.toLocaleString()}</p>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">Pending Payment</p>
+                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5 truncate">₦{totalPending.toLocaleString()}</p>
               </div>
-              <DollarSign className="h-6 w-6 text-orange-500" />
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Programs Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {mentorPrograms.map((program) => (
-          <Card key={program.id} className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg font-semibold text-gray-900 mb-2">
+          <Card key={program.id} className="hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 leading-tight">
                     {program.title}
                   </CardTitle>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -157,14 +158,14 @@ export default function MentorProgramsPage() {
                     </Badge>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="ghost" size="icon" className="shrink-0" asChild>
                   <Link href={`/mentor/dashboard/programs/${program.id}`}>
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Link>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
               {/* Progress */}
               {program.progress > 0 && (
                 <div className="space-y-2">
@@ -226,12 +227,13 @@ export default function MentorProgramsPage() {
               )}
 
               {/* Action Button */}
-              <Button asChild className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium">
+              <Button asChild size="sm" className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium">
                 <Link href={`/mentor/dashboard/programs/${program.id}`}>View Program Details</Link>
               </Button>
             </CardContent>
           </Card>
         ))}
+      </div>
       </div>
     </div>
   )

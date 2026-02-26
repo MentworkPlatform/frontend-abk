@@ -51,17 +51,17 @@ export default function DashboardLayout({
   );
 
   const footerContent = (
-    <div className="mb-4">
-      <div className="flex items-center gap-4">
-        <Avatar>
+    <div className="mb-3">
+      <div className="flex items-center gap-2">
+        <Avatar className="h-8 w-8">
           <AvatarImage
             src="/placeholder.svg?height=40&width=40"
             alt="User avatar"
           />
-          <AvatarFallback>JD</AvatarFallback>
+          <AvatarFallback className="text-xs">JD</AvatarFallback>
         </Avatar>
-        <div>
-          <p className="font-medium">John Doe</p>
+        <div className="min-w-0">
+          <p className="font-medium text-sm truncate">John Doe</p>
         </div>
       </div>
     </div>
@@ -69,9 +69,9 @@ export default function DashboardLayout({
 
   const customMobileHeader = (
     <div className="fixed top-0 left-0 right-0 z-30 w-full border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 md:hidden lg:hidden">
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between px-4 py-2.5">
         <Link href="/mentee/dashboard">
-          <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-6" />
+          <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
         </Link>
         <MobileNav
           userType="mentee"
@@ -99,8 +99,8 @@ export default function DashboardLayout({
       />
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 overflow-y-auto h-[calc(100vh-64px)] lg:h-screen bg-gray-50">
-        <div className="w-full min-w-0 h-full">{children}</div>
+      <main className="flex-1 min-w-0 overflow-hidden h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] lg:h-screen bg-gray-50">
+        <div className="w-full min-w-0 h-full overflow-y-auto px-3 py-4 pt-16 sm:px-6 sm:py-6 md:p-0">{children}</div>
       </main>
     </div>
   );

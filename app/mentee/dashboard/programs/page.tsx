@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, ArrowRight, BookOpen, Plus } from "lucide-react";
+import { Clock, BookOpen, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +54,7 @@ const programs = [
 
 export default function ProgramsPage() {
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full">
       <DashboardHeader
         title="My Programs"
         description="View and manage all your enrolled programs"
@@ -65,23 +65,33 @@ export default function ProgramsPage() {
         }}
       />
 
-      <div className="w-full space-y-6 p-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programs.map((program) => (
-            <Link key={program.id} href={`/mentee/dashboard/programs/${program.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-1">
+      <div className="w-full pt-2 space-y-4 sm:space-y-6 md:px-6 md:pt-8 md:pb-8">
+        {programs.length > 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {programs.map((program) => (
+              <Card
+                key={program.id}
+                className="hover:shadow-md transition-shadow"
+              >
+                <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base sm:text-lg leading-tight">
                         {program.title}
                       </CardTitle>
-                      <CardDescription>with {program.mentor}</CardDescription>
+                      <CardDescription className="text-xs sm:text-sm">
+                        with {program.mentor}
+                      </CardDescription>
                     </div>
-                    <Badge variant="secondary">{program.focusArea}</Badge>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs shrink-0"
+                    >
+                      {program.focusArea}
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 sm:p-6 pt-0 space-y-2 sm:space-y-3">
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Progress</span>
@@ -93,38 +103,44 @@ export default function ProgramsPage() {
                       completed
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="mr-1 h-4 w-4" />
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-1">
+                    <Link
+                      href={`/mentee/dashboard/programs/${program.id}`}
+                      className="flex items-center text-xs sm:text-sm text-gray-600 hover:text-[#FFD500] transition-colors cursor-pointer"
+                    >
+                      <Clock className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                       {program.nextSession}
-                    </div>
+                    </Link>
                     <Button
                       size="sm"
-                      className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-medium"
+                      className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] text-sm"
+                      asChild
                     >
-                      View Program
-                      <ArrowRight className="ml-1 h-4 w-4" />
+                      <Link href={`/mentee/dashboard/programs/${program.id}`}>
+                        Continue
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              </Link>
-          ))}
-        </div>
-
-        {programs.length === 0 && (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <BookOpen className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No programs yet</h3>
-              <p className="text-gray-600 text-center mb-4">
-                Start your learning journey by enrolling in a program
+            ))}
+          </div>
+        ) : (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-12 px-6">
+              <BookOpen className="h-12 w-12 text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                No programs yet
+              </h3>
+              <p className="text-sm text-gray-500 text-center mb-6 max-w-sm">
+                Enroll in a program to start learning. Your progress and sessions
+                will show here.
               </p>
               <Button
                 className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
                 asChild
               >
-                <Link href="/programs">Explore Programs</Link>
+                <Link href="/programs">Explore programs</Link>
               </Button>
             </CardContent>
           </Card>

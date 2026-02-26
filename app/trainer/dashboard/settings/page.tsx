@@ -4,36 +4,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DollarSign, CreditCard, Bell, Lock, User } from "lucide-react"
+import { DollarSign, Bell, Lock } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function TrainerSettingsPage() {
   return (
-    <div className="flex-1 space-y-6">
+    <>
       <DashboardHeader
         title="Settings"
         description="Manage your account settings and preferences"
       />
-
-      <div className="w-full space-y-6 p-8">
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
         <Tabs defaultValue="payment" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="payment">
+          <TabsList className="w-full md:w-auto flex-wrap h-auto">
+            <TabsTrigger value="payment" className="flex-1 md:flex-initial">
               <DollarSign className="h-4 w-4 mr-2" />
-              Payment Details
+              <span className="hidden sm:inline">Payment Details</span>
+              <span className="sm:hidden">Payment</span>
             </TabsTrigger>
-            <TabsTrigger value="profile">
-              <User className="h-4 w-4 mr-2" />
-              Profile
-            </TabsTrigger>
-            <TabsTrigger value="notifications">
+            <TabsTrigger value="notifications" className="flex-1 md:flex-initial">
               <Bell className="h-4 w-4 mr-2" />
-              Notifications
+              <span className="hidden sm:inline">Notifications</span>
+              <span className="sm:hidden">Notifs</span>
             </TabsTrigger>
-            <TabsTrigger value="security">
+            <TabsTrigger value="security" className="flex-1 md:flex-initial">
               <Lock className="h-4 w-4 mr-2" />
-              Security
+              <span className="hidden sm:inline">Security</span>
+              <span className="sm:hidden">Security</span>
             </TabsTrigger>
           </TabsList>
 
@@ -87,29 +85,7 @@ export default function TrainerSettingsPage() {
                     <Input id="routing-number" placeholder="Enter routing number or SWIFT code" />
                   </div>
 
-                  <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Save Payment Details</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your profile details. You can also edit these in your Profile page.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-700">
-                    To edit your profile information, expertise, and other details added during onboarding, please visit your{" "}
-                    <a href="/trainer/profile" className="text-blue-600 hover:underline font-medium">
-                      Profile page
-                    </a>
-                    .
-                  </p>
+                  <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full md:w-auto">Save Payment Details</Button>
                 </div>
               </CardContent>
             </Card>
@@ -158,7 +134,7 @@ export default function TrainerSettingsPage() {
                     <input type="checkbox" defaultChecked className="h-4 w-4" />
                   </div>
                 </div>
-                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Save Preferences</Button>
+                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full md:w-auto">Save Preferences</Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -182,13 +158,13 @@ export default function TrainerSettingsPage() {
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
                   <Input id="confirm-password" type="password" />
                 </div>
-                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">Update Password</Button>
+                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full md:w-auto">Update Password</Button>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+  </>
   )
 }
 

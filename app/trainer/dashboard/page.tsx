@@ -119,7 +119,7 @@ export default function TrainerDashboard() {
   };
 
   return (
-    <div className="flex-1 space-y-6">
+    <>
       <DashboardHeader
         title="Trainer Dashboard"
         description="Manage your programs, sessions, and mentors"
@@ -129,51 +129,43 @@ export default function TrainerDashboard() {
           icon: Plus,
         }}
       />
-
-      <div className="w-full space-y-6 p-8">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Your Programs</h2>
-          <p className="text-gray-600">
-            Manage and track all your training programs
-          </p>
-        </div>
-
+      <div className="w-full pt-2 space-y-4 sm:space-y-6 md:px-6 md:pt-5 md:pb-5">
         {/* All Programs Section */}
         <Card>
-          <CardHeader>
-            <CardTitle>All Programs</CardTitle>
-            <CardDescription>View and manage all your programs</CardDescription>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base font-semibold sm:text-lg">All Programs</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">View and manage all your programs</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <Tabs defaultValue="active" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="active">
+              <TabsList className="grid w-full grid-cols-3 h-9">
+                <TabsTrigger value="active" className="text-xs sm:text-sm">
                   Active ({activePrograms.length})
                 </TabsTrigger>
-                <TabsTrigger value="draft">
+                <TabsTrigger value="draft" className="text-xs sm:text-sm">
                   Draft ({draftPrograms.length})
                 </TabsTrigger>
-                <TabsTrigger value="completed">
+                <TabsTrigger value="completed" className="text-xs sm:text-sm">
                   Completed ({completedPrograms.length})
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="active" className="mt-6">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <TabsContent value="active" className="mt-4">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {activePrograms.map((program) => (
                 <Card
                   key={program.id}
                   className="hover:shadow-md transition-shadow cursor-pointer"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
+                  <CardHeader className="p-4 pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-9 w-9 shrink-0">
                           <AvatarImage
                             src="/placeholder.svg?height=40&width=40"
                             alt="Program"
                           />
-                          <AvatarFallback>
+                          <AvatarFallback className="text-xs">
                             {program.title
                               .split(" ")
                               .map((word) => word[0])
@@ -181,13 +173,13 @@ export default function TrainerDashboard() {
                               .slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
+                        <div className="min-w-0">
+                          <CardTitle className="text-base font-semibold leading-tight">
                             {program.title}
                           </CardTitle>
                           <Badge
                             variant={getStatusColor(program.status)}
-                            className="mt-1"
+                            className="mt-1 text-xs"
                           >
                             {program.status}
                           </Badge>
@@ -195,8 +187,8 @@ export default function TrainerDashboard() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                  <CardContent className="p-4 pt-0">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center">
                           <Users className="h-4 w-4 mr-1" />
@@ -213,11 +205,12 @@ export default function TrainerDashboard() {
                     >
                       <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        size="sm"
+                        className="w-full bg-transparent h-8 text-xs sm:text-sm"
                       >
-                        <Eye className="mr-2 h-4 w-4" />
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Manage Program
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                       </Button>
                     </Link>
                   </CardContent>
@@ -226,22 +219,22 @@ export default function TrainerDashboard() {
             </div>
               </TabsContent>
 
-              <TabsContent value="draft" className="mt-6">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <TabsContent value="draft" className="mt-4">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {draftPrograms.map((program) => (
                 <Card
                   key={program.id}
                   className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
+                  <CardHeader className="p-4 pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-9 w-9 shrink-0">
                           <AvatarImage
                             src="/placeholder.svg?height=40&width=40"
                             alt="Program"
                           />
-                          <AvatarFallback>
+                          <AvatarFallback className="text-xs">
                             {program.title
                               .split(" ")
                               .map((word) => word[0])
@@ -249,13 +242,13 @@ export default function TrainerDashboard() {
                               .slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
+                        <div className="min-w-0">
+                          <CardTitle className="text-base font-semibold leading-tight">
                             {program.title}
                           </CardTitle>
                           <Badge
                             variant={getStatusColor(program.status)}
-                            className="mt-1"
+                            className="mt-1 text-xs"
                           >
                             {program.status}
                           </Badge>
@@ -263,8 +256,8 @@ export default function TrainerDashboard() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                  <CardContent className="p-4 pt-0">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center">
                           <Users className="h-4 w-4 mr-1" />
@@ -281,11 +274,12 @@ export default function TrainerDashboard() {
                     >
                       <Button
                         variant="outline"
-                        className="w-full bg-transparent"
+                        size="sm"
+                        className="w-full bg-transparent h-8 text-xs sm:text-sm"
                       >
-                        <Eye className="mr-2 h-4 w-4" />
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
                         View Program
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                       </Button>
                     </Link>
                   </CardContent>
@@ -294,22 +288,22 @@ export default function TrainerDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="completed" className="mt-6">
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <TabsContent value="completed" className="mt-4">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {completedPrograms.map((program) => (
                     <Card
                       key={program.id}
                       className="hover:shadow-md transition-shadow cursor-pointer opacity-75"
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-10 w-10">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar className="h-9 w-9 shrink-0">
                               <AvatarImage
                                 src="/placeholder.svg?height=40&width=40"
                                 alt="Program"
                               />
-                              <AvatarFallback>
+                              <AvatarFallback className="text-xs">
                                 {program.title
                                   .split(" ")
                                   .map((word) => word[0])
@@ -317,13 +311,13 @@ export default function TrainerDashboard() {
                                   .slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <CardTitle className="text-lg">
+                            <div className="min-w-0">
+                              <CardTitle className="text-base font-semibold leading-tight">
                                 {program.title}
                               </CardTitle>
                               <Badge
                                 variant={getStatusColor(program.status)}
-                                className="mt-1"
+                                className="mt-1 text-xs"
                               >
                                 {program.status}
                               </Badge>
@@ -331,8 +325,8 @@ export default function TrainerDashboard() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                      <CardContent className="p-4 pt-0">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center">
                               <Users className="h-4 w-4 mr-1" />
@@ -341,19 +335,20 @@ export default function TrainerDashboard() {
                             <div className="flex items-center">
                               <BookOpen className="h-4 w-4 mr-1" />
                               {program.mentors} mentors
-            </div>
-          </div>
-        </div>
+                            </div>
+                          </div>
+                        </div>
                         <Link
                           href={`/trainer/dashboard/programs/${program.id}/lms`}
                         >
                           <Button
                             variant="outline"
-                            className="w-full bg-transparent"
+                            size="sm"
+                            className="w-full bg-transparent h-8 text-xs sm:text-sm"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
+                            <Eye className="mr-1.5 h-3.5 w-3.5" />
                             View Program
-                            <ArrowRight className="ml-2 h-4 w-4" />
+                            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                           </Button>
                         </Link>
                       </CardContent>
@@ -366,21 +361,21 @@ export default function TrainerDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
               Your Upcoming Sessions
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Next sessions scheduled with meeting links
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-4 pt-0">
+            <div className="space-y-3">
               {upcomingSessions.map((session) => (
                 <div
                   key={session.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-gray-50 gap-3"
                 >
                   <Link
                     href={`/trainer/dashboard/programs/${session.programId}/lms`}
@@ -429,6 +424,6 @@ export default function TrainerDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+  </>
   );
 }

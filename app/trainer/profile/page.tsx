@@ -105,27 +105,26 @@ export default function TrainerProfilePage() {
   };
 
   return (
-    <div className="flex-1 space-y-6">
+    <>
       <DashboardHeader
         title="Profile Settings"
         description="Update your profile information and expertise"
       />
-
-      <div className="w-full space-y-6 p-8">
+      <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 Personal Information
               </CardTitle>
-              <CardDescription>Your basic profile details</CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground">Your basic profile details</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">Full Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -136,7 +135,7 @@ export default function TrainerProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm font-medium">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -148,7 +147,7 @@ export default function TrainerProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="title">Professional Title *</Label>
+                  <Label htmlFor="title" className="text-sm font-medium">Professional Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -159,7 +158,7 @@ export default function TrainerProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Primary Industry *</Label>
+                  <Label htmlFor="industry" className="text-sm font-medium">Primary Industry *</Label>
                   <Select
                     value={formData.industry}
                     onValueChange={(value) => updateFormData("industry", value)}
@@ -180,7 +179,7 @@ export default function TrainerProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="experience">Years of Experience *</Label>
+                  <Label htmlFor="experience" className="text-sm font-medium">Years of Experience *</Label>
                   <Select
                     value={formData.experience}
                     onValueChange={(value) =>
@@ -205,18 +204,18 @@ export default function TrainerProfilePage() {
 
           {/* Expertise */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" />
                 Expertise & Skills
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground">
                 Your areas of expertise and capabilities
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <Label>Sector</Label>
+                <Label className="text-sm font-medium">Sector</Label>
                 <MultiSelect
                   options={sectorsOptions}
                   selected={formData.selectedSectors}
@@ -236,7 +235,7 @@ export default function TrainerProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Sub-Sector (Skill)</Label>
+                <Label className="text-sm font-medium">Sub-Sector (Skill)</Label>
                 <MultiSelect
                   options={subSectorSkillsOptions}
                   selected={formData.selectedSubSectorSkills}
@@ -255,7 +254,7 @@ export default function TrainerProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Skills & Capabilities</Label>
+                <Label className="text-sm font-medium">Skills & Capabilities</Label>
                 <MultiSelect
                   options={skillsCapabilitiesOptions}
                   selected={formData.selectedSkillsCapabilities}
@@ -270,18 +269,18 @@ export default function TrainerProfilePage() {
 
           {/* Professional Details */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                <Award className="h-4 w-4 sm:h-5 sm:w-5" />
                 Professional Details
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground">
                 Tell others about your background and achievements
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <Label htmlFor="bio">Professional Bio *</Label>
+                <Label htmlFor="bio" className="text-sm font-medium">Professional Bio *</Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
@@ -293,7 +292,7 @@ export default function TrainerProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="achievements">Key Achievements</Label>
+                <Label htmlFor="achievements" className="text-sm font-medium">Key Achievements</Label>
                 <Textarea
                   id="achievements"
                   value={formData.achievements}
@@ -309,19 +308,16 @@ export default function TrainerProfilePage() {
 
           {/* Social Links */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
                 Social Media & Website
               </CardTitle>
-              <CardDescription>Add your professional links</CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground">Add your professional links</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <Label
-                  htmlFor="linkedinUrl"
-                  className="flex items-center gap-2"
-                >
+                <Label htmlFor="linkedinUrl" className="flex items-center gap-2 text-sm font-medium">
                   <Linkedin className="h-4 w-4" />
                   LinkedIn Profile
                 </Label>
@@ -337,7 +333,7 @@ export default function TrainerProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="websiteUrl" className="flex items-center gap-2">
+                <Label htmlFor="websiteUrl" className="flex items-center gap-2 text-sm font-medium">
                   <Globe className="h-4 w-4" />
                   Website (Optional)
                 </Label>
@@ -353,15 +349,15 @@ export default function TrainerProfilePage() {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4">
-            <Link href="/trainer/dashboard">
-              <Button type="button" variant="outline">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
+            <Link href="/trainer/dashboard" className="w-full sm:w-auto">
+              <Button type="button" variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
             </Link>
             <Button
               type="submit"
-              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]"
               disabled={isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
@@ -370,6 +366,6 @@ export default function TrainerProfilePage() {
           </div>
         </form>
       </div>
-    </div>
+  </>
   );
 }

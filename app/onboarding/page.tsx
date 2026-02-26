@@ -181,10 +181,10 @@ export default function OnboardingPage() {
   const totalSteps = 5;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] py-12">
-      <div className="container max-w-4xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-8">
+    <div className="min-h-screen bg-[#F5F5F5] py-4 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8">
+      <div className="container max-w-4xl mx-auto p-0">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6 md:mb-8">
             <Link href="/">
               <img
                 src="/images/mentwork-logo.png"
@@ -194,20 +194,20 @@ export default function OnboardingPage() {
             </Link>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold">
+          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight pr-2">
               {step === 1 && "Let's understand your goals"}
               {step === 2 && "Programs designed for people with your goals"}
               {step === 3 && "Save your progress"}
               {step === 4 && "Create your account"}
               {step === 5 && "What's next?"}
             </h1>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-gray-600 shrink-0">
               Step {step} of {totalSteps}
             </div>
           </div>
 
-          <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+          <div className="w-full bg-gray-200 h-2 rounded-full mb-4 sm:mb-6 md:mb-8">
             <div
               className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
@@ -215,18 +215,18 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        <Card className="border-none shadow-lg rounded-xl">
-          <CardContent className="p-6 md:p-8">
+        <Card className="border-none shadow-lg rounded-xl overflow-hidden">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             {/* Step 1: Intent Snapshot */}
             {step === 1 && (
-              <div className="space-y-6">
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Help us match you with the right programs (takes 30 seconds)
                 </p>
 
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       What are you trying to achieve right now? (Select up to 2)
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -262,8 +262,8 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       What timeframe are you looking at?
                     </Label>
                     <Select
@@ -283,8 +283,8 @@ export default function OnboardingPage() {
                     </Select>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       Which area best describes your interest?
                     </Label>
                     <MultiSelect
@@ -295,8 +295,8 @@ export default function OnboardingPage() {
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-sm sm:text-base font-semibold">
                       Which stage feels closest to you?
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -326,21 +326,21 @@ export default function OnboardingPage() {
 
             {/* Step 2: Immediate Program Exposure */}
             {step === 2 && (
-              <div className="space-y-6">
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Based on your goals, here are programs that might interest you
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {relevantPrograms.map((program) => (
                     <Card
                       key={program.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-[#FFD500]"
+                      className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-[#FFD500] active:border-[#FFD500]"
                       onClick={() => handleProgramClick(program.id)}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <CardTitle className="text-lg leading-tight">
+                      <CardHeader className="pb-2 sm:pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-base sm:text-lg leading-tight break-words">
                             {program.title}
                           </CardTitle>
                           <Button
@@ -355,12 +355,12 @@ export default function OnboardingPage() {
                             <Heart className="h-4 w-4" />
                           </Button>
                         </div>
-                        <CardDescription className="text-sm min-h-[3rem]">
+                        <CardDescription className="text-xs sm:text-sm min-h-[2.5rem] sm:min-h-[3rem] line-clamp-2">
                           {program.outcome}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
                             {program.duration}
@@ -419,21 +419,21 @@ export default function OnboardingPage() {
               if (!program) return null;
               
               return (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <Card className="border-2 border-[#FFD500]">
-                    <CardHeader>
-                      <div className="flex items-start gap-3 mb-4">
-                        <BookOpen className="h-8 w-8 text-[#FFD500] flex-shrink-0 mt-1" />
-                        <div className="flex-1">
-                          <CardTitle className="text-xl mb-2">{program.title}</CardTitle>
-                          <CardDescription className="text-base mb-4">
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-4">
+                        <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-[#FFD500] flex-shrink-0 mt-0.5 sm:mt-1" />
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-lg sm:text-xl mb-1 sm:mb-2 leading-tight break-words">{program.title}</CardTitle>
+                          <CardDescription className="text-sm sm:text-base mb-0 sm:mb-4 line-clamp-3">
                             {program.outcome}
                           </CardDescription>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                    <CardContent className="space-y-3 sm:space-y-4">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-gray-500" />
                           <span className="text-gray-700">{program.duration}</span>
@@ -463,16 +463,16 @@ export default function OnboardingPage() {
                     </CardContent>
                   </Card>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     <Button
-                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-14"
+                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-12 sm:h-14 text-sm sm:text-base"
                       onClick={() => {
                         setNeedsAccount(true);
                         nextStep();
                       }}
                     >
                       Create Account to Continue
-                      <ArrowRight className="h-5 w-5 ml-2" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2 shrink-0" />
                     </Button>
                     <p className="text-xs text-center text-gray-500">
                       Create an account to view full program details and enroll
@@ -484,14 +484,14 @@ export default function OnboardingPage() {
 
             {/* Step 4: Lightweight Account Creation */}
             {step === 4 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <p className="text-gray-600">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Create an account to save your progress
                   </p>
                 </div>
 
-                <form onSubmit={handleCreateAccount} className="space-y-4">
+                <form onSubmit={handleCreateAccount} className="space-y-3 sm:space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <Input
@@ -545,17 +545,17 @@ export default function OnboardingPage() {
 
             {/* Step 5: Clear Next Step */}
             {step === 5 && (
-              <div className="space-y-6 text-center">
-                <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">You're all set!</h2>
-                <p className="text-gray-600 mb-6">
+              <div className="space-y-4 sm:space-y-6 text-center">
+                <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-green-500 mb-2 sm:mb-4" />
+                <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">You're all set!</h2>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
                   Here's what you can do next
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Join Next Session</CardTitle>
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <CardTitle className="text-base sm:text-lg">Join Next Session</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-600 mb-4">
@@ -571,8 +571,8 @@ export default function OnboardingPage() {
                   </Card>
 
                   <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Explore Similar Programs</CardTitle>
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <CardTitle className="text-base sm:text-lg">Explore Similar Programs</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-600 mb-4">
@@ -589,8 +589,8 @@ export default function OnboardingPage() {
                   </Card>
 
                   <Card className="hover:shadow-md transition-shadow border-2 border-[#FFD500] bg-yellow-50/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Improve Recommendations</CardTitle>
+                    <CardHeader className="pb-2 sm:pb-6">
+                      <CardTitle className="text-base sm:text-lg">Improve Recommendations</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-600 mb-4">
@@ -606,17 +606,17 @@ export default function OnboardingPage() {
                   </Card>
                   </div>
 
-                <div className="pt-6 border-t">
-                  <div className="flex gap-3">
+                <div className="pt-4 sm:pt-6 border-t">
+                  <div className="flex flex-col-reverse sm:flex-row gap-3">
                     <Button
                       variant="outline"
-                      className="w-[20%] flex items-center gap-2"
+                      className="w-full sm:w-[20%] flex items-center justify-center gap-2 shrink-0"
                       onClick={() => setStep(4)}
                     >
                       <ArrowLeft className="h-4 w-4" /> Back
                     </Button>
                     <Button
-                      className="w-[80%] bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      className="w-full sm:flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
                       onClick={() => router.push("/mentee/dashboard")}
                     >
                       Go to Dashboard
@@ -628,7 +628,7 @@ export default function OnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 5 && (
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
               {step > 1 ? (
                 <Button
                   type="button"
@@ -641,12 +641,12 @@ export default function OnboardingPage() {
                       prevStep();
                     }
                   }}
-                  className="flex items-center gap-2"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
               ) : (
-                <div></div>
+                <div className="hidden sm:block" />
               )}
 
                 {step === 1 && (
@@ -654,7 +654,7 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={nextStep}
                     disabled={formData.goals.length === 0 || !formData.timeframe || formData.area.length === 0 || !formData.stage}
-                  className="bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center gap-2"
+                  className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center justify-center gap-2"
                 >
                     See Programs <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -669,7 +669,7 @@ export default function OnboardingPage() {
                       setNeedsAccount(true);
                       setStep(4);
                     }}
-                    className="flex items-center gap-2"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                     Skip for now
                 </Button>

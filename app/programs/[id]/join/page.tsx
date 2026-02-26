@@ -91,7 +91,7 @@ export default function JoinProgramPage() {
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Header */}
       <header className="sticky top-0 z-30 w-full border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="container flex items-center justify-between py-2.5">
           <div className="flex items-center gap-2 font-bold text-xl">
             <Link href="/">
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />

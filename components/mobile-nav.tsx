@@ -5,14 +5,14 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface MobileNavProps {
-  userType: "mentor" | "mentee"
+  userType: "mentor" | "mentee" | "trainer"
   userName: string
   userRole?: string
   userAvatar?: string
@@ -37,13 +37,10 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
       <SheetContent side="left" className="p-0">
         <div className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pr-10">
               <Link href="/" onClick={() => setOpen(false)}>
                 <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close menu">
-                <X className="h-5 w-5" />
-              </Button>
             </div>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
@@ -57,7 +54,7 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
               </Avatar>
               <div>
                 <p className="font-medium">{userName}</p>
-                <p className="text-xs text-gray-500">{userRole || (userType === "mentor" ? "Mentor" : "Mentee")}</p>
+                <p className="text-xs text-gray-500">{userRole || (userType === "mentor" ? "Mentor" : userType === "trainer" ? "Trainer" : "Mentee")}</p>
               </div>
             </div>
           </div>
@@ -85,7 +82,7 @@ export default function MobileNav({ userType, userName, userRole, userAvatar, li
 
           <div className="border-t p-4">
             <Button variant="outline" className="w-full" asChild onClick={() => setOpen(false)}>
-              <Link href={`/${userType}/settings`}>Settings</Link>
+              <Link href={userType === "trainer" ? "/trainer/dashboard/settings" : `/${userType}/settings`}>Settings</Link>
             </Button>
           </div>
         </div>

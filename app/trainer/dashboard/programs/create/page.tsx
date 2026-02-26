@@ -175,6 +175,7 @@ export default function CreateProgram() {
   // Step 1: Program Overview
   const [programData, setProgramData] = useState({
     title: "",
+    tagline: "",
     description: "",
     selectedSectors: [] as string[],
     selectedSubSectorSkills: [] as string[],
@@ -253,24 +254,50 @@ export default function CreateProgram() {
     return SKILLS_CAPABILITIES.map((skill) => ({ value: skill, label: skill }))
   }, [])
 
-  // Step 1 validation (just title)
+  // Step 1 validation (Basic Information only)
   const isStep1Valid = () => {
-    return programData.title.trim() !== ""
+    return (
+      programData.title.trim() !== "" &&
+      programData.description.trim() !== "" &&
+      programData.learningOutcomes.some((outcome) => outcome.trim() !== "")
+    )
   }
 
-  // Step 2 validation (description + targeting)
+  // Get Step 1 validation errors
+  const getStep1Errors = () => {
+    const errors: string[] = []
+    if (programData.title.trim() === "") errors.push("Program Title is required")
+    if (programData.description.trim() === "") errors.push("Program Description is required")
+    if (!programData.learningOutcomes.some((outcome) => outcome.trim() !== "")) {
+      errors.push("At least one Learning Outcome is required")
+    }
+    return errors
+  }
+
+  // Step 2 validation (Who is this for? - only step 2 fields)
   const isStep2Valid = () => {
     return (
-      programData.description.trim() !== "" &&
       programData.selectedSectors.length > 0 &&
       programData.experienceLevel !== "" &&
       programData.format !== "" &&
       programData.maxParticipants.trim() !== "" &&
       programData.price.trim() !== "" &&
       programData.durationWeeks.trim() !== "" &&
-      programData.numberOfSessions.trim() !== "" &&
-      programData.learningOutcomes.some((outcome) => outcome.trim() !== "")
+      programData.numberOfSessions.trim() !== ""
     )
+  }
+
+  // Get Step 2 validation errors
+  const getStep2Errors = () => {
+    const errors: string[] = []
+    if (programData.selectedSectors.length === 0) errors.push("At least one Sector is required")
+    if (programData.experienceLevel === "") errors.push("Experience Level is required")
+    if (programData.format === "") errors.push("Format is required")
+    if (programData.maxParticipants.trim() === "") errors.push("Max Participants is required")
+    if (programData.price.trim() === "") errors.push("Price is required")
+    if (programData.durationWeeks.trim() === "") errors.push("Duration is required")
+    if (programData.numberOfSessions.trim() === "") errors.push("Number of Sessions is required")
+    return errors
   }
 
   // Step 3 validation (curriculum)
@@ -446,6 +473,7 @@ export default function CreateProgram() {
             setProgramData={setProgramData}
             onNext={nextStep}
             isValid={isStep1Valid()}
+            errors={getStep1Errors()}
           />
         )}
 
@@ -456,6 +484,7 @@ export default function CreateProgram() {
             onNext={nextStep}
             onPrev={prevStep}
             isValid={isStep2Valid()}
+            errors={getStep2Errors()}
             sectorsOptions={sectorsOptions}
             subSectorSkillsOptions={subSectorSkillsOptions}
             subSectorSkillsGrouped={subSectorSkillsGrouped}
@@ -536,6 +565,7 @@ interface Step1BasicInfoProps {
   setProgramData: (data: any) => void
   onNext: () => void
   isValid: boolean
+  errors: string[]
 }
 
 function Step1BasicInfo({
@@ -543,6 +573,7 @@ function Step1BasicInfo({
   setProgramData,
   onNext,
   isValid,
+  errors,
 }: Step1BasicInfoProps) {
   const updateLearningOutcome = (index: number, value: string) => {
     const updated = [...programData.learningOutcomes]
@@ -600,6 +631,17 @@ function Step1BasicInfo({
                 value={programData.title}
                 onChange={(e) => setProgramData({ ...programData, title: e.target.value })}
               />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tagline">Program Tagline</Label>
+            <Input
+              id="tagline"
+              placeholder="e.g., Master digital marketing from SEO to social media advertising"
+              value={programData.tagline}
+              onChange={(e) => setProgramData({ ...programData, tagline: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">A short, compelling tagline that will be displayed on the program page</p>
           </div>
 
           <div className="space-y-2">
@@ -669,6 +711,17 @@ function Step1BasicInfo({
         </CardContent>
       </Card>
 
+      {errors.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-red-800 mb-2">Please complete the following required fields:</p>
+          <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+            {errors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <Button onClick={onNext} disabled={!isValid} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
           Next: Who is this for?
@@ -686,6 +739,7 @@ interface Step2WhoIsThisForProps {
   onNext: () => void
   onPrev: () => void
   isValid: boolean
+  errors: string[]
   sectorsOptions: { value: string; label: string }[]
   subSectorSkillsOptions: { value: string; label: string }[]
   subSectorSkillsGrouped: { groupLabel: string; options: { value: string; label: string }[] }[]
@@ -698,6 +752,7 @@ function Step2WhoIsThisFor({
   onNext,
   onPrev,
   isValid,
+  errors,
   sectorsOptions,
   subSectorSkillsOptions,
   subSectorSkillsGrouped,
@@ -840,6 +895,17 @@ function Step2WhoIsThisFor({
           </div>
         </CardContent>
       </Card>
+
+      {errors.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-red-800 mb-2">Please complete the following required fields:</p>
+          <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+            {errors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev}>

@@ -95,38 +95,38 @@ export default function DashboardPage() {
         }}
       />
 
-      <div className="w-full p-8 space-y-8">
-        <div className="space-y-6">
+      <div className="w-full pt-4 sm:pt-6 space-y-6 sm:space-y-8 md:px-6 md:pt-8 md:pb-8">
+        <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold">Your Programs</h2>
-              <p className="text-gray-600">
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold">Your Programs</h2>
+              <p className="text-sm sm:text-base text-gray-600">
                 Active programs and personalized recommendations
               </p>
             </div>
           </div>
 
           {/* Active Programs */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Currently Active</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-sm font-semibold text-gray-900">Currently Active</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {yourPrograms.map((program) => (
                 <Card
                   key={program.id}
                   className="hover:shadow-md transition-shadow"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">
+                  <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base sm:text-lg leading-tight">
                           {program.title}
                         </CardTitle>
-                        <CardDescription>with {program.mentor}</CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">with {program.mentor}</CardDescription>
                       </div>
-                      <Badge variant="secondary">{program.focusArea}</Badge>
+                      <Badge variant="secondary" className="text-xs shrink-0">{program.focusArea}</Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="p-4 sm:p-6 space-y-2 sm:space-y-3">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Progress</span>
@@ -134,17 +134,17 @@ export default function DashboardPage() {
                       </div>
                       <Progress value={program.progress} className="h-2" />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <Link
                         href={`/mentee/dashboard/programs/${program.id}`}
-                        className="flex items-center text-sm text-gray-600 hover:text-[#FFD500] transition-colors cursor-pointer"
+                        className="flex items-center text-xs sm:text-sm text-gray-600 hover:text-[#FFD500] transition-colors cursor-pointer"
                       >
-                        <Clock className="mr-1 h-4 w-4" />
+                        <Clock className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                         {program.nextSession}
                       </Link>
                       <Button
                         size="sm"
-                        className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                        className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] text-sm"
                         asChild
                       >
                         <Link href={`/mentee/dashboard/programs/${program.id}`}>
@@ -159,9 +159,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Suggested Programs */}
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Recommended for You</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="space-y-3 sm:space-y-4 pt-4 border-t">
+            <h3 className="text-sm font-medium text-gray-500 mb-2 sm:mb-3">Recommended for You</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {suggestedPrograms.map((program) => (
                 <Card
                   key={program.id}
@@ -211,18 +211,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="space-y-4 pt-4 border-t">
+        <div className="space-y-3 sm:space-y-4 pt-4 border-t">
           <div>
-            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2 mb-3">
-              <TrendingUp className="h-4 w-4 text-gray-400" />
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2 mb-2 sm:mb-3">
+              <TrendingUp className="h-4 w-4 text-gray-400 shrink-0" />
               Recommended for Growth
             </h3>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-gray-500 mb-3 sm:mb-4">
               Opportunities to strengthen your entrepreneurial toolkit
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {growthPrograms.map((program) => (
               <Card
                 key={program.id}

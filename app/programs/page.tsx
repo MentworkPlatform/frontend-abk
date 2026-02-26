@@ -26,7 +26,7 @@ const mentorshipPrograms = [
     type: "mentorship",
     format: "1:1",
     duration: "3 months",
-    price: 2500,
+    price: 3750000,
     rating: 4.8,
     reviews: 127,
     category: "Business",
@@ -45,7 +45,7 @@ const mentorshipPrograms = [
     type: "mentorship",
     format: "1:1",
     duration: "6 months",
-    price: 3200,
+    price: 4800000,
     rating: 4.9,
     reviews: 89,
     category: "Product",
@@ -69,7 +69,7 @@ const trainingPrograms = [
     format: "Self-paced",
     duration: "12 weeks",
     modules: 24,
-    price: 299,
+    price: 299000,
     rating: 4.7,
     reviews: 1247,
     category: "Marketing",
@@ -92,7 +92,7 @@ const trainingPrograms = [
     format: "Live sessions",
     duration: "16 weeks",
     modules: 32,
-    price: 599,
+    price: 599000,
     rating: 4.8,
     reviews: 892,
     category: "Technology",
@@ -114,7 +114,7 @@ const trainingPrograms = [
     format: "Hybrid",
     duration: "10 weeks",
     modules: 20,
-    price: 399,
+    price: 399000,
     rating: 4.6,
     reviews: 1034,
     category: "Design",
@@ -138,7 +138,7 @@ const groupPrograms = [
     format: "Cohort",
     duration: "12 weeks",
     participants: 25,
-    price: 1500,
+    price: 2250000,
     rating: 4.7,
     reviews: 156,
     category: "Entrepreneurship",
@@ -201,7 +201,7 @@ export default function ProgramsPage() {
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 py-2.5 sm:px-6">
           <div className="flex items-center justify-between">
             <Link href="/">
               <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
@@ -241,10 +241,10 @@ export default function ProgramsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder="Sector" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">All Sectors</SelectItem>
                   <SelectItem value="business">Business</SelectItem>
                   <SelectItem value="marketing">Marketing</SelectItem>
                   <SelectItem value="technology">Technology</SelectItem>
@@ -378,9 +378,9 @@ export default function ProgramsPage() {
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">₦{(program.price * 1500).toLocaleString()}</span>
+                    <span className="font-bold text-lg">₦{program.price.toLocaleString()}</span>
                     <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
-                      <Link href={`/programs/${program.id}`}>View Course</Link>
+                      <Link href={`/programs/${program.id}`}>View Program</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -516,12 +516,12 @@ function ProgramCard({ program, viewAsMentor = false }: { program: any; viewAsMe
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="font-bold text-lg">₦{(program.price * 1500).toLocaleString()}</span>
+          <span className="font-bold text-lg">₦{program.price.toLocaleString()}</span>
           <Button size="sm" className="bg-[#FFD500] text-black hover:bg-[#e6c000]" asChild>
             <Link href={`/programs/${program.id}${viewAsMentor ? '?view=mentor' : ''}`}>
               {viewAsMentor 
                 ? "Apply to Mentor" 
-                : (isTraining ? "View Course" : isMentorship ? "View Program" : "Join Cohort")
+                : (isTraining ? "View Program" : isMentorship ? "View Program" : "Join Cohort")
               }
             </Link>
           </Button>

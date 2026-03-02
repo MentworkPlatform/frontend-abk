@@ -81,6 +81,7 @@ export interface MentorAssignment {
   respondedAt?: string
   message?: string
   customMessage?: string
+  feedbackLink?: string
 }
 
 export interface PlatformMentor {

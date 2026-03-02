@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Calendar,
@@ -29,13 +29,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { ApiError, getAuthToken } from "@/lib/api-client"
+import { mentorApi } from "@/lib/mentor"
 
 interface Props {
   params: { id: string }
 }
 
 // Mock data for program topics
-const programTopics = [
+const initialProgramTopics = [
   {
     id: 1,
     title: "Introduction to Startup Funding",
@@ -180,8 +182,297 @@ const programTopics = [
   },
 ]
 
+const asObject = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value === "object" && value !== null) {
+    return value as Record<string, unknown>
+  }
+
+  return null
+}
+
+const pickString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim()
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value)
+    }
+  }
+
+  return null
+}
+
+const pickNumber = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value === "string" && value.trim().length > 0) {
+      const parsed = Number(value)
+
+      if (!Number.isNaN(parsed)) {
+        return parsed
+      }
+    }
+  }
+
+  return 0
+}
+
+const resolveMentorId = () => {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  const token = getAuthToken()
+
+  if (token) {
+    try {
+      const tokenPayload = token.split(".")[1] ?? ""
+      const normalizedPayload = tokenPayload
+        .replace(/-/g, "+")
+        .replace(/_/g, "/")
+      const paddedPayload =
+        normalizedPayload + "=".repeat((4 - (normalizedPayload.length % 4)) % 4)
+      const parsedToken = JSON.parse(window.atob(paddedPayload))
+      const tokenRecord = asObject(parsedToken)
+
+      const tokenId =
+        pickString(
+          tokenRecord?.id,
+          tokenRecord?.userId,
+          tokenRecord?.mentorId,
+          asObject(tokenRecord?.user)?.id,
+          asObject(tokenRecord?.data)?.id,
+        ) ?? null
+
+      if (tokenId) {
+        return tokenId
+      }
+    } catch {
+      // Fallback to local user snapshots below.
+    }
+  }
+
+  const candidates = ["user", "profile", "authUser"]
+
+  for (const key of candidates) {
+    const rawValue = window.localStorage.getItem(key)
+
+    if (!rawValue) {
+      continue
+    }
+
+    try {
+      const parsedValue = JSON.parse(rawValue)
+      const parsedRecord = asObject(parsedValue)
+      const parsedId =
+        pickString(
+          parsedRecord?.id,
+          parsedRecord?.mentorId,
+          parsedRecord?.userId,
+          asObject(parsedRecord?.user)?.id,
+          asObject(parsedRecord?.data)?.id,
+        ) ?? null
+
+      if (parsedId) {
+        return parsedId
+      }
+    } catch {
+      continue
+    }
+  }
+
+  return null
+}
+
+const resolveProgramActivityStatus = (
+  startDateRaw: string | null,
+  endDateRaw: string | null,
+  fallbackStatus: string | null,
+) => {
+  const now = Date.now()
+  const startDate = startDateRaw ? new Date(startDateRaw).getTime() : Number.NaN
+  const endDate = endDateRaw ? new Date(endDateRaw).getTime() : Number.NaN
+  const statusValue = fallbackStatus?.toLowerCase() ?? ""
+
+  if (
+    statusValue.includes("complete") ||
+    statusValue.includes("completed") ||
+    statusValue.includes("ended")
+  ) {
+    return "completed"
+  }
+
+  if (!Number.isNaN(startDate) && now < startDate) {
+    return "upcoming"
+  }
+
+  if (!Number.isNaN(endDate) && now > endDate) {
+    return "completed"
+  }
+
+  return "active"
+}
+
+const formatSessionDate = (rawDate: string | null) => {
+  if (!rawDate) {
+    return {
+      date: "TBD",
+      time: "TBD",
+    }
+  }
+
+  const parsedDate = new Date(rawDate)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return {
+      date: rawDate,
+      time: "TBD",
+    }
+  }
+
+  return {
+    date: parsedDate.toISOString().slice(0, 10),
+    time: parsedDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }
+}
+
+const mapProgramDetailResponse = (payload: unknown, fallbackProgramId: string) => {
+  const root = asObject(payload)
+  const dataRecord = asObject(root?.data)
+  const rootPrograms = Array.isArray(root?.programs) ? root.programs : []
+  const dataPrograms = Array.isArray(dataRecord?.programs) ? dataRecord.programs : []
+  const rootProgram = asObject(root?.program)
+  const dataProgram = asObject(dataRecord?.program)
+  const programRecord =
+    rootProgram ??
+    dataProgram ??
+    asObject(rootPrograms[0]) ??
+    asObject(dataPrograms[0]) ??
+    null
+
+  if (!programRecord) {
+    return null
+  }
+
+  const programStartDate = pickString(programRecord.startDate) ?? null
+  const programEndDate = pickString(programRecord.endDate) ?? null
+  const programStatus = pickString(programRecord.status)
+  const assignedTopics = Array.isArray(programRecord.assignedTopics)
+    ? programRecord.assignedTopics
+    : []
+  const participants = pickNumber(
+    programRecord.participants,
+    programRecord.menteeCount,
+    programRecord.enrolled,
+  )
+  const activityStatus = resolveProgramActivityStatus(
+    programStartDate,
+    programEndDate,
+    programStatus,
+  )
+
+  const mappedTopics = assignedTopics.map((rawTopic, index) => {
+    const topicRecord = asObject(rawTopic) ?? {}
+    const topicId = pickNumber(topicRecord.topicId, topicRecord.id, index + 1)
+    const topicTitle =
+      pickString(topicRecord.topicTitle, topicRecord.title) ?? `Topic ${index + 1}`
+    const topicDescription =
+      pickString(topicRecord.topicDescription, topicRecord.description) ??
+      "No topic description provided."
+    const topicDurationMinutes = pickNumber(
+      topicRecord.topicDuration,
+      topicRecord.duration,
+    )
+    const topicDateSource =
+      pickString(
+        topicRecord.approvedAt,
+        topicRecord.assignedAt,
+        programStartDate,
+        programEndDate,
+      ) ?? null
+    const sessionDateInfo = formatSessionDate(topicDateSource)
+    const proposedHourlyRate = pickNumber(topicRecord.proposedHourlyRate)
+    const amount = proposedHourlyRate > 0 ? Math.max(1, Math.round(proposedHourlyRate / 1500)) : 0
+    const feedbackLink =
+      pickString(topicRecord.feedbacklink, topicRecord.feedbackLink) ?? null
+    const moduleTitle =
+      pickString(topicRecord.moduleTitle, topicRecord.moduleName) ??
+      "Program Module"
+
+    return {
+      id: topicId,
+      title: topicTitle,
+      description: topicDescription,
+      status: activityStatus,
+      duration: topicDurationMinutes > 0 ? `${topicDurationMinutes} min` : "TBD",
+      participants,
+      sessions: [
+        {
+          id: pickNumber(
+            topicRecord.topicMentorId,
+            topicRecord.id,
+            topicId,
+            index + 1,
+          ),
+          title: topicTitle,
+          date: sessionDateInfo.date,
+          time: sessionDateInfo.time,
+          duration: topicDurationMinutes > 0 ? `${topicDurationMinutes} min` : "TBD",
+          status: activityStatus === "active" ? "upcoming" : activityStatus,
+          mentorConfirmed: Boolean(topicRecord.approvedAt),
+          trainerConfirmed: Boolean(topicRecord.approvedAt),
+          paymentStatus: "pending",
+          amount,
+          meetingId: `TOP-${topicId}`,
+          meetingLink: null,
+          recordingUrl: null,
+          facilitatorLinks: feedbackLink
+            ? [
+                {
+                  id: topicId * 1000 + 1,
+                  title: "Feedback Link",
+                  url: feedbackLink,
+                  type: "resource",
+                },
+              ]
+            : [],
+          moduleTitle,
+          proposedHourlyRate,
+        },
+      ],
+      assessments: [],
+      feedback: [],
+    }
+  })
+
+  return {
+    programId: pickString(programRecord.id, fallbackProgramId) ?? fallbackProgramId,
+    title:
+      pickString(programRecord.title, programRecord.programTitle) ??
+      "Mentor Program Dashboard",
+    subtitle:
+      pickString(programRecord.tagline, programRecord.description) ??
+      "Mentor LMS Dashboard",
+    topics: mappedTopics,
+  }
+}
+
 export default function MentorProgramDashboard({ params }: Props) {
+  type ProgramTopicsState = typeof initialProgramTopics
   const [selectedTopic, setSelectedTopic] = useState<number | null>(null)
+  const [programTitle, setProgramTitle] = useState("Mentor Program Dashboard")
+  const [programSubtitle, setProgramSubtitle] = useState("Mentor LMS Dashboard")
+  const [programTopics, setProgramTopics] = useState<ProgramTopicsState>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [activeDetailTab, setActiveDetailTab] = useState("sessions")
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
   const [selectedSessionForFeedback, setSelectedSessionForFeedback] = useState<any>(null)
@@ -203,6 +494,10 @@ export default function MentorProgramDashboard({ params }: Props) {
     .flatMap((topic) => topic.sessions)
     .filter((s) => s.paymentStatus === "pending")
     .reduce((sum, s) => sum + s.amount, 0)
+  const activeMentees = programTopics.reduce(
+    (max, topic) => Math.max(max, pickNumber(topic.participants)),
+    0,
+  )
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -232,13 +527,83 @@ export default function MentorProgramDashboard({ params }: Props) {
 
   const router = useRouter()
 
+  useEffect(() => {
+    let isMounted = true
+
+    const loadProgram = async () => {
+      const mentorId = resolveMentorId()
+
+      if (!mentorId) {
+        if (!isMounted) {
+          return
+        }
+
+        setLoadError("Unable to resolve mentor ID. Please sign in again.")
+        setIsLoading(false)
+        setProgramTopics([])
+        return
+      }
+
+      setIsLoading(true)
+      setLoadError(null)
+      setProgramTopics([])
+      setSelectedTopic(null)
+
+      try {
+        const response = await mentorApi.getMentorProgramById<unknown>(
+          mentorId,
+          params.id,
+        )
+        const mappedProgram = mapProgramDetailResponse(response, params.id)
+
+        if (!mappedProgram) {
+          throw new Error("Unable to load this program.")
+        }
+
+        if (!isMounted) {
+          return
+        }
+
+        setProgramTitle(mappedProgram.title)
+        setProgramSubtitle(mappedProgram.subtitle)
+        setProgramTopics(mappedProgram.topics)
+        setSelectedTopic(null)
+      } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load program details."
+
+        setLoadError(message)
+        setProgramTopics([])
+        setSelectedTopic(null)
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadProgram()
+
+    return () => {
+      isMounted = false
+    }
+  }, [params.id])
+
   return (
     <div className="space-y-0 w-full md:px-6 md:pt-8 md:pb-8">
       <div className="flex flex-col">
         {/* On mobile: back first. On desktop: header first, then back. */}
         <div className="order-2 md:order-1 bg-white border-b w-full px-4 py-4 sm:py-5 md:py-6 md:px-6 -mx-0 md:-mx-6">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">Startup Funding Masterclass</h1>
-          <p className="text-xs sm:text-sm text-gray-600 mt-0.5">Mentor LMS Dashboard</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">{programTitle}</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-0.5">{programSubtitle}</p>
         </div>
         <div className="order-1 md:order-2">
           <button
@@ -252,6 +617,20 @@ export default function MentorProgramDashboard({ params }: Props) {
       </div>
 
       <div className="space-y-4 sm:space-y-6 px-0 pt-4 sm:pt-6">
+      {loadError && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-red-700">{loadError}</p>
+          </CardContent>
+        </Card>
+      )}
+      {isLoading && (
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-600">Loading program details...</p>
+          </CardContent>
+        </Card>
+      )}
       {/* Stats Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <Card>
@@ -259,7 +638,7 @@ export default function MentorProgramDashboard({ params }: Props) {
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">Active Mentees</p>
-                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">12</p>
+                <p className="text-lg sm:text-2xl font-semibold text-gray-900 mt-0.5">{activeMentees}</p>
               </div>
               <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 shrink-0" />
             </div>
@@ -308,104 +687,114 @@ export default function MentorProgramDashboard({ params }: Props) {
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
           <div className="space-y-5 sm:space-y-4 md:space-y-6">
-            {programTopics.map((topic, index) => (
-              <div key={topic.id} className="flex flex-row items-stretch gap-0 sm:gap-4">
-                {/* Desktop: circle + vertical line. Mobile: hidden (step lives inside card) */}
-                <div className="hidden sm:flex flex-col items-center flex-shrink-0">
-                  <div
-                    className={`w-12 h-12 rounded-full ${getStatusColor(topic.status)} flex items-center justify-center text-white font-semibold text-base shrink-0`}
-                  >
-                    {index + 1}
-                  </div>
-                  {index < programTopics.length - 1 && (
-                    <div className="w-px h-12 md:h-16 bg-gray-200 mt-1 sm:mt-2 flex-shrink-0" />
-                  )}
-                </div>
-
-                {/* Topic card: on mobile has left border + step label; desktop unchanged */}
-                <Card
-                  className={`flex-1 min-w-0 cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200 border-l-4 sm:border-l sm:border-l-border ${
-                    topic.status === "completed"
-                      ? "border-l-green-500"
-                      : topic.status === "active"
-                        ? "border-l-blue-500"
-                        : "border-l-gray-400"
-                  }`}
-                  onClick={() => setSelectedTopic(topic.id)}
-                >
-                  <CardContent className="p-4 sm:p-4">
-                    {/* Step label: mobile only, inside card */}
-                    <div className="flex items-center gap-2 mb-2 sm:hidden">
-                      <span className="text-xs font-medium text-muted-foreground">Step {index + 1}</span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 leading-tight">{topic.title}</h3>
-                        <p className="text-xs sm:text-sm text-gray-600 mt-0.5 line-clamp-2 sm:line-clamp-none">{topic.description}</p>
-                      </div>
-                      <div className="shrink-0">{getStatusBadge(topic.status)}</div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-2 sm:gap-4 mt-3 sm:mt-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                        <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Duration</p>
-                          <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{topic.duration}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Mentees</p>
-                          <p className="text-xs sm:text-sm font-semibold text-gray-900">{topic.participants}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                        <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Sessions</p>
-                          <p className="text-xs sm:text-sm font-semibold text-gray-900">{topic.sessions.length}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 col-span-2 md:col-span-1">
-                        <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Earned</p>
-                          <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
-                            ₦{(topic.sessions
-                            .filter((s) => s.paymentStatus === "paid")
-                              .reduce((sum, s) => sum + s.amount, 0) * 1500).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {topic.status === "active" && (
-                      <div className="mt-4">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-600 font-medium">Progress</span>
-                          <span className="font-semibold text-gray-900">
-                            {Math.round(
-                              (topic.sessions.filter((s) => s.status === "completed").length / topic.sessions.length) *
-                                100,
-                            )}
-                            %
-                          </span>
-                        </div>
-                        <Progress
-                          value={
-                            (topic.sessions.filter((s) => s.status === "completed").length / topic.sessions.length) *
-                            100
-                          }
-                          className="h-2"
-                        />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+            {isLoading ? (
+              <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                Loading program topics...
               </div>
-            ))}
+            ) : programTopics.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                No topics available for this program yet.
+              </div>
+            ) : (
+              programTopics.map((topic, index) => (
+                <div key={topic.id} className="flex flex-row items-stretch gap-0 sm:gap-4">
+                  {/* Desktop: circle + vertical line. Mobile: hidden (step lives inside card) */}
+                  <div className="hidden sm:flex flex-col items-center flex-shrink-0">
+                    <div
+                      className={`w-12 h-12 rounded-full ${getStatusColor(topic.status)} flex items-center justify-center text-white font-semibold text-base shrink-0`}
+                    >
+                      {index + 1}
+                    </div>
+                    {index < programTopics.length - 1 && (
+                      <div className="w-px h-12 md:h-16 bg-gray-200 mt-1 sm:mt-2 flex-shrink-0" />
+                    )}
+                  </div>
+
+                  {/* Topic card: on mobile has left border + step label; desktop unchanged */}
+                  <Card
+                    className={`flex-1 min-w-0 cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200 border-l-4 sm:border-l sm:border-l-border ${
+                      topic.status === "completed"
+                        ? "border-l-green-500"
+                        : topic.status === "active"
+                          ? "border-l-blue-500"
+                          : "border-l-gray-400"
+                    }`}
+                    onClick={() => setSelectedTopic(topic.id)}
+                  >
+                    <CardContent className="p-4 sm:p-4">
+                      {/* Step label: mobile only, inside card */}
+                      <div className="flex items-center gap-2 mb-2 sm:hidden">
+                        <span className="text-xs font-medium text-muted-foreground">Step {index + 1}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base sm:text-lg text-gray-900 leading-tight">{topic.title}</h3>
+                          <p className="text-xs sm:text-sm text-gray-600 mt-0.5 line-clamp-2 sm:line-clamp-none">{topic.description}</p>
+                        </div>
+                        <div className="shrink-0">{getStatusBadge(topic.status)}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-2 sm:gap-4 mt-3 sm:mt-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                          <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Duration</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{topic.duration}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                          <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Mentees</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900">{topic.participants}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                          <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Sessions</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900">{topic.sessions.length}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 col-span-2 md:col-span-1">
+                          <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Earned</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
+                              ₦{(topic.sessions
+                              .filter((s) => s.paymentStatus === "paid")
+                                .reduce((sum, s) => sum + s.amount, 0) * 1500).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {topic.status === "active" && (
+                        <div className="mt-4">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-gray-600 font-medium">Progress</span>
+                            <span className="font-semibold text-gray-900">
+                              {Math.round(
+                                (topic.sessions.filter((s) => s.status === "completed").length / topic.sessions.length) *
+                                  100,
+                              )}
+                              %
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              (topic.sessions.filter((s) => s.status === "completed").length / topic.sessions.length) *
+                              100
+                            }
+                            className="h-2"
+                          />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
@@ -42,6 +42,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { ApiError, apiClient } from "@/lib/api-client"
 
 // Type definitions
 type Session = {
@@ -74,19 +75,187 @@ type Topic = {
   sessions?: Session[]
 }
 
+type ApiMentor = {
+  id?: string | number
+  name?: string
+  email?: string
+  profile?:
+    | string
+    | {
+        professional_background?: string | null
+        bio?: string | null
+        expertise?: string | null
+      }
+  status?: string
+  confirmation?: boolean
+}
+
+type ApiTopic = {
+  id?: string | number
+  title?: string
+  description?: string
+  type?: string
+  duration?: number
+  status?: string
+  mentors?: ApiMentor[]
+}
+
+type ApiCurriculumModule = {
+  id?: string | number
+  title?: string
+  description?: string
+  topics?: ApiTopic[]
+}
+
+type ApiMentorAssignment = {
+  id?: string | number
+  mentor?: ApiMentor
+  status?: string
+  confirmation?: boolean
+}
+
+type ApiProgramDetails = {
+  id?: string | number
+  title?: string
+  status?: string
+  isPublished?: boolean
+  startDate?: string | null
+  endDate?: string | null
+  createdAt?: string
+  updatedAt?: string
+  participants?: number
+  participantCount?: number
+  maxParticipants?: number
+  curriculum?: ApiCurriculumModule[]
+  mentorAssignments?: ApiMentorAssignment[]
+}
+
+type ProgramDetailsResponse = {
+  success?: boolean
+  error?: string
+  program?: ApiProgramDetails
+}
+
+const normalizeProgramStatus = (program: ApiProgramDetails) => {
+  if (program.isPublished) {
+    return "published"
+  }
+
+  const normalizedStatus = (program.status ?? "").toLowerCase()
+
+  if (normalizedStatus.includes("publish")) {
+    return "published"
+  }
+
+  if (normalizedStatus.includes("draft")) {
+    return "draft"
+  }
+
+  if (
+    normalizedStatus.includes("active") ||
+    normalizedStatus.includes("ongoing")
+  ) {
+    return "active"
+  }
+
+  return "active"
+}
+
+const normalizeTopicType = (type?: string) => {
+  const normalizedType = (type ?? "").toLowerCase()
+
+  if (normalizedType.includes("live")) {
+    return "live_session"
+  }
+
+  if (normalizedType.includes("project")) {
+    return "project"
+  }
+
+  if (normalizedType.includes("discussion")) {
+    return "discussion"
+  }
+
+  if (normalizedType.includes("video")) {
+    return "video"
+  }
+
+  if (
+    normalizedType.includes("document") ||
+    normalizedType.includes("doc")
+  ) {
+    return "document"
+  }
+
+  return "live_session"
+}
+
+const normalizeTopicStatus = (status?: string, mentorCount = 0) => {
+  const normalizedStatus = (status ?? "").toLowerCase()
+
+  if (
+    normalizedStatus.includes("complete") ||
+    normalizedStatus.includes("done")
+  ) {
+    return "completed"
+  }
+
+  if (normalizedStatus.includes("active")) {
+    return "active"
+  }
+
+  if (
+    normalizedStatus.includes("upcoming") ||
+    normalizedStatus.includes("scheduled")
+  ) {
+    return "upcoming"
+  }
+
+  if (normalizedStatus.includes("draft")) {
+    return "draft"
+  }
+
+  return mentorCount > 0 ? "active" : "draft"
+}
+
+const getMentorExpertise = (profile?: ApiMentor["profile"]) => {
+  if (typeof profile === "string" && profile.trim().length > 0) {
+    return profile
+  }
+
+  if (profile && typeof profile === "object") {
+    if (
+      typeof profile.professional_background === "string" &&
+      profile.professional_background.trim().length > 0
+    ) {
+      return profile.professional_background
+    }
+
+    if (typeof profile.bio === "string" && profile.bio.trim().length > 0) {
+      return profile.bio
+    }
+
+    if (typeof profile.expertise === "string" && profile.expertise.trim().length > 0) {
+      return profile.expertise
+    }
+  }
+
+  return "Mentor"
+}
+
 export default function ProgramLMSPage() {
   const params = useParams()
   const router = useRouter()
   const programId = params.id as string
 
-  const [program] = useState({
+  const [program, setProgram] = useState({
     id: programId,
-    title: "Digital Marketing Bootcamp",
-    status: "active",
-    startDate: "2024-02-15",
-    endDate: "2024-05-15",
-    participants: 25,
-    maxParticipants: 30,
+    title: "Loading program...",
+    status: "draft",
+    startDate: "",
+    endDate: "",
+    participants: 0,
+    maxParticipants: 0,
   })
 
   const [topics] = useState<Topic[]>([
@@ -206,7 +375,10 @@ export default function ProgramLMSPage() {
     },
   ])
 
-  const [topicsState, setTopicsState] = useState<Topic[]>(topics)
+  const [topicsState, setTopicsState] = useState<Topic[]>([])
+  const [isProgramLoading, setIsProgramLoading] = useState(true)
+  const [programError, setProgramError] = useState<string | null>(null)
+  const [programDetails, setProgramDetails] = useState<ApiProgramDetails | null>(null)
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
@@ -229,12 +401,155 @@ export default function ProgramLMSPage() {
   // Track which sessions have feedback submitted
   const [sessionsWithFeedback, setSessionsWithFeedback] = useState<Set<string>>(new Set())
 
-  // Mock accepted mentors list (in real app, this would come from API)
-  const acceptedMentors = [
-    { id: "1", mentorName: "Sarah Johnson", expertise: "SEO & Content Strategy" },
-    { id: "2", mentorName: "Michael Chen", expertise: "Social Media & Analytics" },
-    { id: "3", mentorName: "Emily Rodriguez", expertise: "Email Marketing" },
-  ]
+  const acceptedMentors = useMemo(() => {
+    const assignments = programDetails?.mentorAssignments ?? []
+    const mentorsMap = new Map<string, { id: string; mentorName: string; expertise: string }>()
+
+    assignments.forEach((assignment) => {
+      const mentor = assignment.mentor
+
+      if (!mentor?.name) {
+        return
+      }
+
+      const assignmentStatus = (assignment.status ?? mentor.status ?? "").toLowerCase()
+      const isAcceptedStatus =
+        assignment.confirmation === true ||
+        mentor.confirmation === true ||
+        assignmentStatus.includes("approve") ||
+        assignmentStatus.includes("accept")
+
+      if (!isAcceptedStatus) {
+        return
+      }
+
+      const mentorId = `${mentor.id ?? mentor.email ?? mentor.name}`
+
+      mentorsMap.set(mentorId, {
+        id: mentorId,
+        mentorName: mentor.name,
+        expertise: getMentorExpertise(mentor.profile),
+      })
+    })
+
+    return Array.from(mentorsMap.values())
+  }, [programDetails])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchProgramDetails = async () => {
+      setIsProgramLoading(true)
+      setProgramError(null)
+
+      try {
+        const response = await apiClient.get<ProgramDetailsResponse>(
+          `/programs/details/${encodeURIComponent(programId)}`,
+        )
+
+        if (response.success === false || !response.program) {
+          throw new Error(response.error ?? "Unable to load program details.")
+        }
+
+        const fetchedProgram = response.program
+        const status = normalizeProgramStatus(fetchedProgram)
+        const participants =
+          typeof fetchedProgram.participants === "number"
+            ? fetchedProgram.participants
+            : typeof fetchedProgram.participantCount === "number"
+              ? fetchedProgram.participantCount
+              : 0
+        const maxParticipants =
+          typeof fetchedProgram.maxParticipants === "number"
+            ? fetchedProgram.maxParticipants
+            : participants
+
+        const mappedTopics: Topic[] = (fetchedProgram.curriculum ?? []).flatMap(
+          (moduleItem, moduleIndex) =>
+            (moduleItem.topics ?? []).map((topicItem, topicIndex) => {
+              const mentors = (topicItem.mentors ?? [])
+                .map((mentor) => mentor.name)
+                .filter((mentorName): mentorName is string => Boolean(mentorName))
+              const topicStatus = normalizeTopicStatus(topicItem.status, mentors.length)
+              const completionRate =
+                topicStatus === "completed"
+                  ? 100
+                  : topicStatus === "active"
+                    ? 50
+                    : 0
+
+              return {
+                id: `${topicItem.id ?? `${moduleItem.id ?? moduleIndex}-${topicIndex}`}`,
+                title:
+                  topicItem.title ??
+                  `${moduleItem.title ?? "Module"} Topic ${topicIndex + 1}`,
+                description:
+                  topicItem.description ??
+                  moduleItem.description ??
+                  "No description available",
+                type: normalizeTopicType(topicItem.type),
+                duration:
+                  typeof topicItem.duration === "number" ? topicItem.duration : 0,
+                status: topicStatus,
+                mentors,
+                participants,
+                completionRate,
+                assessments: [],
+                feedback: { rating: 0, reviews: 0 },
+                sessions: [],
+              }
+            }),
+        )
+
+        if (!isMounted) {
+          return
+        }
+
+        setProgram({
+          id: `${fetchedProgram.id ?? programId}`,
+          title: fetchedProgram.title ?? "Untitled Program",
+          status,
+          startDate: fetchedProgram.startDate ?? fetchedProgram.createdAt ?? "",
+          endDate: fetchedProgram.endDate ?? fetchedProgram.updatedAt ?? "",
+          participants,
+          maxParticipants,
+        })
+        setProgramDetails(fetchedProgram)
+
+        if (mappedTopics.length > 0) {
+          setTopicsState(mappedTopics)
+          setSelectedTopic((currentTopic) =>
+            currentTopic
+              ? mappedTopics.find((topic) => topic.id === currentTopic.id) ?? null
+              : null,
+          )
+        }
+      } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load program details."
+
+        setProgramError(message)
+      } finally {
+        if (isMounted) {
+          setIsProgramLoading(false)
+        }
+      }
+    }
+
+    void fetchProgramDetails()
+
+    return () => {
+      isMounted = false
+    }
+  }, [programId])
 
   const handleAttendanceConfirmation = (topicId: string, sessionId: string, type: string) => {
     console.log(`[v0] Confirming ${type} attendance for session ${sessionId} in topic ${topicId}`)
@@ -385,6 +700,9 @@ export default function ProgramLMSPage() {
                   <span className="text-sm text-gray-600 font-medium">
                     {program.participants}/{program.maxParticipants} participants
                   </span>
+                  {isProgramLoading ? (
+                    <span className="text-xs text-gray-500">Loading latest details...</span>
+                  ) : null}
                 </div>
               </>
             )}
@@ -406,6 +724,11 @@ export default function ProgramLMSPage() {
 
       <div className="container mx-auto px-0 py-3 sm:py-6 md:px-6">
         <div className="px-3 sm:px-4 md:px-0">
+        {!selectedTopic && programError ? (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {programError}
+          </div>
+        ) : null}
         {selectedTopic ? (
           // Topic Detail View
           <div className="space-y-4 sm:space-y-6">
@@ -1222,7 +1545,7 @@ export default function ProgramLMSPage() {
 
             {/* Topics timeline: desktop = circles + line, mobile = left border + Step N in card */}
             <div className="space-y-5 sm:space-y-4 md:space-y-6">
-              {topics.map((topic, index) => (
+              {topicsState.map((topic, index) => (
                 <div key={topic.id} className="flex flex-row items-stretch gap-0 sm:gap-4">
                   {/* Desktop: circle + vertical line. Mobile: hidden (step lives inside card) */}
                   <div className="hidden sm:flex flex-col items-center flex-shrink-0">
@@ -1231,7 +1554,7 @@ export default function ProgramLMSPage() {
                     >
                       {index + 1}
                     </div>
-                    {index < topics.length - 1 && (
+                    {index < topicsState.length - 1 && (
                       <div className="w-px h-12 md:h-16 bg-gray-200 mt-1 sm:mt-2 flex-shrink-0" />
                     )}
                   </div>

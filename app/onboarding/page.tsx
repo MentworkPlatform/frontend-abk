@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { SECTORS } from "@/lib/constants/onboarding";
+import { useToast } from "@/hooks/use-toast";
+import { registerUser, REGISTER_ROLE_IDS, ApiError } from "@/lib/auth-register";
 
 // Mock program data - in real app, this would come from API based on intent
 const mockPrograms = [
@@ -99,9 +101,11 @@ const mockPrograms = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedProgram, setSelectedProgram] = useState<number | null>(null);
   const [needsAccount, setNeedsAccount] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Intent Snapshot
     goals: [] as string[], // Max 2 selections
@@ -165,11 +169,41 @@ export default function OnboardingPage() {
     setStep(5); // Go to next steps
   };
 
-  const handleCreateAccount = (e: React.FormEvent) => {
+  const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, create account via API
-    // After account creation, show Step 5 (What's next?)
-    nextStep();
+
+    setIsCreatingAccount(true);
+    try {
+      await registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        roleId: REGISTER_ROLE_IDS.mentee,
+      });
+
+      toast({
+        title: "Account created",
+        description: "Your mentee account was created successfully.",
+      });
+
+      // After account creation, show Step 5 (What's next?)
+      nextStep();
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to create account.";
+
+      toast({
+        title: "Signup failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAccount(false);
+    }
   };
 
   const handleContinueWithoutAccount = () => {
@@ -535,8 +569,11 @@ export default function OnboardingPage() {
                     <Button
                       type="submit"
                       className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      disabled={isCreatingAccount}
                     >
-                      Create Account & Continue
+                      {isCreatingAccount
+                        ? "Creating Account..."
+                        : "Create Account & Continue"}
                     </Button>
                     </div>
                 </form>

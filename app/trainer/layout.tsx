@@ -3,10 +3,12 @@
 import type React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { LayoutDashboard, User, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DashboardSidebar, type NavItem } from "@/components/dashboard-sidebar";
 import MobileNav from "@/components/mobile-nav";
+import { getCurrentUserDetails } from "@/lib/current-user";
 
 export default function TrainerLayout({
   children,
@@ -14,6 +16,27 @@ export default function TrainerLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [currentUserName, setCurrentUserName] = useState("User");
+
+  useEffect(() => {
+    const currentUser = getCurrentUserDetails();
+
+    if (currentUser.name) {
+      setCurrentUserName(currentUser.name);
+    }
+  }, []);
+
+  const userInitials = useMemo(() => {
+    const initials = currentUserName
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word[0]?.toUpperCase() ?? "")
+      .join("")
+      .slice(0, 2);
+
+    return initials || "U";
+  }, [currentUserName]);
+
   const navItems: NavItem[] = [
     {
       href: "/trainer/dashboard",
@@ -42,10 +65,10 @@ export default function TrainerLayout({
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
           <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User avatar" />
-          <AvatarFallback className="text-xs">JD</AvatarFallback>
+          <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="font-medium text-sm truncate">John Doe</p>
+          <p className="font-medium text-sm truncate">{currentUserName}</p>
         </div>
       </div>
     </div>
@@ -59,7 +82,7 @@ export default function TrainerLayout({
         </Link>
         <MobileNav
           userType="trainer"
-          userName="John Doe"
+          userName={currentUserName}
           userRole="Trainer"
           links={navLinks}
         />

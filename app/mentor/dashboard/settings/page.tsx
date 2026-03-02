@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { DollarSign, Bell, Lock } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardHeader } from "@/components/dashboard-header"
+import { PaymentDetailsForm } from "@/components/settings/payment-details-form"
 
 export default function MentorSettingsPage() {
   return (
@@ -37,49 +38,7 @@ export default function MentorSettingsPage() {
           </TabsList>
 
         <TabsContent value="payment" className="mt-4">
-          <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Payment Details</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                Add your payment details to receive payments for teaching sessions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-700">
-                  Payment details are required to receive payments. You can add bank account, mobile money, or other payment methods.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="payment-method">Payment Method</Label>
-                  <select
-                    id="payment-method"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="">Select payment method</option>
-                    <option value="bank">Bank Account</option>
-                    <option value="mobile">Mobile Money</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="account-name">Account Name</Label>
-                  <Input id="account-name" placeholder="Enter account name" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="account-number">Account Number</Label>
-                  <Input id="account-number" placeholder="Enter account number" />
-                </div>
-
-                <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000] w-full sm:w-auto" size="sm">Save Payment Details</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <PaymentDetailsForm showProviderRecipientCode={false} />
         </TabsContent>
 
         <TabsContent value="notifications" className="mt-4">

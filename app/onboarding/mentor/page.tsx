@@ -25,6 +25,8 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import {
   SECTORS,
 } from "@/lib/constants/onboarding"
+import { useToast } from "@/hooks/use-toast";
+import { registerUser, REGISTER_ROLE_IDS, ApiError } from "@/lib/auth-register";
 
 // Mock opportunity data - in real app, this would come from API based on expertise
 const mockOpportunities = [
@@ -76,9 +78,11 @@ const mockOpportunities = [
 
 export default function MentorOnboardingPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedOpportunity, setSelectedOpportunity] = useState<number | null>(null);
   const [needsAccount, setNeedsAccount] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Expertise Snapshot
     selectedSectors: [] as string[], // Max 3 selections using sector IDs
@@ -131,10 +135,41 @@ export default function MentorOnboardingPage() {
     nextStep();
   };
 
-  const handleCreateAccount = (e: React.FormEvent) => {
+  const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, create account and save interest
-    nextStep(); // Go to Step 5 (Done page)
+
+    setIsCreatingAccount(true);
+    try {
+      await registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        roleId: REGISTER_ROLE_IDS.mentor,
+      });
+
+      toast({
+        title: "Account created",
+        description: "Your mentor account was created successfully.",
+      });
+
+      // Go to Step 5 (Done page)
+      nextStep();
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to create account.";
+
+      toast({
+        title: "Signup failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAccount(false);
+    }
   };
 
   const totalSteps = 5;
@@ -439,8 +474,11 @@ export default function MentorOnboardingPage() {
                     <Button
                       type="submit"
                       className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      disabled={isCreatingAccount}
                     >
-                      Create Account & Save Interest
+                      {isCreatingAccount
+                        ? "Creating Account..."
+                        : "Create Account & Save Interest"}
                     </Button>
                   </div>
                 </form>

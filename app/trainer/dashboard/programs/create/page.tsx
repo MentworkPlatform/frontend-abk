@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ArrowRight,
@@ -35,142 +35,723 @@ import type { MentorAssignment, PlatformMentor } from "@/types/trainer"
 import type { CurriculumTemplate, CurriculumModule } from "@/types/curriculum"
 import { CurriculumBuilder } from "@/components/curriculum/curriculum-builder"
 import { TemplateSelector } from "@/components/curriculum/template-selector"
+import { ApiError, apiClient } from "@/lib/api-client"
+import { toast } from "@/hooks/use-toast"
 import {
   SECTORS,
   SKILLS_CAPABILITIES,
   getSkillsForSectors,
   getSkillsGroupedBySector,
 } from "@/lib/constants/onboarding"
-import { useMemo } from "react"
 
-// Mock data for platform mentors
-const mockMentors: PlatformMentor[] = [
-  {
-    id: "mentor-1",
-    name: "Sarah Chen",
-    email: "sarah.chen@email.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    title: "Senior Digital Marketing Strategist",
-    company: "Google",
-    bio: "10+ years in digital marketing with expertise in SEO, content strategy, and performance marketing. Former marketing lead at 3 successful startups.",
-    expertise: ["Digital Marketing", "SEO", "Content Marketing", "Social Media", "Analytics"],
-    rating: 4.9,
-    totalReviews: 127,
-    totalSessions: 340,
-    hourlyRate: 150,
-    availability: "available",
-    languages: ["English", "Mandarin"],
-    timezone: "PST",
-    responseTime: "Usually responds within 1 hour",
-    successRate: 96,
-    specializations: ["B2B Marketing", "SaaS Growth", "Content Strategy"],
-    yearsOfExperience: 12,
-    education: ["MBA Marketing - Stanford", "BS Computer Science - UC Berkeley"],
-    certifications: ["Google Ads Certified", "HubSpot Content Marketing"],
-    portfolioItems: [],
-  },
-  {
-    id: "mentor-2",
-    name: "Marcus Johnson",
-    email: "marcus.j@email.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    title: "Lead Software Engineer",
-    company: "Microsoft",
-    bio: "Full-stack developer with 8 years of experience building scalable web applications. Passionate about mentoring and teaching modern development practices.",
-    expertise: ["Web Development", "JavaScript", "React", "Node.js", "Cloud Architecture"],
-    rating: 4.8,
-    totalReviews: 89,
-    totalSessions: 245,
-    hourlyRate: 120,
-    availability: "available",
-    languages: ["English", "Spanish"],
-    timezone: "EST",
-    responseTime: "Usually responds within 2 hours",
-    successRate: 94,
-    specializations: ["React Development", "API Design", "Cloud Deployment"],
-    yearsOfExperience: 8,
-    education: ["MS Computer Science - MIT", "BS Software Engineering - Georgia Tech"],
-    certifications: ["AWS Solutions Architect", "React Developer Certification"],
-    portfolioItems: [],
-  },
-  {
-    id: "mentor-3",
-    name: "Dr. Emily Rodriguez",
-    email: "emily.rodriguez@email.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    title: "UX Research Director",
-    company: "Airbnb",
-    bio: "PhD in Human-Computer Interaction with 15 years of experience in user research and product design. Led UX teams at Fortune 500 companies.",
-    expertise: ["UX Design", "User Research", "Product Strategy", "Design Thinking", "Prototyping"],
-    rating: 5.0,
-    totalReviews: 156,
-    totalSessions: 420,
-    hourlyRate: 180,
-    availability: "busy",
-    languages: ["English", "Spanish", "Portuguese"],
-    timezone: "PST",
-    responseTime: "Usually responds within 4 hours",
-    successRate: 98,
-    specializations: ["User Research", "Design Systems", "Product Strategy"],
-    yearsOfExperience: 15,
-    education: ["PhD HCI - Carnegie Mellon", "MS Design - RISD"],
-    certifications: ["Google UX Design Certificate", "Nielsen Norman Group UX Certification"],
-    portfolioItems: [],
-  },
-  {
-    id: "mentor-4",
-    name: "Alex Kim",
-    email: "alex.kim@email.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    title: "Data Science Manager",
-    company: "Netflix",
-    bio: "Data scientist and machine learning engineer with expertise in recommendation systems, analytics, and AI product development.",
-    expertise: ["Data Science", "Machine Learning", "Python", "Analytics", "AI"],
-    rating: 4.7,
-    totalReviews: 73,
-    totalSessions: 180,
-    hourlyRate: 140,
-    availability: "available",
-    languages: ["English", "Korean"],
-    timezone: "PST",
-    responseTime: "Usually responds within 3 hours",
-    successRate: 92,
-    specializations: ["ML Engineering", "Data Analytics", "Recommendation Systems"],
-    yearsOfExperience: 7,
-    education: ["MS Data Science - Stanford", "BS Mathematics - UCLA"],
-    certifications: ["TensorFlow Developer", "AWS Machine Learning"],
-    portfolioItems: [],
-  },
-  {
-    id: "mentor-5",
-    name: "Lisa Thompson",
-    email: "lisa.thompson@email.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    title: "Product Management Lead",
-    company: "Stripe",
-    bio: "Product leader with 10 years of experience building fintech and B2B SaaS products. Expert in product strategy, roadmapping, and go-to-market.",
-    expertise: ["Product Management", "Product Strategy", "Go-to-Market", "Analytics", "Leadership"],
-    rating: 4.9,
-    totalReviews: 112,
-    totalSessions: 290,
-    hourlyRate: 160,
-    availability: "available",
-    languages: ["English", "French"],
-    timezone: "EST",
-    responseTime: "Usually responds within 1 hour",
-    successRate: 95,
-    specializations: ["B2B Products", "Fintech", "Product Analytics"],
-    yearsOfExperience: 10,
-    education: ["MBA - Wharton", "BS Engineering - MIT"],
-    certifications: ["Product Management Certificate - Berkeley", "Scrum Master"],
-    portfolioItems: [],
-  },
-]
+type SaveProgramStepResponse = {
+  success?: boolean
+  error?: string
+  programId?: string
+  data?: {
+    programId?: string
+  }
+}
+
+type ProgramStepOnePayload = {
+  step: 1
+  programId: string
+  title: string
+  description: string
+  tagline: string
+  learningOutcomes: string[]
+}
+
+type ProgramStepTwoPayload = {
+  step: 2
+  programId: string
+  sectors: string[]
+  subSectorSkills: string[]
+  skillsCapabilities: string[]
+  category: number
+  level: string
+  format: string
+  type: number
+  maxParticipant: number
+  price: number
+  duration: number
+  numberOfSessions: number
+  meetingLink?: string
+  accessCredentials?: string
+}
+
+type ProgramStepThreePayload = {
+  step: 3
+  programId: string
+  modules: Array<{
+    title: string
+    description: string
+    duration: number
+    learningObjectives: string[]
+    topics: Array<{
+      id: string
+      title: string
+      description: string
+      type: string
+      duration: number
+    }>
+  }>
+}
+
+type ProgramStepFourPayload = {
+  step: 4
+  programId: string
+  topicMentors: Array<{
+    topicIds: string[]
+    mentorId: string
+    proposedRate: number
+    customMessage: string
+    feedbacklink?: string
+  }>
+}
+
+type ApiSurveyItem = {
+  id?: string | number
+  slug?: string
+  surveySlug?: string
+  title?: string
+  name?: string
+  surveyTitle?: string
+  feedbackLink?: string
+  link?: string
+  surveyLink?: string
+  url?: string
+  feedbacklink?: string
+}
+
+type AllSurveysResponse = {
+  success?: boolean
+  message?: string
+  allsurvey?: ApiSurveyItem[]
+}
+
+type ApiMentorProfile = {
+  professional_background?: string | null
+  bio?: string | null
+  expertise?: string | string[] | null
+  availability?: string | null
+  hourlyRate?: string | number | null
+  experience_years?: number | null
+  location?: string | null
+}
+
+type ApiMentorItem = {
+  id?: string | number
+  name?: string
+  email?: string
+  avatar?: string
+  title?: string
+  company?: string
+  bio?: string
+  expertise?: string | string[]
+  rating?: number
+  totalReviews?: number
+  totalSessions?: number
+  hourlyRate?: string | number
+  availability?: string
+  languages?: string[]
+  timezone?: string
+  responseTime?: string
+  successRate?: number
+  specializations?: string[]
+  yearsOfExperience?: number
+  education?: string[]
+  certifications?: string[]
+  profile?: ApiMentorProfile | string
+}
+
+type MentorsApiResponse = {
+  success?: boolean
+  error?: string
+  message?: string
+  mentors?: ApiMentorItem[]
+  mentor?: ApiMentorItem[]
+  data?: ApiMentorItem[]
+}
+
+type DraftProgramEnvelope = {
+  step?: number
+  programId?: string
+  data?: Record<string, unknown>
+}
+
+type DraftProgramResponse = {
+  success?: boolean
+  error?: string
+  message?: string
+  draft?: DraftProgramEnvelope | Record<string, unknown>
+  drafts?: Array<DraftProgramEnvelope | Record<string, unknown>>
+  data?: DraftProgramEnvelope | Record<string, unknown>
+}
+
+type ProgramDetailsByIdResponse = {
+  success?: boolean
+  error?: string
+  message?: string
+  program?: Record<string, unknown>
+  data?: unknown
+}
+
+const LEVEL_VALUE_MAP: Record<string, string> = {
+  beginner: "1",
+  intermediate: "2",
+  advanced: "3",
+  "all-levels": "4",
+}
+
+const LEVEL_LABEL_MAP: Record<string, string> = {
+  "1": "beginner",
+  "2": "intermediate",
+  "3": "advanced",
+  "4": "all-levels",
+}
+
+const FORMAT_VALUE_MAP: Record<string, string> = {
+  hybrid: "1",
+  online: "2",
+  "in-person": "3",
+}
+
+const FORMAT_LABEL_MAP: Record<string, string> = {
+  "1": "hybrid",
+  "2": "online",
+  "3": "in-person",
+}
+
+const getInitialDraftProgramId = () => `draft-program-${Date.now()}`
+
+const toPositiveNumber = (value: string, fallback = 0) => {
+  const parsedValue = Number(value)
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    return fallback
+  }
+
+  return parsedValue
+}
+
+const sanitizeStringArray = (items: string[]) =>
+  items.map((item) => item.trim()).filter((item) => item.length > 0)
+
+const normalizeTopicTypeForApi = (type: string) =>
+  type.trim().replace(/\s+/g, "_").toUpperCase()
+
+const requiresMeetingDetails = (format: string) =>
+  format === "online" || format === "hybrid"
+
+const parseNumberValue = (value: unknown, fallback = 0) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === "string") {
+    const parsedValue = Number(value)
+
+    if (Number.isFinite(parsedValue)) {
+      return parsedValue
+    }
+  }
+
+  return fallback
+}
+
+const hashString = (value: string) => {
+  let hash = 0
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index)
+    hash |= 0
+  }
+
+  return Math.abs(hash)
+}
+
+const getNumericTopicIdFromRaw = (
+  rawTopicId: string,
+  fallbackKey: string,
+  usedIds: Set<string>,
+) => {
+  const digits = rawTopicId.replace(/\D+/g, "")
+  const seed =
+    digits.length > 0
+      ? digits
+      : `${hashString(fallbackKey) || 1}`
+
+  let normalizedId = seed.slice(0, 18).replace(/^0+/, "")
+
+  if (normalizedId.length === 0) {
+    normalizedId = `${hashString(fallbackKey) || 1}`
+  }
+
+  let candidate = normalizedId
+  let suffix = 1
+
+  while (usedIds.has(candidate)) {
+    const suffixText = `${suffix}`
+    const base = normalizedId.slice(0, Math.max(1, 18 - suffixText.length))
+    candidate = `${base}${suffixText}`
+    suffix += 1
+  }
+
+  usedIds.add(candidate)
+  return candidate
+}
+
+const toNumericTopicIdValue = (rawTopicId: string, fallbackKey: string) => {
+  const digits = rawTopicId.replace(/\D+/g, "")
+
+  if (digits.length > 0) {
+    return digits
+  }
+
+  return `${hashString(fallbackKey) || 1}`
+}
+
+const buildTopicIdMapForApi = (modules: CurriculumModule[]) => {
+  const usedIds = new Set<string>()
+  const topicIdMap = new Map<string, string>()
+
+  modules.forEach((module, moduleIndex) => {
+    module.topics.forEach((topic, topicIndex) => {
+      const rawTopicId = `${topic.id}`.trim()
+      const normalizedTopicId = getNumericTopicIdFromRaw(
+        rawTopicId,
+        `${module.id}-${moduleIndex + 1}-${topic.title}-${topicIndex + 1}`,
+        usedIds,
+      )
+
+      topicIdMap.set(rawTopicId, normalizedTopicId)
+    })
+  })
+
+  return topicIdMap
+}
+
+const resolveCategoryId = (selectedSectors: string[]) => {
+  const rawCategory = selectedSectors[0]?.trim()
+
+  if (!rawCategory) {
+    return 0
+  }
+
+  const numericCategory = Number(rawCategory)
+
+  if (Number.isInteger(numericCategory) && numericCategory > 0) {
+    return numericCategory
+  }
+
+  const sectorIndex = SECTORS.findIndex((sector) => sector.id === rawCategory)
+
+  return sectorIndex >= 0 ? sectorIndex + 1 : 0
+}
+
+const normalizeMentorAvailability = (
+  availability: string | undefined,
+): PlatformMentor["availability"] => {
+  const normalizedValue = (availability ?? "").toLowerCase()
+
+  if (normalizedValue.includes("busy")) {
+    return "busy"
+  }
+
+  if (normalizedValue.includes("unavailable")) {
+    return "unavailable"
+  }
+
+  return "available"
+}
+
+const parseMentorExpertise = (mentor: ApiMentorItem): string[] => {
+  const profile =
+    mentor.profile && typeof mentor.profile === "object" ? mentor.profile : undefined
+
+  const expertiseValue = mentor.expertise ?? profile?.expertise
+
+  if (Array.isArray(expertiseValue)) {
+    const cleaned = expertiseValue.map((item) => item.trim()).filter(Boolean)
+    if (cleaned.length > 0) {
+      return cleaned
+    }
+  }
+
+  if (typeof expertiseValue === "string" && expertiseValue.trim().length > 0) {
+    return expertiseValue
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+
+  return ["Mentoring"]
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null
+
+const toStringValue = (value: unknown) => {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim()
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `${value}`
+  }
+
+  return null
+}
+
+const extractSurveySlug = (value: string | null | undefined) => {
+  if (!value) {
+    return null
+  }
+
+  const trimmedValue = value.trim()
+
+  if (!trimmedValue) {
+    return null
+  }
+
+  if (!trimmedValue.includes("/")) {
+    return trimmedValue
+  }
+
+  const normalizedSegments = trimmedValue.split("/").filter(Boolean)
+  const surveysIndex = normalizedSegments.findIndex((segment) => {
+    const normalizedSegment = segment.toLowerCase()
+    return normalizedSegment === "surveys" || normalizedSegment === "survey"
+  })
+
+  const slugCandidate =
+    surveysIndex >= 0 && surveysIndex + 1 < normalizedSegments.length
+      ? normalizedSegments[surveysIndex + 1]
+      : normalizedSegments[normalizedSegments.length - 1]
+
+  if (!slugCandidate) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(slugCandidate).trim()
+  } catch {
+    return slugCandidate.trim()
+  }
+}
+
+const getSurveyHref = (value: string | undefined) => {
+  if (!value) {
+    return null
+  }
+
+  const trimmedValue = value.trim()
+
+  if (!trimmedValue) {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(trimmedValue)) {
+    return trimmedValue
+  }
+
+  const slug = extractSurveySlug(trimmedValue)
+
+  if (!slug) {
+    return null
+  }
+
+  return `/survey/${encodeURIComponent(slug)}`
+}
+
+const toStringArray = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map((item) => toStringValue(item))
+    .filter((item): item is string => Boolean(item))
+}
+
+const normalizeExperienceLevelFromDraft = (value: unknown) => {
+  const rawValue = toStringValue(value)
+
+  if (!rawValue) {
+    return ""
+  }
+
+  const mappedByCode = LEVEL_LABEL_MAP[rawValue]
+
+  if (mappedByCode) {
+    return mappedByCode
+  }
+
+  const normalizedValue = rawValue.toLowerCase()
+
+  if (normalizedValue.includes("begin")) {
+    return "beginner"
+  }
+
+  if (normalizedValue.includes("inter")) {
+    return "intermediate"
+  }
+
+  if (normalizedValue.includes("adv")) {
+    return "advanced"
+  }
+
+  if (normalizedValue.includes("all")) {
+    return "all-levels"
+  }
+
+  return ""
+}
+
+const normalizeFormatFromDraft = (value: unknown) => {
+  const rawValue = toStringValue(value)
+
+  if (!rawValue) {
+    return ""
+  }
+
+  const mappedByCode = FORMAT_LABEL_MAP[rawValue]
+
+  if (mappedByCode) {
+    return mappedByCode
+  }
+
+  const normalizedValue = rawValue.toLowerCase()
+
+  if (normalizedValue.includes("hybrid")) {
+    return "hybrid"
+  }
+
+  if (
+    normalizedValue.includes("in-person") ||
+    normalizedValue.includes("in person") ||
+    normalizedValue.includes("physical") ||
+    normalizedValue.includes("offline")
+  ) {
+    return "in-person"
+  }
+
+  if (normalizedValue.includes("online") || normalizedValue.includes("virtual")) {
+    return "online"
+  }
+
+  return ""
+}
+
+const normalizeTopicTypeFromApi = (
+  value: unknown,
+): CurriculumModule["topics"][number]["type"] => {
+  const normalized = (toStringValue(value) ?? "").toLowerCase().replace(/\s+/g, "_")
+
+  if (
+    normalized === "video" ||
+    normalized === "document" ||
+    normalized === "quiz" ||
+    normalized === "assignment" ||
+    normalized === "live_session" ||
+    normalized === "discussion" ||
+    normalized === "project"
+  ) {
+    return normalized
+  }
+
+  if (normalized.includes("live")) {
+    return "live_session"
+  }
+
+  return "discussion"
+}
+
+const toDraftEnvelope = (
+  value: unknown,
+  fallbackProgramId: string,
+): DraftProgramEnvelope | null => {
+  const record = asRecord(value)
+
+  if (!record) {
+    return null
+  }
+
+  const dataRecord = asRecord(record.data) ?? record
+  const resolvedProgramId =
+    toStringValue(record.programId) ??
+    toStringValue(dataRecord.programId) ??
+    fallbackProgramId
+
+  const rawStep = record.step ?? dataRecord.step
+  const parsedStep = parseNumberValue(rawStep, 0)
+  const step = parsedStep > 0 ? parsedStep : undefined
+
+  return {
+    step,
+    programId: resolvedProgramId,
+    data: dataRecord,
+  }
+}
+
+const getDraftEnvelopeFromResponse = (
+  response: DraftProgramResponse,
+  requestedProgramId: string,
+): DraftProgramEnvelope | null => {
+  if (Array.isArray(response.drafts) && response.drafts.length > 0) {
+    const normalizedDrafts = response.drafts
+      .map((draft) => toDraftEnvelope(draft, requestedProgramId))
+      .filter((draft): draft is DraftProgramEnvelope => Boolean(draft))
+    const matchedDraft =
+      normalizedDrafts.find((draft) => draft.programId === requestedProgramId) ??
+      normalizedDrafts[0]
+
+    if (matchedDraft) {
+      return matchedDraft
+    }
+  }
+
+  return (
+    toDraftEnvelope(response.draft, requestedProgramId) ??
+    toDraftEnvelope(response.data, requestedProgramId)
+  )
+}
+
+const getDraftEnvelopeFromProgramDetailsResponse = (
+  response: ProgramDetailsByIdResponse,
+  requestedProgramId: string,
+) => {
+  const dataRecord = asRecord(response.data)
+  const programRecord =
+    asRecord(response.program) ??
+    asRecord(dataRecord?.program) ??
+    dataRecord
+
+  return toDraftEnvelope(programRecord, requestedProgramId)
+}
+
+const buildDraftCurriculum = (draftData: Record<string, unknown>): CurriculumModule[] => {
+  const rawModules = Array.isArray(draftData.modules)
+    ? draftData.modules
+    : Array.isArray(draftData.curriculum)
+      ? draftData.curriculum
+      : []
+
+  return rawModules.map((moduleItem, moduleIndex) => {
+    const moduleRecord = asRecord(moduleItem) ?? {}
+    const moduleId = toStringValue(moduleRecord.id) ?? `module-${moduleIndex + 1}`
+    const rawTopics = Array.isArray(moduleRecord.topics) ? moduleRecord.topics : []
+
+    return {
+      id: moduleId,
+      title: toStringValue(moduleRecord.title) ?? `Module ${moduleIndex + 1}`,
+      description: toStringValue(moduleRecord.description) ?? "",
+      order: parseNumberValue(moduleRecord.order, moduleIndex + 1),
+      duration: parseNumberValue(moduleRecord.duration, 0),
+      topics: rawTopics.map((topicItem, topicIndex) => {
+        const topicRecord = asRecord(topicItem) ?? {}
+
+        return {
+          id:
+            toStringValue(topicRecord.id) ??
+            `topic-${moduleIndex + 1}-${topicIndex + 1}`,
+          title: toStringValue(topicRecord.title) ?? `Topic ${topicIndex + 1}`,
+          description: toStringValue(topicRecord.description) ?? "",
+          duration: parseNumberValue(topicRecord.duration, 0),
+          order: parseNumberValue(topicRecord.order, topicIndex + 1),
+          type: normalizeTopicTypeFromApi(topicRecord.type),
+          materials: [],
+          prerequisites: [],
+          requiredExpertise: [],
+          content: undefined,
+          isPublished: false,
+        }
+      }),
+      learningObjectives: toStringArray(moduleRecord.learningObjectives),
+      materials: [],
+      assessments: [],
+      isPublished: false,
+    }
+  })
+}
+
+const createFallbackMentor = (mentorId: string): PlatformMentor => ({
+  id: mentorId,
+  name: `Mentor ${mentorId}`,
+  email: "",
+  avatar: "/placeholder.svg",
+  title: "Platform Mentor",
+  bio: "",
+  expertise: ["Mentoring"],
+  rating: 0,
+  totalReviews: 0,
+  totalSessions: 0,
+  hourlyRate: 0,
+  availability: "available",
+  languages: [],
+  timezone: "Africa/Lagos",
+  responseTime: "Response time unavailable",
+  successRate: 0,
+  specializations: [],
+  yearsOfExperience: 0,
+  education: [],
+  certifications: [],
+  portfolioItems: [],
+})
+
+const buildDraftMentorAssignments = (
+  draftData: Record<string, unknown>,
+): MentorAssignment[] => {
+  const rawAssignments = Array.isArray(draftData.topicMentors)
+    ? draftData.topicMentors
+    : []
+
+  return rawAssignments
+    .map((item, index): MentorAssignment | null => {
+      const record = asRecord(item)
+
+      if (!record) {
+        return null
+      }
+
+      const mentorId = toStringValue(record.mentorId)
+
+      if (!mentorId) {
+        return null
+      }
+
+      return {
+        id: `assignment-${mentorId}-${index + 1}`,
+        mentorId,
+        mentor: createFallbackMentor(mentorId),
+        moduleIds: [],
+        topicIds: toStringArray(record.topicIds),
+        proposedRate: parseNumberValue(record.proposedRate, 0),
+        status: "pending",
+        customMessage: toStringValue(record.customMessage) ?? "",
+        feedbackLink: toStringValue(record.feedbacklink) ?? undefined,
+      }
+    })
+    .filter((assignment): assignment is MentorAssignment => Boolean(assignment))
+}
 
 export default function CreateProgram() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const requestedDraftProgramId = (
+    searchParams.get("programId") ??
+    searchParams.get("id") ??
+    searchParams.get("draftId") ??
+    ""
+  ).trim()
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSavingStep, setIsSavingStep] = useState(false)
+  const [isHydratingDraft, setIsHydratingDraft] = useState(false)
+  const [draftProgramId, setDraftProgramId] = useState(getInitialDraftProgramId)
 
   // Step 1: Program Overview
   const [programData, setProgramData] = useState({
@@ -186,6 +767,8 @@ export default function CreateProgram() {
     price: "",
     durationWeeks: "",
     numberOfSessions: "",
+    meetingLink: "",
+    accessCredentials: "",
     learningOutcomes: ["", "", ""],
     prerequisites: [""],
   })
@@ -197,6 +780,9 @@ export default function CreateProgram() {
 
   // Step 3: Mentor Assignments
   const [mentorAssignments, setMentorAssignments] = useState<MentorAssignment[]>([])
+  const [platformMentors, setPlatformMentors] = useState<PlatformMentor[]>([])
+  const [isPlatformMentorsLoading, setIsPlatformMentorsLoading] = useState(false)
+  const [platformMentorsError, setPlatformMentorsError] = useState<string | null>(null)
   const [showMentorBrowser, setShowMentorBrowser] = useState(false)
   const [selectedMentorForAssignment, setSelectedMentorForAssignment] = useState<PlatformMentor | null>(null)
   const [mentorSearchQuery, setMentorSearchQuery] = useState("")
@@ -207,28 +793,432 @@ export default function CreateProgram() {
     rating: "all",
   })
 
-  const nextStep = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1)
-      window.scrollTo(0, 0)
+  useEffect(() => {
+    if (!requestedDraftProgramId) {
+      setIsHydratingDraft(false)
+      return
     }
+
+    let isMounted = true
+
+    const loadDraft = async () => {
+      setIsHydratingDraft(true)
+
+      try {
+        const loadDraftEnvelope = async () => {
+          let draftLookupError: unknown = null
+
+          try {
+            const response = await apiClient.get<DraftProgramResponse>(
+              `/programs/drafts/${encodeURIComponent(requestedDraftProgramId)}`,
+            )
+
+            if (response.success === false) {
+              throw new Error(response.error ?? response.message ?? "Unable to load draft.")
+            }
+
+            const detailedDraftEnvelope = getDraftEnvelopeFromResponse(
+              response,
+              requestedDraftProgramId,
+            )
+            const detailedProgramId =
+              detailedDraftEnvelope?.programId ??
+              toStringValue(detailedDraftEnvelope?.data?.programId) ??
+              null
+
+            if (
+              detailedDraftEnvelope &&
+              detailedProgramId &&
+              detailedProgramId === requestedDraftProgramId
+            ) {
+              return detailedDraftEnvelope
+            }
+
+            const fallbackListResponse = await apiClient.get<DraftProgramResponse>(
+              "/programs/drafts",
+            )
+
+            if (fallbackListResponse.success === false) {
+              throw new Error(
+                fallbackListResponse.error ??
+                  fallbackListResponse.message ??
+                  "Unable to load draft.",
+              )
+            }
+
+            const fallbackDraftEnvelope = getDraftEnvelopeFromResponse(
+              fallbackListResponse,
+              requestedDraftProgramId,
+            )
+
+            if (fallbackDraftEnvelope) {
+              return fallbackDraftEnvelope
+            }
+
+            throw new Error("Draft record was not found.")
+          } catch (error) {
+            draftLookupError = error
+          }
+
+          try {
+            const detailsResponse = await apiClient.get<ProgramDetailsByIdResponse>(
+              `/programs/details/${encodeURIComponent(requestedDraftProgramId)}`,
+            )
+
+            if (detailsResponse.success === false) {
+              throw new Error(
+                detailsResponse.error ??
+                  detailsResponse.message ??
+                  "Unable to load draft.",
+              )
+            }
+
+            const detailsDraftEnvelope = getDraftEnvelopeFromProgramDetailsResponse(
+              detailsResponse,
+              requestedDraftProgramId,
+            )
+
+            if (detailsDraftEnvelope?.data) {
+              return detailsDraftEnvelope
+            }
+          } catch (error) {
+            if (draftLookupError instanceof Error) {
+              throw draftLookupError
+            }
+
+            throw error
+          }
+
+          if (draftLookupError instanceof Error) {
+            throw draftLookupError
+          }
+
+          throw new Error("Draft record was not found.")
+        }
+
+        const draftEnvelope = await loadDraftEnvelope()
+
+        if (!draftEnvelope?.data) {
+          throw new Error("Draft record was not found.")
+        }
+
+        const draftData = draftEnvelope.data
+        const resolvedProgramId =
+          draftEnvelope.programId ??
+          toStringValue(draftData.programId) ??
+          requestedDraftProgramId
+
+        if (!isMounted) {
+          return
+        }
+
+        setDraftProgramId(resolvedProgramId)
+        const learningOutcomes = toStringArray(draftData.learningOutcomes)
+        const prerequisites = toStringArray(draftData.prerequisites)
+
+        setProgramData({
+          title: toStringValue(draftData.title) ?? "",
+          tagline: toStringValue(draftData.tagline) ?? "",
+          description: toStringValue(draftData.description) ?? "",
+          selectedSectors: toStringArray(draftData.sectors),
+          selectedSubSectorSkills: toStringArray(draftData.subSectorSkills),
+          selectedSkillsCapabilities: toStringArray(draftData.skillsCapabilities),
+          experienceLevel: normalizeExperienceLevelFromDraft(draftData.level),
+          format: normalizeFormatFromDraft(draftData.format),
+          maxParticipants:
+            toStringValue(draftData.maxParticipant ?? draftData.maxParticipants) ?? "",
+          price: toStringValue(draftData.price) ?? "",
+          durationWeeks: toStringValue(draftData.duration) ?? "",
+          numberOfSessions:
+            toStringValue(draftData.numberOfSessions ?? draftData.sessionCount) ??
+            "",
+          meetingLink: toStringValue(draftData.meetingLink) ?? "",
+          accessCredentials:
+            toStringValue(draftData.accessCredentials) ??
+            "",
+          learningOutcomes:
+            learningOutcomes.length > 0 ? learningOutcomes : [""],
+          prerequisites:
+            prerequisites.length > 0 ? prerequisites : [""],
+        })
+
+        const draftCurriculum = buildDraftCurriculum(draftData)
+        setCurriculum(draftCurriculum)
+        setSelectedTemplate(null)
+
+        const draftMentorAssignments = buildDraftMentorAssignments(draftData)
+        setMentorAssignments(draftMentorAssignments)
+
+        const draftStep =
+          typeof draftEnvelope.step === "number" && Number.isFinite(draftEnvelope.step)
+            ? draftEnvelope.step
+            : parseNumberValue(draftData.step, 1)
+        const resumeStep = Math.min(4, Math.max(1, draftStep))
+        setCurrentStep(resumeStep)
+
+        toast({
+          title: "Draft loaded",
+          description: "Continue from where you stopped.",
+        })
+      } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load draft."
+
+        toast({
+          title: "Load draft failed",
+          description: message,
+          variant: "destructive",
+        })
+      } finally {
+        if (isMounted) {
+          setIsHydratingDraft(false)
+        }
+      }
+    }
+
+    void loadDraft()
+
+    return () => {
+      isMounted = false
+    }
+  }, [requestedDraftProgramId])
+
+  const setNextStep = () => {
+    setCurrentStep((previousStep) => Math.min(previousStep + 1, 4))
+    window.scrollTo(0, 0)
   }
 
   const prevStep = () => {
-    if (currentStep > 1) {
+    if (currentStep > 1 && !isSavingStep && !isLoading) {
       setCurrentStep(currentStep - 1)
       window.scrollTo(0, 0)
     }
   }
 
+  const persistProgramStep = async <TPayload extends Record<string, unknown>>(
+    payload: TPayload,
+  ) => {
+    const response = await apiClient.post<SaveProgramStepResponse, TPayload>(
+      "/programs",
+      payload,
+    )
+
+    if (response?.success === false) {
+      throw new Error(response.error ?? "Unable to save program step.")
+    }
+
+    const backendProgramId =
+      response?.programId ?? response?.data?.programId
+
+    if (typeof backendProgramId === "string" && backendProgramId.trim().length > 0) {
+      setDraftProgramId(backendProgramId)
+    }
+  }
+
+  const buildStepOnePayload = (): ProgramStepOnePayload => ({
+    step: 1,
+    programId: draftProgramId,
+    title: programData.title.trim(),
+    description: programData.description.trim(),
+    tagline: programData.tagline.trim(),
+    learningOutcomes: sanitizeStringArray(programData.learningOutcomes),
+  })
+
+  const buildStepTwoPayload = (): ProgramStepTwoPayload => ({
+    step: 2,
+    programId: draftProgramId,
+    sectors: programData.selectedSectors,
+    subSectorSkills: programData.selectedSubSectorSkills,
+    skillsCapabilities: programData.selectedSkillsCapabilities,
+    category: resolveCategoryId(programData.selectedSectors),
+    level: LEVEL_VALUE_MAP[programData.experienceLevel] ?? "1",
+    format: FORMAT_VALUE_MAP[programData.format] ?? "1",
+    type: toPositiveNumber(programData.maxParticipants, 1) > 1 ? 2 : 1,
+    maxParticipant: toPositiveNumber(programData.maxParticipants),
+    price: toPositiveNumber(programData.price),
+    duration: toPositiveNumber(programData.durationWeeks),
+    numberOfSessions: toPositiveNumber(programData.numberOfSessions),
+    meetingLink: requiresMeetingDetails(programData.format)
+      ? programData.meetingLink.trim()
+      : undefined,
+    accessCredentials: requiresMeetingDetails(programData.format)
+      ? programData.accessCredentials.trim()
+      : undefined,
+  })
+
+  const buildStepThreePayload = (): ProgramStepThreePayload => {
+    const topicIdMap = buildTopicIdMapForApi(curriculum)
+
+    return {
+      step: 3,
+      programId: draftProgramId,
+      modules: curriculum.map((module, moduleIndex) => ({
+        title: module.title.trim(),
+        description: module.description.trim(),
+        duration: module.duration,
+        learningObjectives: sanitizeStringArray(module.learningObjectives ?? []),
+        topics: module.topics.map((topic, topicIndex) => ({
+          id:
+            topicIdMap.get(`${topic.id}`) ??
+            toNumericTopicIdValue(
+              `${topic.id}`,
+              `${module.id}-${moduleIndex + 1}-${topic.title}-${topicIndex + 1}`,
+            ),
+          title: topic.title.trim(),
+          description: topic.description.trim(),
+          type: normalizeTopicTypeForApi(topic.type),
+          duration: topic.duration,
+        })),
+      })),
+    }
+  }
+
+  const buildStepFourPayload = (): ProgramStepFourPayload => {
+    const topicIdMap = buildTopicIdMapForApi(curriculum)
+
+    return {
+      step: 4,
+      programId: draftProgramId,
+      topicMentors: mentorAssignments.map((assignment, assignmentIndex) => ({
+        topicIds: assignment.topicIds.map((topicId, topicIndex) => {
+          const rawTopicId = topicId.trim()
+
+          return (
+            topicIdMap.get(rawTopicId) ??
+            toNumericTopicIdValue(
+              rawTopicId,
+              `${assignment.mentorId}-${assignmentIndex + 1}-${topicIndex + 1}`,
+            )
+          )
+        }),
+        mentorId: assignment.mentorId,
+        proposedRate: assignment.proposedRate,
+        customMessage: assignment.customMessage?.trim() ?? "",
+        feedbacklink: assignment.feedbackLink?.trim() || undefined,
+      })),
+    }
+  }
+
+  const nextStep = async () => {
+    if (isSavingStep || isLoading || currentStep >= 4) {
+      return
+    }
+
+    setIsSavingStep(true)
+
+    try {
+      if (currentStep === 1) {
+        await persistProgramStep(buildStepOnePayload())
+        toast({
+          title: "Step saved",
+          description: "Basic info was saved to draft.",
+        })
+      }
+
+      if (currentStep === 2) {
+        await persistProgramStep(buildStepTwoPayload())
+        toast({
+          title: "Step saved",
+          description: "Audience details were saved to draft.",
+        })
+      }
+
+      if (currentStep === 3) {
+        await persistProgramStep(buildStepThreePayload())
+        toast({
+          title: "Step saved",
+          description: "Curriculum was saved to draft.",
+        })
+      }
+
+      setNextStep()
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to save this step."
+
+      toast({
+        title: "Save failed",
+        description: message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSavingStep(false)
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    if (isSavingStep || isLoading) {
+      return
+    }
+
+    setIsSavingStep(true)
+
+    try {
+      await persistProgramStep(buildStepFourPayload())
+      toast({
+        title: "Draft saved",
+        description: "Mentor assignments were saved to your draft.",
+      })
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to save your draft."
+
+      toast({
+        title: "Save failed",
+        description: message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSavingStep(false)
+    }
+  }
+
   const handleSubmit = async () => {
+    if (isLoading || isSavingStep) {
+      return
+    }
+
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      await persistProgramStep(buildStepFourPayload())
+      toast({
+        title: "Program created",
+        description: "Your program has been saved successfully.",
+      })
       router.push("/trainer/dashboard")
-    }, 2000)
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to create program."
+
+      toast({
+        title: "Create program failed",
+        description: message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Memoized options for sectors and skills
@@ -276,6 +1266,11 @@ export default function CreateProgram() {
 
   // Step 2 validation (Who is this for? - only step 2 fields)
   const isStep2Valid = () => {
+    const hasMeetingDetails =
+      !requiresMeetingDetails(programData.format) ||
+      (programData.meetingLink.trim() !== "" &&
+        programData.accessCredentials.trim() !== "")
+
     return (
       programData.selectedSectors.length > 0 &&
       programData.experienceLevel !== "" &&
@@ -283,7 +1278,8 @@ export default function CreateProgram() {
       programData.maxParticipants.trim() !== "" &&
       programData.price.trim() !== "" &&
       programData.durationWeeks.trim() !== "" &&
-      programData.numberOfSessions.trim() !== ""
+      programData.numberOfSessions.trim() !== "" &&
+      hasMeetingDetails
     )
   }
 
@@ -297,6 +1293,18 @@ export default function CreateProgram() {
     if (programData.price.trim() === "") errors.push("Price is required")
     if (programData.durationWeeks.trim() === "") errors.push("Duration is required")
     if (programData.numberOfSessions.trim() === "") errors.push("Number of Sessions is required")
+    if (
+      requiresMeetingDetails(programData.format) &&
+      programData.meetingLink.trim() === ""
+    ) {
+      errors.push("Meeting Link is required for online/hybrid format")
+    }
+    if (
+      requiresMeetingDetails(programData.format) &&
+      programData.accessCredentials.trim() === ""
+    ) {
+      errors.push("Access Credentials is required for online/hybrid format")
+    }
     return errors
   }
 
@@ -349,8 +1357,129 @@ export default function CreateProgram() {
     setShowTemplateSelector(false) // Close the template selector after selection
   }
 
+  useEffect(() => {
+    if (!showMentorBrowser) {
+      return
+    }
+
+    let isMounted = true
+
+    const fetchPlatformMentors = async () => {
+      setIsPlatformMentorsLoading(true)
+      setPlatformMentorsError(null)
+
+      try {
+        const response = await apiClient.get<MentorsApiResponse>("/mentors")
+
+        if (response.success === false) {
+          throw new Error(response.error ?? response.message ?? "Unable to load mentors.")
+        }
+
+        const rawMentors = response.mentor ?? response.mentors ?? response.data ?? []
+        const mappedMentors = rawMentors
+          .map((mentor, index): PlatformMentor | null => {
+            const profile =
+              mentor.profile && typeof mentor.profile === "object"
+                ? mentor.profile
+                : undefined
+            const mentorName = mentor.name?.trim()
+
+            if (!mentorName || mentor.id === undefined || mentor.id === null) {
+              return null
+            }
+
+            const rating = parseNumberValue(mentor.rating, 0)
+            const hourlyRate = parseNumberValue(
+              mentor.hourlyRate ?? profile?.hourlyRate,
+              0,
+            )
+            const yearsOfExperience = parseNumberValue(
+              mentor.yearsOfExperience ?? profile?.experience_years,
+              0,
+            )
+
+            return {
+              id: `${mentor.id}`,
+              name: mentorName,
+              email: mentor.email ?? "",
+              avatar: mentor.avatar,
+              title:
+                mentor.title?.trim() ||
+                profile?.professional_background?.trim() ||
+                "Mentor",
+              company: mentor.company?.trim(),
+              bio:
+                mentor.bio?.trim() ||
+                profile?.bio?.trim() ||
+                "Experienced mentor available on the platform.",
+              expertise: parseMentorExpertise(mentor),
+              rating,
+              totalReviews: parseNumberValue(mentor.totalReviews, 0),
+              totalSessions: parseNumberValue(mentor.totalSessions, 0),
+              hourlyRate,
+              availability: normalizeMentorAvailability(
+                mentor.availability ?? profile?.availability ?? undefined,
+              ),
+              languages:
+                Array.isArray(mentor.languages) && mentor.languages.length > 0
+                  ? mentor.languages
+                  : ["English"],
+              timezone: mentor.timezone ?? "UTC",
+              responseTime: mentor.responseTime ?? "Usually responds within 24 hours",
+              successRate: parseNumberValue(mentor.successRate, 0),
+              specializations:
+                Array.isArray(mentor.specializations) && mentor.specializations.length > 0
+                  ? mentor.specializations
+                  : [],
+              yearsOfExperience,
+              education:
+                Array.isArray(mentor.education) && mentor.education.length > 0
+                  ? mentor.education
+                  : [],
+              certifications:
+                Array.isArray(mentor.certifications) && mentor.certifications.length > 0
+                  ? mentor.certifications
+                  : [],
+              portfolioItems: [],
+            }
+          })
+          .filter((mentor): mentor is PlatformMentor => Boolean(mentor))
+
+        if (!isMounted) {
+          return
+        }
+
+        setPlatformMentors(mappedMentors)
+      } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load mentors."
+
+        setPlatformMentorsError(message)
+        setPlatformMentors([])
+      } finally {
+        if (isMounted) {
+          setIsPlatformMentorsLoading(false)
+        }
+      }
+    }
+
+    void fetchPlatformMentors()
+
+    return () => {
+      isMounted = false
+    }
+  }, [showMentorBrowser])
+
   // Filter mentors based on search and filters
-  const filteredMentors = mockMentors.filter((mentor) => {
+  const filteredMentors = platformMentors.filter((mentor) => {
     const matchesSearch =
       mentor.name.toLowerCase().includes(mentorSearchQuery.toLowerCase()) ||
       mentor.expertise.some((exp) => exp.toLowerCase().includes(mentorSearchQuery.toLowerCase())) ||
@@ -377,6 +1506,27 @@ export default function CreateProgram() {
 
     return matchesSearch && matchesExpertise && matchesAvailability && matchesRating && matchesPrice
   })
+
+  if (isHydratingDraft) {
+    return (
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        <div className="container max-w-4xl px-0 py-4 sm:px-0 sm:py-6 md:px-6 md:py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Loading Draft</CardTitle>
+              <CardDescription>Prefilling saved fields...</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Progress value={50} className="h-2" />
+              <p className="text-sm text-muted-foreground">
+                Please wait while we load your saved draft.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
@@ -438,6 +1588,7 @@ export default function CreateProgram() {
             setProgramData={setProgramData}
             onNext={nextStep}
             isValid={isStep1Valid()}
+            isSaving={isSavingStep}
             errors={getStep1Errors()}
           />
         )}
@@ -449,6 +1600,7 @@ export default function CreateProgram() {
             onNext={nextStep}
             onPrev={prevStep}
             isValid={isStep2Valid()}
+            isSaving={isSavingStep}
             errors={getStep2Errors()}
             sectorsOptions={sectorsOptions}
             subSectorSkillsOptions={subSectorSkillsOptions}
@@ -464,6 +1616,7 @@ export default function CreateProgram() {
             onNext={nextStep}
             onPrev={prevStep}
             isValid={isStep3Valid()}
+            isSaving={isSavingStep}
             onShowTemplateSelector={() => setShowTemplateSelector(true)}
             selectedTemplate={selectedTemplate}
           />
@@ -475,8 +1628,10 @@ export default function CreateProgram() {
             mentorAssignments={mentorAssignments}
             setMentorAssignments={setMentorAssignments}
             onPrev={prevStep}
+            onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             isLoading={isLoading}
+            isSavingDraft={isSavingStep}
             onShowMentorBrowser={() => setShowMentorBrowser(true)}
           />
         )}
@@ -486,6 +1641,8 @@ export default function CreateProgram() {
           isOpen={showMentorBrowser}
           onClose={() => setShowMentorBrowser(false)}
           mentors={filteredMentors}
+          isLoading={isPlatformMentorsLoading}
+          error={platformMentorsError}
           curriculum={curriculum}
           searchQuery={mentorSearchQuery}
           setSearchQuery={setMentorSearchQuery}
@@ -528,8 +1685,9 @@ export default function CreateProgram() {
 interface Step1BasicInfoProps {
   programData: any
   setProgramData: (data: any) => void
-  onNext: () => void
+  onNext: () => Promise<void>
   isValid: boolean
+  isSaving: boolean
   errors: string[]
 }
 
@@ -538,6 +1696,7 @@ function Step1BasicInfo({
   setProgramData,
   onNext,
   isValid,
+  isSaving,
   errors,
 }: Step1BasicInfoProps) {
   const updateLearningOutcome = (index: number, value: string) => {
@@ -693,9 +1852,13 @@ function Step1BasicInfo({
       )}
 
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
-          Next: Who is this for?
-          <ArrowRight className="h-4 w-4 ml-2" />
+        <Button
+          onClick={onNext}
+          disabled={!isValid || isSaving}
+          className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+        >
+          {isSaving ? "Saving..." : "Next: Who is this for?"}
+          {!isSaving && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
       </div>
     </div>
@@ -706,9 +1869,10 @@ function Step1BasicInfo({
 interface Step2WhoIsThisForProps {
   programData: any
   setProgramData: (data: any) => void
-  onNext: () => void
+  onNext: () => Promise<void>
   onPrev: () => void
   isValid: boolean
+  isSaving: boolean
   errors: string[]
   sectorsOptions: { value: string; label: string }[]
   subSectorSkillsOptions: { value: string; label: string }[]
@@ -722,6 +1886,7 @@ function Step2WhoIsThisFor({
   onNext,
   onPrev,
   isValid,
+  isSaving,
   errors,
   sectorsOptions,
   subSectorSkillsOptions,
@@ -807,7 +1972,15 @@ function Step2WhoIsThisFor({
               <Label htmlFor="format">Format *</Label>
               <Select
                 value={programData.format}
-                onValueChange={(value) => setProgramData({ ...programData, format: value })}
+                onValueChange={(value) =>
+                  setProgramData({
+                    ...programData,
+                    format: value,
+                    meetingLink: value === "in-person" ? "" : programData.meetingLink,
+                    accessCredentials:
+                      value === "in-person" ? "" : programData.accessCredentials,
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select format" />
@@ -820,6 +1993,37 @@ function Step2WhoIsThisFor({
               </Select>
             </div>
           </div>
+
+          {requiresMeetingDetails(programData.format) ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="meetingLink">Meeting Link *</Label>
+                <Input
+                  id="meetingLink"
+                  type="url"
+                  placeholder="e.g., https://meet.google.com/abc-defg-hij"
+                  value={programData.meetingLink}
+                  onChange={(e) =>
+                    setProgramData({ ...programData, meetingLink: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accessCredentials">Access Credentials *</Label>
+                <Input
+                  id="accessCredentials"
+                  placeholder="e.g., Meeting ID: 123-456-789, Passcode: 9876"
+                  value={programData.accessCredentials}
+                  onChange={(e) =>
+                    setProgramData({
+                      ...programData,
+                      accessCredentials: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
@@ -878,13 +2082,17 @@ function Step2WhoIsThisFor({
       )}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} disabled={isSaving} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
-          Next: Build Curriculum
-          <ArrowRight className="h-4 w-4 ml-2" />
+        <Button
+          onClick={onNext}
+          disabled={!isValid || isSaving}
+          className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+        >
+          {isSaving ? "Saving..." : "Next: Build Curriculum"}
+          {!isSaving && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
       </div>
     </div>
@@ -895,9 +2103,10 @@ function Step2WhoIsThisFor({
 interface Step2Props {
   curriculum: CurriculumModule[]
   setCurriculum: (curriculum: CurriculumModule[]) => void
-  onNext: () => void
+  onNext: () => Promise<void>
   onPrev: () => void
   isValid: boolean
+  isSaving: boolean
   onShowTemplateSelector: () => void
   selectedTemplate: CurriculumTemplate | null
 }
@@ -908,6 +2117,7 @@ function Step2Curriculum({
   onNext,
   onPrev,
   isValid,
+  isSaving,
   onShowTemplateSelector,
   selectedTemplate,
 }: Step2Props) {
@@ -983,13 +2193,17 @@ function Step2Curriculum({
       </Card>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} disabled={isSaving} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
-          Next: Assign Mentors
-          <ArrowRight className="h-4 w-4 ml-2" />
+        <Button
+          onClick={onNext}
+          disabled={!isValid || isSaving}
+          className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+        >
+          {isSaving ? "Saving..." : "Next: Assign Mentors"}
+          {!isSaving && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
       </div>
     </div>
@@ -1002,8 +2216,10 @@ interface Step3Props {
   mentorAssignments: MentorAssignment[]
   setMentorAssignments: (assignments: MentorAssignment[]) => void
   onPrev: () => void
-  onSubmit: () => void
+  onSaveDraft: () => Promise<void>
+  onSubmit: () => Promise<void>
   isLoading: boolean
+  isSavingDraft: boolean
   onShowMentorBrowser: () => void
 }
 
@@ -1012,8 +2228,10 @@ function Step3AssignMentors({
   mentorAssignments,
   setMentorAssignments,
   onPrev,
+  onSaveDraft,
   onSubmit,
   isLoading,
+  isSavingDraft,
   onShowMentorBrowser,
 }: Step3Props) {
   const removeMentorAssignment = (assignmentId: string) => {
@@ -1221,6 +2439,26 @@ function Step3AssignMentors({
                           </Badge>
                         )}
                       </div>
+
+                      <div className="text-xs text-muted-foreground pt-1">
+                        <span className="font-medium text-gray-700">feedbacklink: </span>
+                        {assignment.feedbackLink ? (
+                          getSurveyHref(assignment.feedbackLink) ? (
+                            <a
+                              href={getSurveyHref(assignment.feedbackLink) ?? undefined}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:underline break-all"
+                            >
+                              {assignment.feedbackLink}
+                            </a>
+                          ) : (
+                            <span>{assignment.feedbackLink}</span>
+                          )
+                        ) : (
+                          <span>Not set</span>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1261,13 +2499,24 @@ function Step3AssignMentors({
       </Card>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} disabled={isLoading || isSavingDraft} className="w-full sm:w-auto min-h-10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
         <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:space-x-2">
-          <Button variant="outline" className="w-full sm:w-auto min-h-10">Save as Draft</Button>
-          <Button onClick={onSubmit} disabled={isLoading} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto min-h-10"
+            onClick={onSaveDraft}
+            disabled={isLoading || isSavingDraft}
+          >
+            {isSavingDraft ? "Saving Draft..." : "Save as Draft"}
+          </Button>
+          <Button
+            onClick={onSubmit}
+            disabled={isLoading || isSavingDraft}
+            className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+          >
             {isLoading ? "Creating Program..." : "Create Program"}
             {!isLoading && <Check className="h-4 w-4 ml-2" />}
           </Button>
@@ -1282,6 +2531,8 @@ interface MentorBrowserModalProps {
   isOpen: boolean
   onClose: () => void
   mentors: PlatformMentor[]
+  isLoading: boolean
+  error: string | null
   curriculum: CurriculumModule[]
   searchQuery: string
   setSearchQuery: (query: string) => void
@@ -1295,6 +2546,8 @@ function MentorBrowserModal({
   isOpen,
   onClose,
   mentors,
+  isLoading,
+  error,
   curriculum,
   searchQuery,
   setSearchQuery,
@@ -1393,7 +2646,17 @@ function MentorBrowserModal({
         {/* Mentors List */}
         <div className="flex-1 overflow-y-auto">
           <div className="space-y-4 pr-2">
-            {mentors.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8">
+                <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Loading mentors...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            ) : mentors.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-muted-foreground">No mentors found matching your criteria</p>
@@ -1512,11 +2775,115 @@ function MentorAssignmentModal({
   existingAssignments,
   onAssign,
 }: MentorAssignmentModalProps) {
+  const [surveyOptions, setSurveyOptions] = useState<
+    Array<{ id: string; slug: string; title: string }>
+  >([])
+  const [selectedFeedbackSurveySlug, setSelectedFeedbackSurveySlug] = useState("")
+  const [isSurveysLoading, setIsSurveysLoading] = useState(false)
+  const [surveysError, setSurveysError] = useState<string | null>(null)
   const [selectedTopics, setSelectedTopics] = useState<string[]>([])
   const [proposedRate, setProposedRate] = useState(150) // Default pay per session
   const [customMessage, setCustomMessage] = useState("")
 
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    let isMounted = true
+
+    const loadSurveys = async () => {
+      setIsSurveysLoading(true)
+      setSurveysError(null)
+
+      try {
+        const response = await apiClient.get<AllSurveysResponse>("/surveys/all-survey")
+
+        if (response.success === false) {
+          throw new Error(response.message ?? "Unable to load surveys.")
+        }
+
+        const normalizedSurveys = (response.allsurvey ?? [])
+          .map((survey, index) => {
+            const title = (
+              survey.title ??
+              survey.surveyTitle ??
+              survey.name ??
+              ""
+            ).trim()
+            const surveyId = `${survey.id ?? `survey-${index + 1}`}`
+            const slug =
+              extractSurveySlug(
+                toStringValue(survey.slug) ??
+                  toStringValue(survey.surveySlug) ??
+                  toStringValue(survey.feedbacklink) ??
+                  toStringValue(survey.feedbackLink) ??
+                  toStringValue(survey.link) ??
+                  toStringValue(survey.surveyLink) ??
+                  toStringValue(survey.url),
+              ) ?? null
+
+            if (!title || !slug) {
+              return null
+            }
+
+            return {
+              id: surveyId,
+              slug,
+              title,
+            }
+          })
+          .filter(
+            (survey): survey is { id: string; slug: string; title: string } =>
+              Boolean(survey),
+          )
+
+        if (!isMounted) {
+          return
+        }
+
+        setSurveyOptions(normalizedSurveys)
+
+        const defaultSurvey =
+          normalizedSurveys.find(
+            (survey) => survey.title.trim().toLowerCase() === "default",
+          ) ?? normalizedSurveys[0]
+
+        setSelectedFeedbackSurveySlug(defaultSurvey?.slug ?? "")
+      } catch (error) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load surveys."
+
+        setSurveysError(message)
+        setSurveyOptions([])
+        setSelectedFeedbackSurveySlug("")
+      } finally {
+        if (isMounted) {
+          setIsSurveysLoading(false)
+        }
+      }
+    }
+
+    void loadSurveys()
+
+    return () => {
+      isMounted = false
+    }
+  }, [isOpen])
+
   const handleAssign = () => {
+    const selectedSurvey = surveyOptions.find(
+      (survey) => survey.slug === selectedFeedbackSurveySlug,
+    )
+
     const assignment: MentorAssignment = {
       id: `assignment-${Date.now()}`,
       mentorId: mentor.id,
@@ -1526,6 +2893,7 @@ function MentorAssignmentModal({
       proposedRate: proposedRate,
       status: "pending",
       customMessage: customMessage,
+      feedbackLink: selectedSurvey?.slug,
     }
 
     onAssign(assignment)
@@ -1684,6 +3052,40 @@ function MentorAssignmentModal({
             />
           </div>
 
+          {/* feedbacklink */}
+          <div className="space-y-2">
+            <Label htmlFor="feedbacklink">feedbacklink *</Label>
+            <Select
+              value={selectedFeedbackSurveySlug}
+              onValueChange={setSelectedFeedbackSurveySlug}
+              disabled={isSurveysLoading}
+            >
+              <SelectTrigger id="feedbacklink">
+                <SelectValue
+                  placeholder={
+                    isSurveysLoading
+                      ? "Loading surveys..."
+                      : "Select survey"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {surveyOptions.map((survey) => (
+                  <SelectItem key={survey.id} value={survey.slug}>
+                    {survey.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {surveysError ? (
+              <p className="text-xs text-red-600">{surveysError}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                The survey with title "default" is selected automatically when available.
+              </p>
+            )}
+          </div>
+
           {/* Summary */}
           {selectedTopics.length > 0 && (
             <Card className="bg-blue-50 border-blue-200">
@@ -1714,7 +3116,7 @@ function MentorAssignmentModal({
             </Button>
             <Button
               onClick={handleAssign}
-              disabled={selectedTopics.length === 0}
+              disabled={selectedTopics.length === 0 || isSurveysLoading || !selectedFeedbackSurveySlug}
               className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
             >
               Assign Topics & Send Invitation

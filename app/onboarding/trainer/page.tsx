@@ -21,6 +21,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { CurriculumTemplate } from "@/types/curriculum";
+import { useToast } from "@/hooks/use-toast";
+import { registerUser, REGISTER_ROLE_IDS, ApiError } from "@/lib/auth-register";
 
 // Mock demand data - in real app, this would come from API
 const mockDemandSignals = [
@@ -148,11 +150,13 @@ const mockTemplates: CurriculumTemplate[] = [
 
 export default function TrainerOnboardingPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedDemand, setSelectedDemand] = useState<typeof mockDemandSignals[0] | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<CurriculumTemplate | null>(null);
   const [useTemplate, setUseTemplate] = useState<boolean | null>(null);
   const [needsAccount, setNeedsAccount] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [formData, setFormData] = useState({
     // Step 4: Minimum Program Structure
     programTitle: "",
@@ -231,11 +235,41 @@ export default function TrainerOnboardingPage() {
   };
 
 
-  const handleCreateAccount = (e: React.FormEvent) => {
+  const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, create account and save draft
-    // After account creation, show Step 6 with options to complete profile or complete program
-    nextStep();
+
+    setIsCreatingAccount(true);
+    try {
+      await registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        roleId: REGISTER_ROLE_IDS.trainer,
+      });
+
+      toast({
+        title: "Account created",
+        description: "Your trainer account was created successfully.",
+      });
+
+      // After account creation, show Step 6 with options to complete profile or complete program
+      nextStep();
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to create account.";
+
+      toast({
+        title: "Signup failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAccount(false);
+    }
   };
 
   const totalSteps = 6;
@@ -593,8 +627,11 @@ export default function TrainerOnboardingPage() {
                     <Button
                       type="submit"
                       className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      disabled={isCreatingAccount}
                     >
-                      Create Account & Continue Building
+                      {isCreatingAccount
+                        ? "Creating Account..."
+                        : "Create Account & Continue Building"}
                     </Button>
                   </div>
                 </form>

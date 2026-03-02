@@ -3,10 +3,12 @@
 import type React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { BarChart3, Users, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DashboardSidebar, type NavItem } from "@/components/dashboard-sidebar";
 import MobileNav from "@/components/mobile-nav";
+import { getCurrentUserDetails } from "@/lib/current-user";
 
 export default function MentorDashboardLayout({
   children,
@@ -14,6 +16,27 @@ export default function MentorDashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [currentUserName, setCurrentUserName] = useState("User");
+
+  useEffect(() => {
+    const currentUser = getCurrentUserDetails();
+
+    if (currentUser.name) {
+      setCurrentUserName(currentUser.name);
+    }
+  }, []);
+
+  const userInitials = useMemo(() => {
+    const initials = currentUserName
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word[0]?.toUpperCase() ?? "")
+      .join("")
+      .slice(0, 2);
+
+    return initials || "U";
+  }, [currentUserName]);
+
   const navItems: NavItem[] = [
     {
       href: "/mentor/dashboard",
@@ -54,11 +77,11 @@ export default function MentorDashboardLayout({
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
           <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User avatar" />
-          <AvatarFallback className="text-xs">SJ</AvatarFallback>
+          <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="font-medium text-sm truncate">Sarah Johnson</p>
-          <p className="text-xs text-gray-500">Business Mentor</p>
+          <p className="font-medium text-sm truncate">{currentUserName}</p>
+          <p className="text-xs text-gray-500">Mentor</p>
         </div>
       </div>
     </div>
@@ -72,8 +95,8 @@ export default function MentorDashboardLayout({
         </Link>
         <MobileNav
           userType="mentor"
-          userName="Sarah Johnson"
-          userRole="Business Mentor"
+          userName={currentUserName}
+          userRole="Mentor"
           links={navLinks}
         />
           </div>

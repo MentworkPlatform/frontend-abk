@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams, useSearchParams, useRouter } from "next/navigation"
 import {
@@ -12,8 +12,6 @@ import {
   Play,
   CheckCircle,
   Award,
-  Download,
-  Globe,
   Target,
   Share2,
 } from "lucide-react"
@@ -22,13 +20,464 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { ApiError } from "@/lib/api-client"
+import { getCurrentUserDetails } from "@/lib/current-user"
+import { type ProgramFullEnrollmentPayload, programApi } from "@/lib/programs"
+
+type ProgramTrainerViewModel = {
+  id: string
+  name: string
+  title: string
+  bio: string
+  image: string
+  rating: number
+  totalStudents: number
+  totalCourses: number
+  expertise: string[]
+  socialLinks: {
+    linkedin: string
+    twitter: string
+    website: string
+  }
+}
+
+type ProgramCurriculumModuleViewModel = {
+  id: string
+  title: string
+  duration: string
+  lessons: number
+  topics: string[]
+}
+
+type ProgramReviewViewModel = {
+  id: string
+  student: string
+  avatar: string
+  rating: number
+  date: string
+  comment: string
+}
+
+type ProgramMentorViewModel = {
+  id: string
+  name: string
+  title: string
+  bio: string
+  image: string
+  rating: number
+  expertise: string[]
+}
+
+type ProgramDetailViewModel = {
+  id: string
+  title: string
+  tagline: string
+  description: string
+  longDescription: string
+  type: string
+  category: string
+  level: string
+  format: string
+  duration: string
+  price: number
+  originalPrice: number
+  rating: number
+  reviews: number
+  students: number
+  modules: number
+  totalHours: number
+  language: string
+  lastUpdated: string
+  certificateIncluded: boolean
+  freeSessionsIncluded: number
+  sessions: number
+  mentorCompensation: string
+  trainer: ProgramTrainerViewModel
+  skills: string[]
+  learningOutcomes: string[]
+  curriculum: ProgramCurriculumModuleViewModel[]
+  prerequisites: string[]
+  includes: string[]
+  reviewList: ProgramReviewViewModel[]
+  mentors: ProgramMentorViewModel[]
+}
+
+type PaystackPopupInstance = {
+  newTransaction: (options: {
+    key: string
+    email: string
+    amount: number
+    currency?: string
+    reference?: string
+    metadata?: Record<string, unknown>
+    onSuccess?: (response: { reference?: string; trxref?: string }) => void
+    onCancel?: () => void
+    onError?: (response: {
+      message?: string
+      reference?: string
+      trxref?: string
+    }) => void
+  }) => void
+}
+
+type PaystackPopupConstructor = new () => PaystackPopupInstance
+
+type PendingProgramEnrollment = {
+  programId: string
+  payload: ProgramFullEnrollmentPayload
+  redirectPath: string
+  createdAt: string
+}
+
+const PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY = "pending-program-enrollment"
+
+const asObject = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value === "object" && value !== null) {
+    return value as Record<string, unknown>
+  }
+
+  return null
+}
+
+const pickString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim()
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value)
+    }
+  }
+
+  return null
+}
+
+const pickNumber = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value === "string" && value.trim().length > 0) {
+      const parsedValue = Number(value)
+
+      if (!Number.isNaN(parsedValue)) {
+        return parsedValue
+      }
+    }
+
+    if (Array.isArray(value)) {
+      return value.length
+    }
+  }
+
+  return 0
+}
+
+const mapToStringArray = (...values: unknown[]) => {
+  for (const value of values) {
+    if (!Array.isArray(value)) {
+      continue
+    }
+
+    const mapped = value
+      .map((item) => pickString(item))
+      .filter((item): item is string => Boolean(item))
+
+    if (mapped.length > 0) {
+      return mapped
+    }
+  }
+
+  return []
+}
+
+const formatCurrency = (amount: number) => `₦${Math.round(amount).toLocaleString()}`
+
+const readPendingProgramEnrollment = (): PendingProgramEnrollment | null => {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  const rawValue = window.localStorage.getItem(PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY)
+
+  if (!rawValue) {
+    return null
+  }
+
+  try {
+    const parsedValue = JSON.parse(rawValue) as PendingProgramEnrollment
+
+    if (
+      typeof parsedValue?.programId !== "string" ||
+      typeof parsedValue?.redirectPath !== "string" ||
+      typeof parsedValue?.createdAt !== "string" ||
+      typeof parsedValue?.payload !== "object" ||
+      parsedValue.payload === null
+    ) {
+      window.localStorage.removeItem(PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY)
+      return null
+    }
+
+    return parsedValue
+  } catch {
+    window.localStorage.removeItem(PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY)
+    return null
+  }
+}
+
+const savePendingProgramEnrollment = (payload: PendingProgramEnrollment) => {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  window.localStorage.setItem(
+    PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY,
+    JSON.stringify(payload),
+  )
+}
+
+const clearPendingProgramEnrollment = () => {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  window.localStorage.removeItem(PENDING_PROGRAM_ENROLLMENT_STORAGE_KEY)
+}
+
+const mapPublicProgramResponse = (
+  payload: unknown,
+  fallbackProgramId: string,
+): ProgramDetailViewModel => {
+  const root = asObject(payload)
+  const dataRecord = asObject(root?.data)
+  const programRecord =
+    asObject(root?.program) ??
+    asObject(dataRecord?.program) ??
+    dataRecord ??
+    root ??
+    {}
+
+  const trainerRecord =
+    asObject(programRecord.trainer) ??
+    asObject(programRecord.createdByUser) ??
+    asObject(programRecord.createdByProfile) ??
+    asObject(programRecord.facilitator) ??
+    asObject(programRecord.createdBy) ??
+    {}
+
+  const mentorsArray = Array.isArray(programRecord.mentors)
+    ? programRecord.mentors
+    : []
+  const reviewArray =
+    (Array.isArray(programRecord.reviewList) ? programRecord.reviewList : null) ??
+    (Array.isArray(programRecord.reviewsList) ? programRecord.reviewsList : null) ??
+    (Array.isArray(programRecord.reviews) ? programRecord.reviews : null) ??
+    []
+  const curriculumArray =
+    (Array.isArray(programRecord.curriculum) ? programRecord.curriculum : null) ??
+    (Array.isArray(programRecord.modules) ? programRecord.modules : null) ??
+    []
+
+  const mappedCurriculum = curriculumArray.map((moduleItem, index) => {
+    const moduleRecord = asObject(moduleItem)
+
+    const durationValue = pickNumber(
+      moduleRecord?.duration,
+      moduleRecord?.estimatedDuration,
+      moduleRecord?.durationMinutes,
+    )
+    const topics = mapToStringArray(
+      moduleRecord?.topics,
+      moduleRecord?.learningObjectives,
+      moduleRecord?.learningOutcomes,
+    )
+
+    return {
+      id: pickString(moduleRecord?.id, moduleRecord?.moduleId) ?? `module-${index + 1}`,
+      title:
+        pickString(moduleRecord?.title, moduleRecord?.moduleTitle) ??
+        `Module ${index + 1}`,
+      duration: durationValue > 0 ? `${durationValue} mins` : "TBD",
+      lessons: Math.max(
+        1,
+        pickNumber(moduleRecord?.lessons, moduleRecord?.numberOfSessions, topics),
+      ),
+      topics,
+    } satisfies ProgramCurriculumModuleViewModel
+  })
+
+  const totalHoursFromModules = mappedCurriculum.reduce((accumulator, moduleItem) => {
+    const durationNumber = pickNumber(moduleItem.duration.replace(" mins", ""))
+
+    return accumulator + durationNumber
+  }, 0) / 60
+
+  const price = pickNumber(
+    programRecord.price,
+    programRecord.amount,
+    programRecord.fee,
+  )
+  const rating = pickNumber(
+    programRecord.rating,
+    programRecord.averageRating,
+    programRecord.avgRating,
+  )
+  const sessions = pickNumber(
+    programRecord.sessions,
+    programRecord.numberOfSessions,
+  )
+  const mentorCompensationValue = pickNumber(
+    programRecord.mentorCompensation,
+    programRecord.proposedHourlyRate,
+  )
+
+  return {
+    id: pickString(programRecord.id, programRecord.programId, fallbackProgramId) ?? fallbackProgramId,
+    title: pickString(programRecord.title, programRecord.name) ?? "Untitled Program",
+    tagline:
+      pickString(programRecord.tagline) ??
+      pickString(programRecord.description) ??
+      "Program overview",
+    description:
+      pickString(programRecord.description, programRecord.tagline) ??
+      "Program description not available.",
+    longDescription:
+      pickString(
+        programRecord.longDescription,
+        programRecord.description,
+        programRecord.tagline,
+      ) ?? "Program details are not available yet.",
+    type: pickString(programRecord.type) ?? "training",
+    category: pickString(programRecord.category, programRecord.industry) ?? "General",
+    level: pickString(programRecord.level) ?? "Intermediate",
+    format: pickString(programRecord.format) ?? "Online",
+    duration: pickString(programRecord.duration) ?? `${Math.max(1, sessions)} weeks`,
+    price,
+    originalPrice: pickNumber(programRecord.originalPrice, price),
+    rating,
+    reviews: pickNumber(programRecord.reviews, programRecord.reviewCount, reviewArray),
+    students: pickNumber(
+      programRecord.students,
+      programRecord.participants,
+      programRecord.participantCount,
+      programRecord.maxParticipants,
+    ),
+    modules: pickNumber(programRecord.modules, curriculumArray),
+    totalHours: Math.max(
+      0,
+      pickNumber(programRecord.totalHours, totalHoursFromModules),
+    ),
+    language: pickString(programRecord.language) ?? "English",
+    lastUpdated:
+      pickString(programRecord.updatedAt, programRecord.createdAt) ?? "Recently",
+    certificateIncluded: Boolean(
+      programRecord.certificateIncluded ?? programRecord.certificate,
+    ),
+    freeSessionsIncluded: pickNumber(programRecord.freeSessionsIncluded),
+    sessions,
+    mentorCompensation:
+      mentorCompensationValue > 0
+        ? `${formatCurrency(mentorCompensationValue)}/session`
+        : "Compensation shared on request",
+    trainer: {
+      id: pickString(trainerRecord.id, trainerRecord.userId) ?? "trainer",
+      name:
+        pickString(
+          trainerRecord.name,
+          trainerRecord.fullName,
+          trainerRecord.firstName &&
+            trainerRecord.lastName
+            ? `${String(trainerRecord.firstName)} ${String(trainerRecord.lastName)}`
+            : null,
+        ) ?? "Mentwork Facilitator",
+      title: pickString(trainerRecord.title, trainerRecord.role) ?? "Trainer",
+      bio: pickString(trainerRecord.bio) ?? "Trainer profile details unavailable.",
+      image:
+        pickString(trainerRecord.image, trainerRecord.avatar, trainerRecord.photo) ??
+        "/placeholder.svg?height=120&width=120",
+      rating: pickNumber(trainerRecord.rating, trainerRecord.averageRating),
+      totalStudents: pickNumber(trainerRecord.totalStudents),
+      totalCourses: pickNumber(trainerRecord.totalCourses),
+      expertise: mapToStringArray(
+        trainerRecord.expertise,
+        trainerRecord.skills,
+        programRecord.skillsCapabilities,
+      ),
+      socialLinks: {
+        linkedin: pickString(asObject(trainerRecord.socialLinks)?.linkedin) ?? "",
+        twitter: pickString(asObject(trainerRecord.socialLinks)?.twitter) ?? "",
+        website: pickString(asObject(trainerRecord.socialLinks)?.website) ?? "",
+      },
+    },
+    skills: mapToStringArray(
+      programRecord.skills,
+      programRecord.skillsCapabilities,
+      programRecord.subSectorSkills,
+    ),
+    learningOutcomes: mapToStringArray(
+      programRecord.learningOutcomes,
+      programRecord.objectives,
+    ),
+    curriculum: mappedCurriculum,
+    prerequisites: mapToStringArray(programRecord.prerequisites),
+    includes: mapToStringArray(programRecord.includes, programRecord.benefits),
+    reviewList: reviewArray.map((reviewItem, index) => {
+      const reviewRecord = asObject(reviewItem)
+
+      return {
+        id:
+          pickString(reviewRecord?.id, reviewRecord?.reviewId) ??
+          `review-${index + 1}`,
+        student:
+          pickString(reviewRecord?.student, reviewRecord?.name) ??
+          "Anonymous Learner",
+        avatar:
+          pickString(reviewRecord?.avatar, reviewRecord?.image) ??
+          "/placeholder.svg?height=40&width=40",
+        rating: Math.max(0, pickNumber(reviewRecord?.rating)),
+        date: pickString(reviewRecord?.date, reviewRecord?.createdAt) ?? "Recently",
+        comment:
+          pickString(reviewRecord?.comment, reviewRecord?.message) ??
+          "No written review.",
+      } satisfies ProgramReviewViewModel
+    }),
+    mentors: mentorsArray.map((mentorItem, index) => {
+      const mentorRecord = asObject(mentorItem)
+
+      return {
+        id:
+          pickString(mentorRecord?.id, mentorRecord?.mentorId) ??
+          `mentor-${index + 1}`,
+        name:
+          pickString(
+            mentorRecord?.name,
+            mentorRecord?.fullName,
+            mentorRecord?.firstName && mentorRecord?.lastName
+              ? `${String(mentorRecord.firstName)} ${String(mentorRecord.lastName)}`
+              : null,
+          ) ?? "Program Mentor",
+        title: pickString(mentorRecord?.title, mentorRecord?.role) ?? "Mentor",
+        bio: pickString(mentorRecord?.bio) ?? "Mentor profile not provided.",
+        image:
+          pickString(mentorRecord?.image, mentorRecord?.avatar) ??
+          "/placeholder.svg?height=80&width=80",
+        rating: pickNumber(mentorRecord?.rating, mentorRecord?.averageRating),
+        expertise: mapToStringArray(
+          mentorRecord?.expertise,
+          mentorRecord?.skills,
+          mentorRecord?.skillsCapabilities,
+        ),
+      } satisfies ProgramMentorViewModel
+    }),
+  }
+}
 
 export default function ProgramDetailPage() {
   const params = useParams()
@@ -39,229 +488,316 @@ export default function ProgramDetailPage() {
   const [showMentorModal, setShowMentorModal] = useState(false)
   const { toast } = useToast()
 
-  // Mock program data - in real app, this would be fetched based on programId
-  const program = {
-    id: programId,
-    title: "Complete Digital Marketing Bootcamp",
-    tagline: "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp",
-    description:
-      "Master digital marketing from SEO to social media advertising in this comprehensive bootcamp. Learn from industry experts and build real-world campaigns.",
-    longDescription:
-      "This comprehensive digital marketing bootcamp covers everything you need to know to become a successful digital marketer. From search engine optimization and content marketing to paid advertising and analytics, you'll gain hands-on experience with the tools and strategies used by top companies worldwide.",
-    type: "training", // training, mentorship, or group
-    category: "Marketing",
-    level: "Beginner",
-    format: "Self-paced",
-    duration: "12 weeks",
-    price: 299000,
-    originalPrice: 399000,
-    rating: 4.7,
-    reviews: 1247,
-    students: 2847,
-    modules: 24,
-    totalHours: 48,
-    language: "English",
-    lastUpdated: "December 2023",
-    certificateIncluded: true,
-    freeSessionsIncluded: 1,
-    sessions: 8,
-    mentorCompensation: "₦225,000/session",
-    trainer: {
-      id: "trainer-1",
-      name: "Emily Rodriguez",
-      title: "Digital Marketing Expert",
-      bio: "Emily has over 10 years of experience in digital marketing, having worked with Fortune 500 companies and successful startups. She's helped generate over $50M in revenue through digital campaigns.",
-      image: "/placeholder.svg?height=120&width=120",
-      rating: 4.8,
-      totalStudents: 15000,
-      totalCourses: 8,
-      expertise: ["Digital Marketing", "SEO", "Social Media", "PPC", "Analytics"],
-      socialLinks: {
-        linkedin: "https://linkedin.com/in/emilyrodriguez",
-        twitter: "https://twitter.com/emilymarketing",
-        website: "https://emilyrodriguez.com",
-      },
-    },
-    skills: [
-      "SEO",
-      "Social Media Marketing",
-      "Google Ads",
-      "Facebook Ads",
-      "Email Marketing",
-      "Content Marketing",
-      "Analytics",
-      "Conversion Optimization",
-    ],
-    learningOutcomes: [
-      "Build and execute comprehensive digital marketing strategies",
-      "Master SEO techniques to rank higher in search results",
-      "Create effective social media campaigns across all platforms",
-      "Set up and optimize Google Ads and Facebook advertising campaigns",
-      "Analyze marketing performance using Google Analytics and other tools",
-      "Develop content marketing strategies that drive engagement",
-      "Implement email marketing automation sequences",
-      "Optimize conversion rates and improve ROI",
-    ],
-    curriculum: [
-      {
-        id: 1,
-        title: "Digital Marketing Fundamentals",
-        duration: "4 hours",
-        lessons: 8,
-        topics: [
-          "Introduction to Digital Marketing",
-          "Understanding Your Target Audience",
-          "Digital Marketing Channels Overview",
-          "Setting SMART Marketing Goals",
-        ],
-      },
-      {
-        id: 2,
-        title: "Search Engine Optimization (SEO)",
-        duration: "8 hours",
-        lessons: 12,
-        topics: [
-          "SEO Fundamentals and How Search Engines Work",
-          "Keyword Research and Analysis",
-          "On-Page SEO Optimization",
-          "Technical SEO Best Practices",
-          "Link Building Strategies",
-        ],
-      },
-      {
-        id: 3,
-        title: "Social Media Marketing",
-        duration: "6 hours",
-        lessons: 10,
-        topics: [
-          "Platform-Specific Strategies",
-          "Content Creation and Curation",
-          "Community Management",
-          "Social Media Advertising",
-        ],
-      },
-      {
-        id: 4,
-        title: "Paid Advertising",
-        duration: "10 hours",
-        lessons: 15,
-        topics: [
-          "Google Ads Setup and Optimization",
-          "Facebook and Instagram Advertising",
-          "Display and Video Advertising",
-          "Retargeting Campaigns",
-        ],
-      },
-      {
-        id: 5,
-        title: "Content Marketing",
-        duration: "6 hours",
-        lessons: 9,
-        topics: [
-          "Content Strategy Development",
-          "Blog Writing and SEO",
-          "Video Marketing",
-          "Email Marketing Automation",
-        ],
-      },
-      {
-        id: 6,
-        title: "Analytics and Optimization",
-        duration: "8 hours",
-        lessons: 12,
-        topics: [
-          "Google Analytics Setup and Analysis",
-          "Conversion Tracking",
-          "A/B Testing",
-          "ROI Measurement and Reporting",
-        ],
-      },
-    ],
-    prerequisites: [
-      "Basic computer skills and internet familiarity",
-      "No prior marketing experience required",
-      "Access to a computer with internet connection",
-    ],
-    includes: [
-      "24 comprehensive modules with video lessons",
-      "Downloadable resources and templates",
-      "Real-world project assignments",
-      "Certificate of completion",
-      "Lifetime access to course materials",
-      "Private student community access",
-      "Direct instructor support",
-    ],
-    reviewList: [
-      {
-        id: 1,
-        student: "Sarah Johnson",
-        avatar: "/placeholder.svg?height=40&width=40",
-        rating: 5,
-        date: "2 weeks ago",
-        comment:
-          "This course completely transformed my understanding of digital marketing. Emily's teaching style is clear and practical. I was able to implement what I learned immediately and saw results within a month!",
-      },
-      {
-        id: 2,
-        student: "Michael Chen",
-        avatar: "/placeholder.svg?height=40&width=40",
-        rating: 5,
-        date: "1 month ago",
-        comment:
-          "Excellent course! The content is up-to-date and covers everything you need to know. The hands-on projects really helped me build a portfolio. Highly recommend!",
-      },
-      {
-        id: 3,
-        student: "Lisa Park",
-        avatar: "/placeholder.svg?height=40&width=40",
-        rating: 4,
-        date: "2 months ago",
-        comment:
-          "Great comprehensive course. Emily knows her stuff and explains complex concepts in an easy-to-understand way. The only thing I'd like to see is more advanced topics.",
-      },
-    ],
-    mentors: [
-      {
-        id: "mentor-1",
-        name: "David Okonkwo",
-        title: "Marketing Strategy Consultant",
-        bio: "David specializes in helping startups build effective marketing strategies.",
-        image: "/placeholder.svg?height=80&width=80",
-        rating: 4.9,
-        expertise: ["Strategy", "Growth Marketing", "Brand Development"],
-      },
-      {
-        id: "mentor-2",
-        name: "Amina Bello",
-        title: "Social Media Expert",
-        bio: "Amina has managed social media campaigns for leading Nigerian brands.",
-        image: "/placeholder.svg?height=80&width=80",
-        rating: 4.7,
-        expertise: ["Social Media", "Content Creation", "Community Building"],
-      },
-      {
-        id: "mentor-3",
-        name: "Chidi Eze",
-        title: "SEO Specialist",
-        bio: "Chidi has over 7 years of experience in search engine optimization.",
-        image: "/placeholder.svg?height=80&width=80",
-        rating: 4.8,
-        expertise: ["SEO", "Technical SEO", "Analytics"],
-      },
-    ],
+  const [program, setProgram] = useState<ProgramDetailViewModel | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isEnrollPaymentLoading, setIsEnrollPaymentLoading] = useState(false)
+  const [isEnrollmentSyncing, setIsEnrollmentSyncing] = useState(false)
+  const [paystackPopupConstructor, setPaystackPopupConstructor] =
+    useState<PaystackPopupConstructor | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadProgram = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await programApi.getPublicProgramById<unknown>(programId)
+        const mappedProgram = mapPublicProgramResponse(response, programId)
+
+        if (!isMounted) {
+          return
+        }
+
+        setProgram(mappedProgram)
+      } catch (loadError) {
+        if (!isMounted) {
+          return
+        }
+
+        const message =
+          loadError instanceof ApiError
+            ? loadError.message
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load program details."
+
+        setError(message)
+        setProgram(null)
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadProgram()
+
+    return () => {
+      isMounted = false
+    }
+  }, [programId])
+
+  useEffect(() => {
+    let isMounted = true
+
+    void import("@paystack/inline-js")
+      .then((module) => {
+        if (!isMounted) {
+          return
+        }
+
+        setPaystackPopupConstructor(
+          () => module.default as unknown as PaystackPopupConstructor,
+        )
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return
+        }
+
+        setPaystackPopupConstructor(null)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const syncEnrollmentToBackend = async (
+    pendingEnrollment: PendingProgramEnrollment,
+    options: { isRetry?: boolean } = {},
+  ) => {
+    const { isRetry = false } = options
+
+    setIsEnrollmentSyncing(true)
+
+    try {
+      await programApi.enrollFull<unknown>(
+        pendingEnrollment.programId,
+        pendingEnrollment.payload,
+      )
+
+      const resolvedRedirectPath = `/mentee/dashboard/programs/${encodeURIComponent(
+        pendingEnrollment.programId,
+      )}`
+
+      clearPendingProgramEnrollment()
+      setIsEnrollPaymentLoading(false)
+
+      toast({
+        title: "Payment successful",
+        description: isRetry
+          ? "Payment was confirmed and enrollment has now been completed."
+          : "Enrollment completed successfully.",
+      })
+
+      window.location.href = resolvedRedirectPath
+    } catch (enrollError) {
+      savePendingProgramEnrollment(pendingEnrollment)
+
+      const message =
+        enrollError instanceof ApiError
+          ? enrollError.message
+          : enrollError instanceof Error
+            ? enrollError.message
+            : "Payment succeeded, but enrollment confirmation failed."
+
+      toast({
+        title: "Enrollment sync failed",
+        description: `${message} Your payment has been saved and will be retried automatically.`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsEnrollmentSyncing(false)
+      setIsEnrollPaymentLoading(false)
+    }
   }
 
+  useEffect(() => {
+    if (!program || viewAsMentor) {
+      return
+    }
+
+    const pendingEnrollment = readPendingProgramEnrollment()
+    const currentEmail = getCurrentUserDetails().email?.trim() ?? ""
+
+    if (
+      !pendingEnrollment ||
+      pendingEnrollment.programId !== program.id ||
+      (typeof pendingEnrollment.payload.email === "string" &&
+        pendingEnrollment.payload.email.length > 0 &&
+        pendingEnrollment.payload.email !== currentEmail)
+    ) {
+      return
+    }
+
+    void syncEnrollmentToBackend(pendingEnrollment, { isRetry: true })
+  }, [program, viewAsMentor])
+
   const handleEnroll = () => {
+    if (!program) {
+      return
+    }
+
     if (viewAsMentor) {
       // Show mentor interest modal
       setShowMentorModal(true)
     } else {
-      // Navigate to join/enrollment page
-      window.location.href = `/programs/${programId}/join`
+      const amount = Number(program.price)
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        window.location.href = `/programs/${program.id}/join`
+        return
+      }
+
+      const email = getCurrentUserDetails().email?.trim() ?? ""
+
+      if (!email) {
+        toast({
+          title: "Email not found",
+          description: "Unable to resolve your logged-in email. Sign in again.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!email.includes("@")) {
+        toast({
+          title: "Email required",
+          description: "Enter a valid email to continue with Paystack.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const pendingEnrollment = readPendingProgramEnrollment()
+
+      if (
+        pendingEnrollment &&
+        pendingEnrollment.programId === program.id &&
+        pendingEnrollment.payload.email === email
+      ) {
+        void syncEnrollmentToBackend(pendingEnrollment, { isRetry: true })
+        return
+      }
+
+      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY?.trim() ?? ""
+
+      if (!publicKey) {
+        toast({
+          title: "Paystack key missing",
+          description:
+            "Set NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY in your environment.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (!paystackPopupConstructor) {
+        toast({
+          title: "Payment not ready",
+          description: "Paystack is still loading. Please try again.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setIsEnrollPaymentLoading(true)
+
+      const amountKobo = Math.round(amount * 100)
+      const reference = `program-enrollment-${program.id}-${Date.now()}`
+
+      const launchPaystack = () => {
+        try {
+          const popup = new paystackPopupConstructor()
+
+          popup.newTransaction({
+            key: publicKey,
+            email,
+            amount: amountKobo,
+            currency: "NGN",
+            reference,
+            metadata: {
+              source: "program-details-enroll",
+              programId: program.id,
+            },
+            onSuccess: (response) => {
+              const paymentReference =
+                response.reference ?? response.trxref ?? reference
+
+              const enrollmentPayload: ProgramFullEnrollmentPayload = {
+                amount,
+                currency: "NGN",
+                paymentMethod: "card",
+                email,
+                reference: paymentReference,
+                status: "SUCCESS",
+                gateway: "paystack",
+                gatewayResponse: "Approved",
+                channel: "card",
+                paidAt: new Date().toISOString(),
+                metadata: {
+                  source: "paystack-inline",
+                  transactionId: response.trxref ?? paymentReference,
+                  programId: program.id,
+                },
+              }
+
+              const pendingEnrollmentPayload: PendingProgramEnrollment = {
+                programId: program.id,
+                payload: enrollmentPayload,
+                redirectPath: `/mentee/dashboard/programs/${program.id}`,
+                createdAt: new Date().toISOString(),
+              }
+
+              savePendingProgramEnrollment(pendingEnrollmentPayload)
+              void syncEnrollmentToBackend(pendingEnrollmentPayload)
+            },
+            onCancel: () => {
+              toast({
+                title: "Payment cancelled",
+                description: "You can try enrolling again.",
+              })
+              setIsEnrollPaymentLoading(false)
+            },
+            onError: (response) => {
+              toast({
+                title: "Payment failed",
+                description: response.message ?? "Unable to complete payment.",
+                variant: "destructive",
+              })
+              setIsEnrollPaymentLoading(false)
+            },
+          })
+        } catch (paymentError) {
+          const message =
+            paymentError instanceof ApiError
+              ? paymentError.message
+              : paymentError instanceof Error
+                ? paymentError.message
+                : "Unable to initialize Paystack."
+
+          toast({
+            title: "Payment failed",
+            description: message,
+            variant: "destructive",
+          })
+          setIsEnrollPaymentLoading(false)
+        }
+      }
+
+      window.setTimeout(launchPaystack, 150)
     }
   }
 
   const handleShare = async () => {
+    if (!program) {
+      return
+    }
+
     const shareData = {
       title: program.title,
       text: `Check out this program: ${program.title}`,
@@ -299,8 +835,53 @@ export default function ProgramDetailPage() {
     // Could show success message or redirect to mentor dashboard
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-6 py-12">
+          <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+            Loading program details...
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!program || error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-6 py-12 space-y-4">
+          <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+            {error ?? "Unable to load program details."}
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              router.back()
+            }}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      {isEnrollmentSyncing && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center px-6">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
+            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-black" />
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">Finalizing enrollment</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Please wait while we confirm your payment with the server.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section - Dark Background */}
       <section className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 text-white relative overflow-hidden">
         {/* Decorative elements */}
@@ -350,6 +931,7 @@ export default function ProgramDetailPage() {
                 size="lg"
                 className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-semibold text-lg px-8"
                 onClick={handleEnroll}
+                disabled={!viewAsMentor && (isEnrollPaymentLoading || isEnrollmentSyncing)}
               >
                 {viewAsMentor ? `Express Interest • ${program.mentorCompensation}` : `Enroll Now • ₦${program.price.toLocaleString()}`}
               </Button>

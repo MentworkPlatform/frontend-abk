@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Save, User, Briefcase, Award, Globe, Linkedin } from "lucide-react";
 
@@ -31,29 +30,351 @@ import {
   getSkillsForSectors,
   getSkillsGroupedBySector,
 } from "@/lib/constants/onboarding";
-import { useMemo } from "react";
+import { getCurrentUserDetails } from "@/lib/current-user";
+import { ApiError, apiClient } from "@/lib/api-client";
+import { useToast } from "@/hooks/use-toast";
+
+const INDUSTRY_OPTIONS = [
+  "technology",
+  "finance",
+  "healthcare",
+  "education",
+  "marketing",
+  "business",
+  "other",
+] as const;
+
+const asObject = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value === "object" && value !== null) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
+};
+
+const pickString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value);
+    }
+  }
+
+  return null;
+};
+
+const pickStringArray = (...values: unknown[]) => {
+  for (const value of values) {
+    if (!Array.isArray(value)) {
+      continue;
+    }
+
+    const mapped = value
+      .map((item) => pickString(item))
+      .filter((item): item is string => Boolean(item));
+
+    if (mapped.length > 0) {
+      return mapped;
+    }
+  }
+
+  return [] as string[];
+};
+
+const normalizeIndustry = (value: string | null) => {
+  if (!value) {
+    return "";
+  }
+
+  const normalizedValue = value.toLowerCase().trim();
+
+  if (
+    (INDUSTRY_OPTIONS as readonly string[]).includes(normalizedValue)
+  ) {
+    return normalizedValue;
+  }
+
+  return "other";
+};
+
+const normalizeExperience = (value: string | null) => {
+  if (!value) {
+    return "";
+  }
+
+  const normalizedValue = value.trim();
+  const mappedByRange: Record<string, string> = {
+    "1": "1-3",
+    "2": "1-3",
+    "3": "1-3",
+    "4": "4-7",
+    "5": "4-7",
+    "6": "4-7",
+    "7": "4-7",
+    "8": "8-12",
+    "9": "8-12",
+    "10": "8-12",
+    "11": "8-12",
+    "12": "8-12",
+    "13": "13-20",
+    "14": "13-20",
+    "15": "13-20",
+    "16": "13-20",
+    "17": "13-20",
+    "18": "13-20",
+    "19": "13-20",
+    "20": "13-20",
+  };
+
+  if (mappedByRange[normalizedValue]) {
+    return mappedByRange[normalizedValue];
+  }
+
+  if (
+    normalizedValue === "1-3" ||
+    normalizedValue === "4-7" ||
+    normalizedValue === "8-12" ||
+    normalizedValue === "13-20" ||
+    normalizedValue === "20+"
+  ) {
+    return normalizedValue;
+  }
+
+  return "";
+};
+
+const normalizeSectorIds = (values: string[]) => {
+  return values
+    .map((value) => {
+      const normalized = value.toLowerCase().trim();
+      const matchedById = SECTORS.find(
+        (sector) => sector.id.toLowerCase() === normalized,
+      );
+      if (matchedById) {
+        return matchedById.id;
+      }
+
+      const matchedByName = SECTORS.find(
+        (sector) => sector.name.toLowerCase() === normalized,
+      );
+      if (matchedByName) {
+        return matchedByName.id;
+      }
+
+      return null;
+    })
+    .filter((value): value is string => Boolean(value));
+};
+
+const mapTrainerProfileResponse = (
+  payload: unknown,
+  fallbackName: string,
+  fallbackEmail: string,
+) => {
+  const root = asObject(payload);
+  const dataRecord = asObject(root?.data);
+  const trainerRecord =
+    asObject(root?.trainer) ??
+    asObject(dataRecord?.trainer) ??
+    dataRecord ??
+    root ??
+    {};
+  const profileRecord =
+    asObject(trainerRecord.profile) ??
+    asObject(trainerRecord.trainerProfile) ??
+    asObject(trainerRecord.trainer_profile) ??
+    {};
+
+  const name =
+    pickString(
+      trainerRecord.name,
+      trainerRecord.fullName,
+      profileRecord.name,
+      profileRecord.fullName,
+    ) ?? fallbackName;
+  const email =
+    pickString(trainerRecord.email, profileRecord.email) ?? fallbackEmail;
+  const title =
+    pickString(
+      trainerRecord.title,
+      profileRecord.title,
+      profileRecord.professionalTitle,
+      profileRecord.designation,
+    ) ?? "";
+  const industry = normalizeIndustry(
+    pickString(
+      trainerRecord.industry,
+      profileRecord.industry,
+      profileRecord.primaryIndustry,
+    ),
+  );
+  const experience = normalizeExperience(
+    pickString(
+      trainerRecord.experience,
+      profileRecord.experience,
+      profileRecord.yearsOfExperience,
+      profileRecord.experienceYears,
+    ),
+  );
+  const selectedSectors = normalizeSectorIds(
+    pickStringArray(
+      trainerRecord.sectors,
+      trainerRecord.selectedSectors,
+      profileRecord.sectors,
+      profileRecord.selectedSectors,
+    ),
+  );
+  const selectedSubSectorSkills = pickStringArray(
+    trainerRecord.subSectorSkills,
+    trainerRecord.sub_sector_skills,
+    trainerRecord.selectedSubSectorSkills,
+    profileRecord.subSectorSkills,
+    profileRecord.sub_sector_skills,
+    profileRecord.selectedSubSectorSkills,
+  );
+  const selectedSkillsCapabilities = pickStringArray(
+    trainerRecord.skillsCapabilities,
+    trainerRecord.skills_capabilities,
+    trainerRecord.selectedSkillsCapabilities,
+    profileRecord.skillsCapabilities,
+    profileRecord.skills_capabilities,
+    profileRecord.selectedSkillsCapabilities,
+  );
+  const bio = pickString(trainerRecord.bio, profileRecord.bio) ?? "";
+  const achievements =
+    pickString(trainerRecord.achievements, profileRecord.achievements) ?? "";
+  const linkedinUrl =
+    pickString(
+      trainerRecord.linkedinUrl,
+      trainerRecord.linkedin,
+      profileRecord.linkedinUrl,
+      profileRecord.linkedin,
+    ) ?? "";
+  const websiteUrl =
+    pickString(
+      trainerRecord.websiteUrl,
+      trainerRecord.website,
+      profileRecord.websiteUrl,
+      profileRecord.website,
+    ) ?? "";
+
+  return {
+    name,
+    email,
+    title,
+    industry,
+    experience,
+    selectedSectors,
+    selectedSubSectorSkills,
+    selectedSkillsCapabilities,
+    bio,
+    achievements,
+    linkedinUrl,
+    websiteUrl,
+  };
+};
 
 export default function TrainerProfilePage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const [trainerId, setTrainerId] = useState<string | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    title: "Senior Digital Marketing Manager",
-    industry: "technology",
-    experience: "8-12",
-    selectedSectors: ["technology-it", "creative-arts"],
-    selectedSubSectorSkills: ["Software", "Web development", "Graphic design"],
-    selectedSkillsCapabilities: [
-      "Leadership, People & Culture",
-      "Business Planning & Strategic Thinking",
-      "Branding, Marketing & Digital Presence",
-    ],
-    bio: "Experienced trainer with 10+ years in digital marketing and creative design. Passionate about helping others grow their skills.",
-    achievements: "Trained 500+ professionals, Built 3 successful programs",
-    linkedinUrl: "https://linkedin.com/in/johndoe",
-    websiteUrl: "https://johndoe.com",
+    name: "",
+    email: "",
+    title: "",
+    industry: "",
+    experience: "",
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
+    bio: "",
+    achievements: "",
+    linkedinUrl: "",
+    websiteUrl: "",
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      setIsProfileLoading(true);
+      const currentUser = getCurrentUserDetails();
+      const resolvedTrainerId = currentUser.id;
+
+      if (!isMounted) {
+        return;
+      }
+
+      setTrainerId(resolvedTrainerId);
+      setFormData((prev) => ({
+        ...prev,
+        name: currentUser.name ?? prev.name,
+        email: currentUser.email ?? prev.email,
+      }));
+
+      if (!resolvedTrainerId) {
+        setIsProfileLoading(false);
+        toast({
+          title: "Unable to load profile",
+          description: "Trainer ID was not found. Please sign in again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const response = await apiClient.get<unknown>(
+          `/trainer/id/${encodeURIComponent(resolvedTrainerId)}`,
+          { cache: "no-store" },
+        );
+        const mappedProfile = mapTrainerProfileResponse(
+          response,
+          currentUser.name ?? "",
+          currentUser.email ?? "",
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          ...mappedProfile,
+        }));
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Unable to load trainer profile.";
+
+        toast({
+          title: "Unable to load profile",
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        if (isMounted) {
+          setIsProfileLoading(false);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -84,24 +405,63 @@ export default function TrainerProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // TODO: Add API call to save profile data
-    // const response = await fetch(API_URL + '/trainer/profile', {
-    //   method: 'PUT',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: 'Bearer ' + localStorage.getItem('token'),
-    //   },
-    //   body: JSON.stringify(formData),
-    // })
+    if (!trainerId) {
+      toast({
+        title: "Unable to save profile",
+        description: "Trainer ID was not found. Please sign in again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Show success message
-      alert("Profile updated successfully!");
-    }, 1000);
+    setIsSaving(true);
+
+    const payload = {
+      name: formData.name.trim(),
+      fullName: formData.name.trim(),
+      email: formData.email.trim(),
+      title: formData.title.trim(),
+      industry: formData.industry || undefined,
+      experience: formData.experience || undefined,
+      sectors: formData.selectedSectors,
+      selectedSectors: formData.selectedSectors,
+      subSectorSkills: formData.selectedSubSectorSkills,
+      selectedSubSectorSkills: formData.selectedSubSectorSkills,
+      skillsCapabilities: formData.selectedSkillsCapabilities,
+      selectedSkillsCapabilities: formData.selectedSkillsCapabilities,
+      bio: formData.bio.trim(),
+      achievements: formData.achievements.trim(),
+      linkedinUrl: formData.linkedinUrl.trim(),
+      websiteUrl: formData.websiteUrl.trim(),
+    };
+
+    try {
+      await apiClient.put<unknown, typeof payload>(
+        `/trainer/${encodeURIComponent(trainerId)}`,
+        payload,
+      );
+
+      toast({
+        title: "Profile updated",
+        description: "Your profile changes were saved successfully.",
+      });
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to save trainer profile.";
+
+      toast({
+        title: "Unable to save profile",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -111,6 +471,11 @@ export default function TrainerProfilePage() {
         description="Update your profile information and expertise"
       />
       <div className="w-full space-y-4 md:px-6 md:pt-8 md:pb-8">
+        {isProfileLoading ? (
+          <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+            Loading trainer profile...
+          </div>
+        ) : null}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <Card>
@@ -358,10 +723,10 @@ export default function TrainerProfilePage() {
             <Button
               type="submit"
               className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000]"
-              disabled={isLoading}
+              disabled={isSaving || isProfileLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

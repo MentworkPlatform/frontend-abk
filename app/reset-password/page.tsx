@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { Mail, ArrowRight, CheckCircle } from "lucide-react"
+import { Mail, ArrowRight, CheckCircle, Lock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,14 +13,19 @@ import { Label } from "@/components/ui/label"
 import { apiClient, ApiError } from "@/lib/api-client"
 import { PASSWORD_RESET_URL } from "@/lib/server-url"
 import { toast } from "@/components/ui/use-toast"
+import { useSearchParams } from "next/navigation";
 
 
 export default function ResetPasswordPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-   const [confirmPassword, setConfirmPassword] = useState("")
+  
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const emailParam = searchParams.get("email");
 
   type PasswordResetResponse = {
     success?: boolean
@@ -44,14 +49,38 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    if(password !== confirmPassword) {
+      toast({
+        title: 'Password reset failed',
+        description: 'The passwords you entered do not match.',
+        variant: 'destructive',
+      })
+      alert("The passwords you entered do not match.")
+      setIsLoading(false)
+      return
+    }
+
+    if(emailParam === null || token === null) {
+      toast({
+        title: 'Password reset failed', 
+        description: 'Invalid reset link. Please request a new password reset.',
+        variant: 'destructive',
+      })
+      alert("Invalid reset link. Please request a new password reset.")
+      setIsLoading(false)
+      return
+    }
+
     try {
           const response = await apiClient.post<
             PasswordResetResponse,
-            { email: string }
+            { email: string, password: string, token: string | null }
           >(
             PASSWORD_RESET_URL,
             {
-              email: email,
+              password: password,
+              token: token, // Assuming you have a token to send along with the password reset request
+              email: emailParam, // Assuming you have the user's email to send along with the password reset request
             },
             { withAuth: false },
           )
@@ -97,34 +126,50 @@ export default function ResetPasswordPage() {
           <Link href="/" className="inline-block">
             <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-12 w-auto mx-auto" />
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Reset Your Password</h2>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Reset Password</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password
+           Choose a new password for your account
           </p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Password Recovery</CardTitle>
-            <CardDescription>We'll help you regain access to your account</CardDescription>
-          </CardHeader>
+          {/* <CardHeader>
+            <CardTitle>Set Password</CardTitle>
+            <CardDescription>Choose a new password for your account</CardDescription>
+          </CardHeader> */}
 
           <CardContent>
             {!isSubmitted ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  
                   <div className="relative">
-                    <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type="password"
+                      placeholder="New Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="pl-8"
                       required
                     />
+
+                    
+
+                  </div>
+
+                   <div className="relative">
+                    <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-8"
+                        required
+                        />
                   </div>
                 </div>
 
@@ -134,10 +179,10 @@ export default function ResetPasswordPage() {
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    "Sending..."
+                    "Saving..."
                   ) : (
                     <>
-                      Send Reset Link
+                      Save Password
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
@@ -149,36 +194,25 @@ export default function ResetPasswordPage() {
                   <CheckCircle className="h-12 w-12 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Check Your Email</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Congratulations!</h3>
                   <p className="text-sm text-gray-600">
-                    We've sent a password reset link to <strong>{email}</strong>. Click the link in the email to reset
-                    your password.
+                    Your password has been successfully reset.
                   </p>
                 </div>
-                <div className="pt-4 space-y-2">
-                  <p className="text-xs text-gray-500">Didn't receive the email? Check your spam folder or</p>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-transparent"
-                    onClick={() => {
-                      setIsSubmitted(false)
-                      setEmail("")
-                    }}
-                  >
-                    Try Another Email
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                  
+                >
+                    Login Now
+                    <Link href="/login">
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+               
               </div>
             )}
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Remember your password?{" "}
-                <Link href="/login" className="font-medium text-[#FFD500] hover:text-[#e6c000]">
-                  Sign in
-                </Link>
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

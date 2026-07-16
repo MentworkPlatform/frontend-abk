@@ -36,6 +36,7 @@ import type { CurriculumTemplate, CurriculumModule } from "@/types/curriculum"
 import { CurriculumBuilder } from "@/components/curriculum/curriculum-builder"
 import { TemplateSelector } from "@/components/curriculum/template-selector"
 import { ApiError, apiClient } from "@/lib/api-client"
+import { getCurrentUserDetails, type CurrentUserDetails } from "@/lib/current-user"
 import { toast } from "@/hooks/use-toast"
 import {
   SECTORS,
@@ -702,6 +703,38 @@ const createFallbackMentor = (mentorId: string): PlatformMentor => ({
   portfolioItems: [],
 })
 
+const buildTrainerAsMentor = (
+  trainerDetails: CurrentUserDetails,
+): PlatformMentor | null => {
+  if (!trainerDetails.id) {
+    return null
+  }
+
+  return {
+    id: trainerDetails.id,
+    name: trainerDetails.name ?? "Current trainer",
+    email: trainerDetails.email ?? "",
+    avatar: "/placeholder.svg",
+    title: "Program Trainer",
+    bio: "Trainer for this program.",
+    expertise: ["Trainer"],
+    rating: 0,
+    totalReviews: 0,
+    totalSessions: 0,
+    hourlyRate: 0,
+    availability: "available",
+    languages: ["English"],
+    timezone: "Africa/Lagos",
+    responseTime: "Available for this program",
+    successRate: 0,
+    specializations: [],
+    yearsOfExperience: 0,
+    education: [],
+    certifications: [],
+    portfolioItems: [],
+  }
+}
+
 const buildDraftMentorAssignments = (
   draftData: Record<string, unknown>,
 ): MentorAssignment[] => {
@@ -739,6 +772,7 @@ const buildDraftMentorAssignments = (
 }
 
 export default function CreateProgram() {
+  const totalSteps = 5
   const router = useRouter()
   const searchParams = useSearchParams()
   const requestedDraftProgramId = (
@@ -785,6 +819,14 @@ export default function CreateProgram() {
   const [platformMentorsError, setPlatformMentorsError] = useState<string | null>(null)
   const [showMentorBrowser, setShowMentorBrowser] = useState(false)
   const [selectedMentorForAssignment, setSelectedMentorForAssignment] = useState<PlatformMentor | null>(null)
+  const [trainerDetails, setTrainerDetails] = useState<CurrentUserDetails>({
+    id: null,
+    name: null,
+    email: null,
+  })
+  const [trainerTakesTopics, setTrainerTakesTopics] = useState(false)
+  const [trainerTopicIds, setTrainerTopicIds] = useState<string[]>([])
+  const [trainerFeedbackLink, setTrainerFeedbackLink] = useState("default")
   const [mentorSearchQuery, setMentorSearchQuery] = useState("")
   const [mentorFilters, setMentorFilters] = useState({
     expertise: "all",
@@ -792,6 +834,78 @@ export default function CreateProgram() {
     priceRange: "all",
     rating: "all",
   })
+
+  useEffect(() => {
+    setTrainerDetails(getCurrentUserDetails())
+  }, [])
+
+  useEffect(() => {
+    if (currentStep !== 5) {
+      return
+    }
+
+    let isMounted = true
+
+    const loadDefaultTrainerFeedbackLink = async () => {
+      try {
+        const response = await apiClient.get<AllSurveysResponse>("/surveys/all-survey")
+
+        if (response.success === false) {
+          throw new Error(response.message ?? "Unable to load surveys.")
+        }
+
+        const normalizedSurveys = (response.allsurvey ?? [])
+          .map((survey) => {
+            const title = (
+              survey.title ??
+              survey.surveyTitle ??
+              survey.name ??
+              ""
+            ).trim()
+            const slug =
+              extractSurveySlug(
+                toStringValue(survey.slug) ??
+                  toStringValue(survey.surveySlug) ??
+                  toStringValue(survey.feedbacklink) ??
+                  toStringValue(survey.feedbackLink) ??
+                  toStringValue(survey.link) ??
+                  toStringValue(survey.surveyLink) ??
+                  toStringValue(survey.url),
+              ) ?? null
+
+            if (!title || !slug) {
+              return null
+            }
+
+            return { title, slug }
+          })
+          .filter((survey): survey is { title: string; slug: string } =>
+            Boolean(survey),
+          )
+
+        const defaultSurvey =
+          normalizedSurveys.find(
+            (survey) => survey.title.trim().toLowerCase() === "default",
+          ) ?? normalizedSurveys[0]
+
+        if (isMounted && defaultSurvey?.slug) {
+          setTrainerFeedbackLink(defaultSurvey.slug)
+        }
+      } catch {
+        if (isMounted) {
+          setTrainerFeedbackLink((currentValue) => currentValue || "default")
+        }
+      }
+    }
+
+    void loadDefaultTrainerFeedbackLink()
+
+    return () => {
+      isMounted = false
+    }
+  }, [currentStep])
+
+  const trainerReservedTopicIds = trainerTakesTopics ? trainerTopicIds : []
 
   useEffect(() => {
     if (!requestedDraftProgramId) {
@@ -953,7 +1067,7 @@ export default function CreateProgram() {
           typeof draftEnvelope.step === "number" && Number.isFinite(draftEnvelope.step)
             ? draftEnvelope.step
             : parseNumberValue(draftData.step, 1)
-        const resumeStep = Math.min(4, Math.max(1, draftStep))
+        const resumeStep = draftStep >= 4 ? 5 : draftStep === 3 ? 4 : Math.max(1, draftStep)
         setCurrentStep(resumeStep)
 
         toast({
@@ -992,7 +1106,7 @@ export default function CreateProgram() {
   }, [requestedDraftProgramId])
 
   const setNextStep = () => {
-    setCurrentStep((previousStep) => Math.min(previousStep + 1, 4))
+    setCurrentStep((previousStep) => Math.min(previousStep + 1, totalSteps))
     window.scrollTo(0, 0)
   }
 
@@ -1081,13 +1195,42 @@ export default function CreateProgram() {
     }
   }
 
+  const getStepFourAssignments = (): MentorAssignment[] => {
+    const trainerMentor = buildTrainerAsMentor(trainerDetails)
+    const assignedMentorTopicIds = new Set(
+      mentorAssignments.flatMap((assignment) => assignment.topicIds),
+    )
+    const selectedTrainerTopicIds = trainerTopicIds.filter(
+      (topicId) => !assignedMentorTopicIds.has(topicId),
+    )
+
+    if (!trainerTakesTopics || !trainerMentor || selectedTrainerTopicIds.length === 0) {
+      return mentorAssignments
+    }
+
+    const trainerAssignment: MentorAssignment = {
+      id: `trainer-assignment-${trainerMentor.id}`,
+      mentorId: trainerMentor.id,
+      mentor: trainerMentor,
+      moduleIds: [],
+      topicIds: selectedTrainerTopicIds,
+      proposedRate: 150,
+      status: "active",
+      customMessage: "Trainer will take these topics.",
+      feedbackLink: trainerFeedbackLink || "default",
+    }
+
+    return [...mentorAssignments, trainerAssignment]
+  }
+
   const buildStepFourPayload = (): ProgramStepFourPayload => {
     const topicIdMap = buildTopicIdMapForApi(curriculum)
+    const stepFourAssignments = getStepFourAssignments()
 
     return {
       step: 4,
       programId: draftProgramId,
-      topicMentors: mentorAssignments.map((assignment, assignmentIndex) => ({
+      topicMentors: stepFourAssignments.map((assignment, assignmentIndex) => ({
         topicIds: assignment.topicIds.map((topicId, topicIndex) => {
           const rawTopicId = topicId.trim()
 
@@ -1108,7 +1251,7 @@ export default function CreateProgram() {
   }
 
   const nextStep = async () => {
-    if (isSavingStep || isLoading || currentStep >= 4) {
+    if (isSavingStep || isLoading || currentStep >= totalSteps) {
       return
     }
 
@@ -1132,6 +1275,13 @@ export default function CreateProgram() {
       }
 
       if (currentStep === 3) {
+        toast({
+          title: "Modules ready",
+          description: "Now add topics under each module.",
+        })
+      }
+
+      if (currentStep === 4) {
         await persistProgramStep(buildStepThreePayload())
         toast({
           title: "Step saved",
@@ -1278,8 +1428,8 @@ export default function CreateProgram() {
       programData.maxParticipants.trim() !== "" &&
       programData.price.trim() !== "" &&
       programData.durationWeeks.trim() !== "" &&
-      programData.numberOfSessions.trim() !== "" &&
-      hasMeetingDetails
+      programData.numberOfSessions.trim() !== "" //&&
+      //hasMeetingDetails
     )
   }
 
@@ -1293,37 +1443,49 @@ export default function CreateProgram() {
     if (programData.price.trim() === "") errors.push("Price is required")
     if (programData.durationWeeks.trim() === "") errors.push("Duration is required")
     if (programData.numberOfSessions.trim() === "") errors.push("Number of Sessions is required")
-    if (
-      requiresMeetingDetails(programData.format) &&
-      programData.meetingLink.trim() === ""
-    ) {
-      errors.push("Meeting Link is required for online/hybrid format")
-    }
-    if (
-      requiresMeetingDetails(programData.format) &&
-      programData.accessCredentials.trim() === ""
-    ) {
-      errors.push("Access Credentials is required for online/hybrid format")
-    }
+    // if (
+    //   requiresMeetingDetails(programData.format) &&
+    //   programData.meetingLink.trim() === ""
+    // ) {
+    //   errors.push("Meeting Link is required for online/hybrid format")
+    // }
+    // if (
+    //   requiresMeetingDetails(programData.format) &&
+    //   programData.accessCredentials.trim() === ""
+    // ) {
+    //   errors.push("Access Credentials is required for online/hybrid format")
+    // }
     return errors
   }
 
-  // Step 3 validation (curriculum)
+  // Step 3 validation (modules)
   const isStep3Valid = () => {
     return (
       curriculum.length > 0 &&
       curriculum.every(
         (module) =>
+          module.title.trim() !== "" 
+        // && module.description.trim() !== "",
+      )
+    )
+  }
+
+  // Step 4 validation (topics)
+  const isStep4Valid = () => {
+    return (
+      curriculum.length > 0 &&
+      curriculum.every(
+        (module) =>
           module.title.trim() !== "" &&
-          module.description.trim() !== "" &&
+          // module.description.trim() !== "" &&
           module.topics.length > 0 &&
-          module.topics.every((topic) => topic.title.trim() !== "" && topic.description.trim() !== ""),
+          module.topics.every((topic) => topic.title.trim() !== ""),
       )
     )
   }
 
   const getStepProgress = () => {
-    return (currentStep / 4) * 100
+    return (currentStep / totalSteps) * 100
   }
 
   const handleTemplateSelect = (template: CurriculumTemplate) => {
@@ -1548,7 +1710,7 @@ export default function CreateProgram() {
           {/* Progress Bar */}
           <div className="mt-4 sm:mt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium sm:text-sm">Step {currentStep} of 4</span>
+              <span className="text-xs font-medium sm:text-sm">Step {currentStep} of {totalSteps}</span>
               <span className="text-xs text-muted-foreground sm:text-sm">{Math.round(getStepProgress())}% Complete</span>
             </div>
             <Progress value={getStepProgress()} className="h-2" />
@@ -1560,8 +1722,9 @@ export default function CreateProgram() {
               {[
                 { step: 1, label: "Basic Info" },
                 { step: 2, label: "Who" },
-                { step: 3, label: "Curriculum" },
-                { step: 4, label: "Mentors" },
+                { step: 3, label: "Modules" },
+                { step: 4, label: "Topics" },
+                { step: 5, label: "Mentors" },
               ].map(({ step, label }, i) => (
                 <div key={step} className="flex items-center gap-2 sm:flex-1 sm:gap-1.5">
                   <div
@@ -1574,7 +1737,7 @@ export default function CreateProgram() {
                   <span className={`text-xs sm:text-sm truncate ${currentStep >= step ? "font-medium" : "text-muted-foreground"}`}>
                     {label}
                   </span>
-                  {i < 3 && <div className="hidden flex-1 h-px bg-gray-200 mx-1 sm:block min-w-[8px]" />}
+                  {i < totalSteps - 1 && <div className="hidden flex-1 h-px bg-gray-200 mx-1 sm:block min-w-[8px]" />}
                 </div>
               ))}
             </div>
@@ -1619,14 +1782,34 @@ export default function CreateProgram() {
             isSaving={isSavingStep}
             onShowTemplateSelector={() => setShowTemplateSelector(true)}
             selectedTemplate={selectedTemplate}
+            displayMode="modules"
           />
         )}
 
         {currentStep === 4 && (
+          <Step2Curriculum
+            curriculum={curriculum}
+            setCurriculum={setCurriculum}
+            onNext={nextStep}
+            onPrev={prevStep}
+            isValid={isStep4Valid()}
+            isSaving={isSavingStep}
+            onShowTemplateSelector={() => setShowTemplateSelector(true)}
+            selectedTemplate={selectedTemplate}
+            displayMode="topics"
+          />
+        )}
+
+        {currentStep === 5 && (
           <Step3AssignMentors
             curriculum={curriculum}
             mentorAssignments={mentorAssignments}
             setMentorAssignments={setMentorAssignments}
+            trainerDetails={trainerDetails}
+            trainerTakesTopics={trainerTakesTopics}
+            setTrainerTakesTopics={setTrainerTakesTopics}
+            trainerTopicIds={trainerTopicIds}
+            setTrainerTopicIds={setTrainerTopicIds}
             onPrev={prevStep}
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
@@ -1663,6 +1846,7 @@ export default function CreateProgram() {
             mentor={selectedMentorForAssignment}
             curriculum={curriculum}
             existingAssignments={mentorAssignments}
+            reservedTopicIds={trainerReservedTopicIds}
             onAssign={(assignment) => {
               setMentorAssignments([...mentorAssignments, assignment])
               setSelectedMentorForAssignment(null)
@@ -1997,7 +2181,7 @@ function Step2WhoIsThisFor({
           {requiresMeetingDetails(programData.format) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="meetingLink">Meeting Link *</Label>
+                <Label htmlFor="meetingLink">Meeting Link </Label>
                 <Input
                   id="meetingLink"
                   type="url"
@@ -2009,7 +2193,7 @@ function Step2WhoIsThisFor({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="accessCredentials">Access Credentials *</Label>
+                <Label htmlFor="accessCredentials">Access Credentials</Label>
                 <Input
                   id="accessCredentials"
                   placeholder="e.g., Meeting ID: 123-456-789, Passcode: 9876"
@@ -2109,6 +2293,7 @@ interface Step2Props {
   isSaving: boolean
   onShowTemplateSelector: () => void
   selectedTemplate: CurriculumTemplate | null
+  displayMode: "modules" | "topics"
 }
 
 function Step2Curriculum({
@@ -2120,6 +2305,7 @@ function Step2Curriculum({
   isSaving,
   onShowTemplateSelector,
   selectedTemplate,
+  displayMode
 }: Step2Props) {
   const getTotalDuration = () => {
     return curriculum.reduce(
@@ -2146,7 +2332,7 @@ function Step2Curriculum({
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {curriculum.length === 0 && !selectedTemplate ? (
+          {/* {curriculum.length === 0 && !selectedTemplate ? (
             <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
               <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-muted-foreground mb-2">Start building your curriculum</p>
@@ -2187,8 +2373,58 @@ function Step2Curriculum({
               initialTemplate={selectedTemplate || undefined}
               modules={curriculum}
               setModules={setCurriculum}
+              displayMode={displayMode}
             />
-          )}
+          )} */}
+
+          {curriculum.length === 0 && !selectedTemplate ? (
+            displayMode === "modules" ? (
+              <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                {/* existing Browse Templates / Start from Scratch buttons */}
+                <Button onClick={onShowTemplateSelector} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                            <BookOpen className="h-4 w-4 mr-2" />
+                            Browse Templates
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full sm:w-auto min-h-10"
+                            onClick={() =>
+                              setCurriculum([
+                                {
+                                  id: `module-${Date.now()}`,
+                                  title: "",
+                                  description: "",
+                                  order: 1,
+                                  duration: 0,
+                                  topics: [],
+                                  learningObjectives: [""],
+                                  materials: [],
+                                  assessments: [],
+                                  isPublished: false,
+                                },
+                              ])
+                            }
+                          >
+                            Start from Scratch
+                          </Button>
+              </div>
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground mb-2">No modules yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Go back to the Modules step to create a module before adding topics.
+                  </p>
+                </div>
+              )
+            ) : (
+              <CurriculumBuilder
+                          initialTemplate={selectedTemplate || undefined}
+                          modules={curriculum}
+                          setModules={setCurriculum}
+                          displayMode={displayMode}
+                        />
+            )}
         </CardContent>
       </Card>
 
@@ -2215,6 +2451,11 @@ interface Step3Props {
   curriculum: CurriculumModule[]
   mentorAssignments: MentorAssignment[]
   setMentorAssignments: (assignments: MentorAssignment[]) => void
+  trainerDetails: CurrentUserDetails
+  trainerTakesTopics: boolean
+  setTrainerTakesTopics: (takesTopics: boolean) => void
+  trainerTopicIds: string[]
+  setTrainerTopicIds: (topicIds: string[]) => void
   onPrev: () => void
   onSaveDraft: () => Promise<void>
   onSubmit: () => Promise<void>
@@ -2227,6 +2468,11 @@ function Step3AssignMentors({
   curriculum,
   mentorAssignments,
   setMentorAssignments,
+  trainerDetails,
+  trainerTakesTopics,
+  setTrainerTakesTopics,
+  trainerTopicIds,
+  setTrainerTopicIds,
   onPrev,
   onSaveDraft,
   onSubmit,
@@ -2239,12 +2485,48 @@ function Step3AssignMentors({
   }
 
   const getAssignedTopicsCount = () => {
-    const assignedTopicIds = new Set(mentorAssignments.flatMap((a) => a.topicIds))
+    const assignedTopicIds = new Set([
+      ...mentorAssignments.flatMap((a) => a.topicIds),
+      ...(trainerTakesTopics ? trainerTopicIds : []),
+    ])
     return assignedTopicIds.size
   }
 
   const getTotalTopicsCount = () => {
     return curriculum.reduce((total, module) => total + module.topics.length, 0)
+  }
+
+  const allTopics = curriculum.flatMap((module) =>
+    module.topics.map((topic) => ({ ...topic, moduleTitle: module.title })),
+  )
+  const mentorAssignedTopicIds = new Set(mentorAssignments.flatMap((a) => a.topicIds))
+  const availableTrainerTopicIds = allTopics
+    .filter((topic) => !mentorAssignedTopicIds.has(topic.id))
+    .map((topic) => topic.id)
+  const activeTrainerTopicIds = trainerTakesTopics
+    ? trainerTopicIds.filter((topicId) => !mentorAssignedTopicIds.has(topicId))
+    : []
+  const trainerCanBeAssigned = Boolean(trainerDetails.id)
+
+  const handleTrainerTakesTopicsChange = (checked: boolean | "indeterminate") => {
+    const shouldTakeTopics = checked === true
+    setTrainerTakesTopics(shouldTakeTopics)
+
+    if (shouldTakeTopics && trainerTopicIds.length === 0) {
+      setTrainerTopicIds(availableTrainerTopicIds)
+    }
+
+    if (!shouldTakeTopics) {
+      setTrainerTopicIds([])
+    }
+  }
+
+  const toggleTrainerTopic = (topicId: string) => {
+    setTrainerTopicIds(
+      trainerTopicIds.includes(topicId)
+        ? trainerTopicIds.filter((id) => id !== topicId)
+        : [...trainerTopicIds, topicId],
+    )
   }
 
   return (
@@ -2262,7 +2544,9 @@ function Step3AssignMentors({
               <div>
                 {getAssignedTopicsCount()} of {getTotalTopicsCount()} topics assigned
               </div>
-              <div>{mentorAssignments.length} mentors invited</div>
+              <div>
+                {mentorAssignments.length + (activeTrainerTopicIds.length > 0 ? 1 : 0)} mentors invited
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -2293,12 +2577,14 @@ function Step3AssignMentors({
                   {module.topics.map((topic, topicIndex) => {
                     const isAssigned = mentorAssignments.some((a) => a.topicIds.includes(topic.id))
                     const assignedMentor = mentorAssignments.find((a) => a.topicIds.includes(topic.id))
+                    const isTrainerAssigned =
+                      !isAssigned && activeTrainerTopicIds.includes(topic.id)
 
                     return (
                       <div
                         key={topic.id}
                         className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-2 rounded ${
-                          isAssigned ? "bg-green-50 border border-green-200" : "bg-gray-50"
+                          isAssigned || isTrainerAssigned ? "bg-green-50 border border-green-200" : "bg-gray-50"
                         }`}
                       >
                         <div className="flex items-center gap-2 sm:space-x-3">
@@ -2326,6 +2612,21 @@ function Step3AssignMentors({
                               </Avatar>
                               <Badge className="bg-green-100 text-green-800">{assignedMentor?.mentor.name}</Badge>
                             </div>
+                          ) : isTrainerAssigned ? (
+                            <div className="flex items-center space-x-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src="/placeholder.svg" />
+                                <AvatarFallback className="text-xs">
+                                  {(trainerDetails.name ?? "Trainer")
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                              <Badge className="bg-green-100 text-green-800">
+                                {trainerDetails.name ?? "Trainer"}
+                              </Badge>
+                            </div>
                           ) : (
                             <Badge variant="outline" className="text-muted-foreground">
                               Unassigned
@@ -2339,6 +2640,80 @@ function Step3AssignMentors({
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Trainer Assignment */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Trainer Participation</CardTitle>
+          <CardDescription>
+            Include yourself as the trainer for topics you want to take.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg border p-4">
+            <Checkbox
+              id="trainer-takes-topics"
+              checked={trainerTakesTopics}
+              disabled={!trainerCanBeAssigned || (!trainerTakesTopics && availableTrainerTopicIds.length === 0)}
+              onCheckedChange={handleTrainerTakesTopicsChange}
+            />
+            <div className="space-y-1">
+              <Label htmlFor="trainer-takes-topics" className="cursor-pointer text-sm font-medium">
+                I will take some of these topics
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {trainerCanBeAssigned
+                  ? `${trainerDetails.name ?? "The signed-in trainer"} will be sent with the same topic mentor payload.`
+                  : "Sign-in details are unavailable, so the trainer cannot be added yet."}
+              </p>
+            </div>
+          </div>
+
+          {trainerTakesTopics && (
+            <div className="rounded-lg border p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <Label className="text-sm font-medium">Trainer Topics</Label>
+                <span className="text-xs text-muted-foreground">
+                  {activeTrainerTopicIds.length} topics selected
+                </span>
+              </div>
+              <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
+                {allTopics.map((topic) => {
+                  const isAlreadyAssigned = mentorAssignedTopicIds.has(topic.id)
+                  const isSelected = activeTrainerTopicIds.includes(topic.id)
+
+                  return (
+                    <div key={topic.id} className="flex items-start gap-2">
+                      <Checkbox
+                        id={`trainer-topic-${topic.id}`}
+                        checked={isSelected}
+                        disabled={isAlreadyAssigned}
+                        onCheckedChange={() => !isAlreadyAssigned && toggleTrainerTopic(topic.id)}
+                      />
+                      <label
+                        htmlFor={`trainer-topic-${topic.id}`}
+                        className={`flex-1 cursor-pointer text-sm ${
+                          isAlreadyAssigned ? "text-muted-foreground line-through" : ""
+                        }`}
+                      >
+                        <span className="font-medium">{topic.title}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {topic.moduleTitle} - {topic.duration} min
+                        </span>
+                        {isAlreadyAssigned && (
+                          <span className="ml-2 text-xs text-red-600">
+                            (Already assigned to a mentor)
+                          </span>
+                        )}
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -2483,7 +2858,9 @@ function Step3AssignMentors({
             </div>
             <div className="flex items-center space-x-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{mentorAssignments.length} mentors assigned</span>
+              <span>
+                {mentorAssignments.length + (activeTrainerTopicIds.length > 0 ? 1 : 0)} mentors assigned
+              </span>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -2764,6 +3141,7 @@ interface MentorAssignmentModalProps {
   mentor: PlatformMentor
   curriculum: CurriculumModule[]
   existingAssignments: MentorAssignment[]
+  reservedTopicIds?: string[]
   onAssign: (assignment: MentorAssignment) => void
 }
 
@@ -2773,6 +3151,7 @@ function MentorAssignmentModal({
   mentor,
   curriculum,
   existingAssignments,
+  reservedTopicIds = [],
   onAssign,
 }: MentorAssignmentModalProps) {
   const [surveyOptions, setSurveyOptions] = useState<
@@ -2880,6 +3259,16 @@ function MentorAssignmentModal({
   }, [isOpen])
 
   const handleAssign = () => {
+    const assignedTopicIds = getAssignedTopics()
+    const assignableSelectedTopics = selectedTopics.filter(
+      (topicId) => !assignedTopicIds.has(topicId),
+    )
+
+    if (assignableSelectedTopics.length === 0) {
+      setSelectedTopics([])
+      return
+    }
+
     const selectedSurvey = surveyOptions.find(
       (survey) => survey.slug === selectedFeedbackSurveySlug,
     )
@@ -2889,7 +3278,7 @@ function MentorAssignmentModal({
       mentorId: mentor.id,
       mentor: mentor,
       moduleIds: [],
-      topicIds: selectedTopics,
+      topicIds: assignableSelectedTopics,
       proposedRate: proposedRate,
       status: "pending",
       customMessage: customMessage,
@@ -2909,7 +3298,10 @@ function MentorAssignmentModal({
   }
 
   const getAssignedTopics = () => {
-    const assignedTopicIds = new Set(existingAssignments.flatMap((a) => a.topicIds))
+    const assignedTopicIds = new Set([
+      ...existingAssignments.flatMap((a) => a.topicIds),
+      ...reservedTopicIds,
+    ])
     return assignedTopicIds
   }
 

@@ -15,9 +15,13 @@ interface CurriculumBuilderProps {
   initialTemplate?: CurriculumTemplate
   modules: CurriculumModule[]
   setModules: (modules: CurriculumModule[]) => void
+  displayMode?: "all" | "modules" | "topics"
 }
 
-export function CurriculumBuilder({ initialTemplate, modules, setModules }: CurriculumBuilderProps) {
+export function CurriculumBuilder({ initialTemplate, modules, setModules, displayMode = "all" }: CurriculumBuilderProps) {
+  const showModuleFields = displayMode !== "topics"
+  const showTopicFields = displayMode !== "modules"
+
   const addModule = () => {
     const newModule: CurriculumModule = {
       id: `module-${Date.now()}`,
@@ -163,11 +167,17 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
         <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-base sm:text-lg">Curriculum Builder</CardTitle>
+              <CardTitle className="text-base sm:text-lg">
+                {displayMode === "modules" ? "Modules" : displayMode === "topics" ? "Topics" : "Curriculum Builder"}
+              </CardTitle>
               <CardDescription className="text-sm">
-                {initialTemplate
-                  ? `Building from template: ${initialTemplate.name}`
-                  : "Create your custom curriculum from scratch"}
+                {displayMode === "modules"
+                  ? "Create the main sections of your program"
+                  : displayMode === "topics"
+                    ? "Add topics under each module"
+                    : initialTemplate
+                      ? `Building from template: ${initialTemplate.name}`
+                      : "Create your custom curriculum from scratch"}
               </CardDescription>
             </div>
             <div className="text-sm text-muted-foreground sm:text-right">
@@ -190,7 +200,7 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
                   <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground cursor-move" />
                   <Badge variant="outline">Module {moduleIndex + 1}</Badge>
                 </div>
-                {modules.length > 1 && (
+                {showModuleFields && modules.length > 1 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -203,210 +213,223 @@ export function CurriculumBuilder({ initialTemplate, modules, setModules }: Curr
               </div>
             </CardHeader>
             <CardContent className="space-y-4 bg-gray-50/50 p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Module Title *</Label>
-                  <Input
-                    placeholder="e.g., Introduction to Digital Marketing"
-                    value={module.title}
-                    onChange={(e) => updateModule(module.id, { title: e.target.value })}
-                    className="bg-white"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Estimated Duration (hours)</Label>
-                  <Input
-                    type="number"
-                    placeholder="e.g., 4"
-                    value={module.duration / 60}
-                    onChange={(e) =>
-                      updateModule(module.id, { duration: (Number.parseFloat(e.target.value) || 0) * 60 })
-                    }
-                    className="bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Module Description *</Label>
-                <Textarea
-                  placeholder="Describe what this module covers..."
-                  value={module.description}
-                  onChange={(e) => updateModule(module.id, { description: e.target.value })}
-                  rows={2}
-                  className="bg-white"
-                />
-              </div>
-
-              {/* Learning Objectives */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Learning Objectives</Label>
-                {module.learningObjectives.map((objective, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      placeholder={`Learning objective ${index + 1}`}
-                      value={objective}
-                      onChange={(e) => updateLearningObjective(module.id, index, e.target.value)}
-                      className="min-w-0 flex-1 bg-white"
-                    />
-                    {module.learningObjectives.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={() => removeLearningObjective(module.id, index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+              {showModuleFields ? (
+                <>
+                  <div className="gap-4">
+                    <div className="">
+                      <Label>Module Title *</Label>
+                      <Input
+                        placeholder="e.g., Introduction to Digital Marketing"
+                        value={module.title}
+                        onChange={(e) => updateModule(module.id, { title: e.target.value })}
+                        className="bg-white mt-4"
+                      />
+                    </div>
+                    {/* <div className="space-y-2">
+                      <Label>Estimated Duration (hours)</Label>
+                      <Input
+                        type="number"
+                        placeholder="e.g., 4"
+                        value={module.duration / 60}
+                        onChange={(e) =>
+                          updateModule(module.id, { duration: (Number.parseFloat(e.target.value) || 0) * 60 })
+                        }
+                        className="bg-white"
+                      />
+                    </div> */}
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => addLearningObjective(module.id)}
-                  className="w-full min-h-10 bg-transparent"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Learning Objective
-                </Button>
-              </div>
 
-              {/* Topics */}
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <Label className="text-base font-medium">Topics</Label>
-                  <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto min-h-9" onClick={() => addTopic(module.id)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Topic
-                  </Button>
-                </div>
+                  {/* <div className="space-y-2">
+                    <Label>Module Description *</Label>
+                    <Textarea
+                      placeholder="Describe what this module covers..."
+                      value={module.description}
+                      onChange={(e) => updateModule(module.id, { description: e.target.value })}
+                      rows={2}
+                      className="bg-white"
+                    />
+                  </div> */}
 
-                {module.topics.length === 0 ? (
-                  <div className="text-center py-6 sm:py-8 border-2 border-dashed border-gray-200 rounded-lg px-4">
-                    <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-muted-foreground text-sm sm:text-base">No topics yet</p>
+                  {/* <div className="space-y-3">
+                    <Label className="text-base font-medium">Learning Objectives</Label>
+                    {module.learningObjectives.map((objective, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          placeholder={`Learning objective ${index + 1}`}
+                          value={objective}
+                          onChange={(e) => updateLearningObjective(module.id, index, e.target.value)}
+                          className="min-w-0 flex-1 bg-white"
+                        />
+                        {module.learningObjectives.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="shrink-0"
+                            onClick={() => removeLearningObjective(module.id, index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      onClick={() => addTopic(module.id)}
-                      className="mt-2 min-h-9"
+                      onClick={() => addLearningObjective(module.id)}
+                      className="w-full min-h-10 bg-transparent"
                     >
-                      Add First Topic
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Learning Objective
+                    </Button>
+                  </div> */}
+                </>
+              ) : (
+                <div className="rounded-lg border bg-white p-3">
+                  <p className="text-sm font-medium">{module.title || `Module ${moduleIndex + 1}`}</p>
+                  {module.description && (
+                    <p className="mt-1 text-sm text-muted-foreground">{module.description}</p>
+                  )}
+                </div>
+              )}
+
+              {showTopicFields && (
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <Label className="text-base font-medium">Topics</Label>
+                    <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto min-h-9" onClick={() => addTopic(module.id)}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Topic
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {module.topics.map((topic, topicIndex) => (
-                      <Card key={topic.id} className="bg-gray-50 overflow-hidden">
-                        <CardContent className="p-3 sm:p-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div
-                                className={`w-8 h-8 rounded flex items-center justify-center ${getTopicColor(topic.type)}`}
-                              >
-                                {getTopicIcon(topic.type)}
+
+                  {module.topics.length === 0 ? (
+                    <div className="text-center py-6 sm:py-8 border-2 border-dashed border-gray-200 rounded-lg px-4">
+                      <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground text-sm sm:text-base">No topics yet</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addTopic(module.id)}
+                        className="mt-2 min-h-9"
+                      >
+                        Add First Topic
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {module.topics.map((topic, topicIndex) => (
+                        <Card key={topic.id} className="bg-gray-50 overflow-hidden">
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div
+                                  className={`w-8 h-8 rounded flex items-center justify-center ${getTopicColor(topic.type)}`}
+                                >
+                                  {getTopicIcon(topic.type)}
+                                </div>
+                                <Badge variant="secondary">Topic {topicIndex + 1}</Badge>
                               </div>
-                              <Badge variant="secondary">Topic {topicIndex + 1}</Badge>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeTopic(module.id, topic.id)}
-                              className="shrink-0 text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">Topic Title *</Label>
-                              <Input
-                                placeholder="e.g., SEO Fundamentals"
-                                value={topic.title}
-                                onChange={(e) => updateTopic(module.id, topic.id, { title: e.target.value })}
-                                className="h-8 text-sm bg-white"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Duration (min)</Label>
-                              <Input
-                                type="number"
-                                placeholder="60"
-                                value={topic.duration}
-                                onChange={(e) =>
-                                  updateTopic(module.id, topic.id, { duration: Number.parseInt(e.target.value) || 60 })
-                                }
-                                className="h-8 text-sm bg-white"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Type</Label>
-                              <Select
-                                value={topic.type}
-                                onValueChange={(value) => updateTopic(module.id, topic.id, { type: value as any })}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeTopic(module.id, topic.id)}
+                                className="shrink-0 text-red-600 hover:text-red-700"
                               >
-                                <SelectTrigger className="h-8 text-sm bg-white">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="live_session">Live Session</SelectItem>
-                                  <SelectItem value="discussion">Discussion</SelectItem>
-                                  <SelectItem value="project">Project</SelectItem>
-                                  <SelectItem value="video">Video</SelectItem>
-                                  <SelectItem value="document">Document</SelectItem>
-                                  <SelectItem value="quiz">Quiz</SelectItem>
-                                  <SelectItem value="assignment">Assignment</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
-                          </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-xs">Description *</Label>
-                            <Textarea
-                              placeholder="Describe what will be covered in this topic..."
-                              value={topic.description}
-                              onChange={(e) => updateTopic(module.id, topic.id, { description: e.target.value })}
-                              rows={2}
-                              className="text-sm bg-white"
-                            />
-                          </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 mb-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs">Topic Title *</Label>
+                                <Input
+                                  placeholder="e.g., SEO Fundamentals"
+                                  value={topic.title}
+                                  onChange={(e) => updateTopic(module.id, topic.id, { title: e.target.value })}
+                                  className="h-8 text-sm bg-white"
+                                />
+                              </div>
+                              {/* <div className="space-y-1">
+                                <Label className="text-xs">Duration (min)</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="60"
+                                  value={topic.duration}
+                                  onChange={(e) =>
+                                    updateTopic(module.id, topic.id, { duration: Number.parseInt(e.target.value) || 60 })
+                                  }
+                                  className="h-8 text-sm bg-white"
+                                />
+                              </div> */}
+                              <div className="space-y-1">
+                                <Label className="text-xs">Type</Label>
+                                <Select
+                                  value={topic.type}
+                                  onValueChange={(value) => updateTopic(module.id, topic.id, { type: value as any })}
+                                >
+                                  <SelectTrigger className="h-8 text-sm bg-white">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="live_session">Live Session</SelectItem>
+                                    <SelectItem value="discussion">Discussion</SelectItem>
+                                    <SelectItem value="project">Project</SelectItem>
+                                    <SelectItem value="video">Video</SelectItem>
+                                    <SelectItem value="document">Document</SelectItem>
+                                    <SelectItem value="quiz">Quiz</SelectItem>
+                                    <SelectItem value="assignment">Assignment</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
 
-                          <div className="flex items-center gap-2 pt-2">
-                            <input
-                              type="checkbox"
-                              id={`free-${topic.id}`}
-                              checked={topic.isFree || false}
-                              onChange={(e) => updateTopic(module.id, topic.id, { isFree: e.target.checked })}
-                              className="h-4 w-4 shrink-0 rounded border-gray-300 text-[#FFD500] focus:ring-[#FFD500]"
-                            />
-                            <Label htmlFor={`free-${topic.id}`} className="text-sm font-normal cursor-pointer min-w-0">
-                              Free Trial Session {topic.isFree && <Badge className="ml-2 bg-green-500 text-white text-xs">FREE</Badge>}
-                            </Label>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
+                            {/* <div className="space-y-1">
+                              <Label className="text-xs">Description *</Label>
+                              <Textarea
+                                placeholder="Describe what will be covered in this topic..."
+                                value={topic.description}
+                                onChange={(e) => updateTopic(module.id, topic.id, { description: e.target.value })}
+                                rows={2}
+                                className="text-sm bg-white"
+                              />
+                            </div> */}
+
+                            <div className="flex items-center gap-2 pt-2">
+                              <input
+                                type="checkbox"
+                                id={`free-${topic.id}`}
+                                checked={topic.isFree || false}
+                                onChange={(e) => updateTopic(module.id, topic.id, { isFree: e.target.checked })}
+                                className="h-4 w-4 shrink-0 rounded border-gray-300 text-[#FFD500] focus:ring-[#FFD500]"
+                              />
+                              <Label htmlFor={`free-${topic.id}`} className="text-sm font-normal cursor-pointer min-w-0">
+                                Free Trial Session {topic.isFree && <Badge className="ml-2 bg-green-500 text-white text-xs">FREE</Badge>}
+                              </Label>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={addModule}
-          className="w-full border-dashed min-h-12 bg-transparent"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Module
-        </Button>
+        {showModuleFields && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addModule}
+            className="w-full border-dashed min-h-12 bg-transparent"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Module
+          </Button>
+        )}
       </div>
     </div>
   )

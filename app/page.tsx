@@ -134,7 +134,7 @@ export default function HomePage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link
+            {/* <Link
               href="/programs"
               className="rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
@@ -145,7 +145,7 @@ export default function HomePage() {
               className="rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
               Contact
-            </Link>
+            </Link> */}
             <Link
               href="/login"
               className="rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -173,12 +173,12 @@ export default function HomePage() {
                   <Link href="/get-started" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setMobileNavOpen(false)}>
                     Get Started
                   </Link>
-                  <Link href="/programs" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setMobileNavOpen(false)}>
+                  {/* <Link href="/programs" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setMobileNavOpen(false)}>
                     Pricing
                   </Link>
                   <Link href="/#contact" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setMobileNavOpen(false)}>
                     Contact
-                  </Link>
+                  </Link> */}
                   <Link href="/login" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setMobileNavOpen(false)}>
                     Log in
                   </Link>
@@ -288,12 +288,12 @@ export default function HomePage() {
             <span className="text-xs text-gray-500 sm:text-sm">© 2025 Mentwork. All rights reserved.</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <Link href="/programs" className="py-2 text-sm text-gray-500 hover:text-gray-900">
+            {/* <Link href="/programs" className="py-2 text-sm text-gray-500 hover:text-gray-900">
               Pricing
             </Link>
             <Link href="/#contact" className="py-2 text-sm text-gray-500 hover:text-gray-900">
               Contact
-            </Link>
+            </Link> */}
             <Link href="/login" className="py-2 text-sm text-gray-500 hover:text-gray-900">
               Log in
             </Link>

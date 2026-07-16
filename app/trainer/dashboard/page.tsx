@@ -1128,7 +1128,7 @@ export default function TrainerDashboard() {
           const programHref =
             program.status === 'draft'
               ? `/trainer/dashboard/programs/create?programId=${encodeURIComponent(resumeProgramId)}&id=${encodeURIComponent(resumeProgramId)}`
-              : `/trainer/dashboard/programs/${program.id}`
+              : `/trainer/dashboard/programs/view?id=${encodeURIComponent(program.id)}`
           const actionLabel =
             program.status === 'draft'
               ? 'Continue Draft'
@@ -1438,7 +1438,7 @@ export default function TrainerDashboard() {
                   className='flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-gray-50 gap-3'
                 >
                   <Link
-                    href={`/trainer/dashboard/programs/${session.programId}/lms`}
+                    href={`/trainer/dashboard/programs/lms?id=${encodeURIComponent(session.programId)}`}
                     className='flex-1 cursor-pointer'
                   >
                     <div className='flex items-center gap-2 mb-1 flex-wrap'>

@@ -151,7 +151,7 @@ const mockTemplates: CurriculumTemplate[] = [
 export default function TrainerOnboardingPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(5);
   const [selectedDemand, setSelectedDemand] = useState<typeof mockDemandSignals[0] | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<CurriculumTemplate | null>(null);
   const [useTemplate, setUseTemplate] = useState<boolean | null>(null);
@@ -699,7 +699,7 @@ export default function TrainerOnboardingPage() {
             {/* Navigation Buttons */}
             {step < 6 && (
             <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
-              {step > 1 ? (
+              {/* {step > 1 ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -710,7 +710,7 @@ export default function TrainerOnboardingPage() {
                 </Button>
               ) : (
                 <div className="hidden sm:block" />
-              )}
+              )} */}
 
                 {step === 1 && (
                 <Button

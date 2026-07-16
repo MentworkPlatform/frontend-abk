@@ -16,3 +16,6 @@ export const buildApiUrl = (endpoint: string) => {
 }
 
 export const LOGIN_URL = 'auth/login'
+
+export const PASSWORD_RESET_URL = 'auth/forgot-password'
+export const PASSWORD_RESET_CONFIRM_URL = 'auth/reset-password'

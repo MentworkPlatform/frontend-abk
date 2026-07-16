@@ -62,8 +62,8 @@ export interface CurriculumModule {
 export interface CurriculumTopic {
   id: string
   title: string
-  description: string
-  duration: number // in minutes
+  description?: string
+  duration?: number // in minutes
   order: number
   type: "video" | "document" | "quiz" | "assignment" | "live_session" | "discussion" | "project"
   materials: string[]

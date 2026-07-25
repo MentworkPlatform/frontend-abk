@@ -46,8 +46,23 @@ type ProgramTopicViewModel = {
 type ProgramDetailsViewModel = {
   id: string
   title: string
+  tagline: string
   description: string
   focusArea: string
+  experienceLevel: string
+  createdAt: string
+  updatedAt: string
+  enrollmentStatus: string
+  enrolledAt: string
+  trainerName: string
+  priceLabel: string
+  paymentStatus: string
+  durationLabel: string
+  numberOfSessions: number
+  maxParticipants: number | null
+  sectors: string[]
+  skillsCapabilities: string[]
+  learningOutcomes: string[]
   progress: number
   totalTopics: number
   completedTopics: number
@@ -125,7 +140,7 @@ const normalizeStatus = (value: string | null): TopicStatus => {
 
 const formatNextSession = (value: string | null) => {
   if (!value) {
-    return 'Schedule pending'
+    return 'No session date provided'
   }
 
   const parsedDate = new Date(value)
@@ -135,6 +150,48 @@ const formatNextSession = (value: string | null) => {
   }
 
   return parsedDate.toLocaleString()
+}
+
+const pickStringArray = (...values: unknown[]) => {
+  for (const value of values) {
+    if (!Array.isArray(value)) continue
+
+    return value.filter(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0,
+    )
+  }
+
+  return []
+}
+
+const formatDate = (value: string | null) => {
+  if (!value) return 'Not provided'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString()
+}
+
+const formatMoney = (amount: number | null, currency: string | null) => {
+  if (amount === null) return 'Not provided'
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency ?? 'NGN',
+      maximumFractionDigits: 2,
+    }).format(amount)
+  } catch {
+    return `${currency ?? 'NGN'} ${amount.toLocaleString()}`
+  }
+}
+
+const formatDuration = (minutes: number) => {
+  if (minutes <= 0) return 'Duration not provided'
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'}`
+  if (minutes % 60 === 0) {
+    const hours = minutes / 60
+    return `${hours} hour${hours === 1 ? '' : 's'}`
+  }
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`
 }
 
 const isJoinableFormat = (format: string) => {
@@ -208,12 +265,16 @@ const mapProgramDetailsResponse = (
 ): ProgramDetailsViewModel => {
   const root = asObject(payload)
   const dataRecord = asObject(root?.data)
+  const detailsRecord =
+    asObject(root?.details) ?? asObject(dataRecord?.details) ?? null
   const enrollmentRecord =
+    asObject(detailsRecord?.enrollment) ??
     asObject(root?.enrollment) ??
     asObject(dataRecord?.enrollment) ??
     null
   const programRecord =
     asObject(enrollmentRecord?.program) ??
+    asObject(detailsRecord?.program) ??
     asObject(root?.program) ??
     asObject(dataRecord?.program) ??
     dataRecord ??
@@ -234,7 +295,17 @@ const mapProgramDetailsResponse = (
   }
 
   const programFormat =
-    pickString(programRecord.format, programRecord.deliveryMode) ?? 'Online'
+    pickString(
+      asObject(programRecord.format)?.name,
+      programRecord.format,
+      programRecord.deliveryMode,
+    ) ?? 'Not provided'
+  const trainerRecord = asObject(detailsRecord?.trainer)
+  const latestPayment = asObject(detailsRecord?.latestPayment)
+  const paymentSummary = asObject(detailsRecord?.paymentSummary)
+  const enrollmentStatus =
+    pickString(enrollmentRecord?.status, enrollmentRecord?.enrollmentStatus) ??
+    'UNKNOWN'
 
   const mentorAssignments = Array.isArray(programRecord.mentorAssignments)
     ? programRecord.mentorAssignments
@@ -322,7 +393,7 @@ const mapProgramDetailsResponse = (
           programFormat,
         ) ?? programFormat
       const topicStatus = normalizeStatus(
-        pickString(topicRecord.status, assignment?.status),
+        pickString(topicRecord.status, enrollmentStatus),
       )
       const durationValue =
         pickNumber(topicRecord.duration, topicRecord.durationHours) ?? 0
@@ -364,7 +435,7 @@ const mapProgramDetailsResponse = (
           'No description provided.',
         status: topicStatus,
         durationLabel:
-          durationValue > 0 ? `${durationValue} hour(s)` : 'Duration pending',
+          formatDuration(durationValue),
         mentorName:
           pickString(
             assignmentMentor?.name,
@@ -385,6 +456,7 @@ const mapProgramDetailsResponse = (
             assignment?.joinUrl,
             assignment?.meetingLink,
             assignment?.sessionLink,
+            programRecord.meetingLink,
           ) ?? null,
         feedbackLink,
         surveySlug: extractSurveySlug(feedbackLink),
@@ -414,10 +486,6 @@ const mapProgramDetailsResponse = (
     enrollmentRecord?.completionPercent,
     enrollmentRecord?.completionRate,
   )
-  const enrollmentStatus = pickString(
-    enrollmentRecord?.status,
-    enrollmentRecord?.enrollmentStatus,
-  )
   const canUseFeedback =
     Boolean(enrollmentRecord) &&
     !['cancelled', 'rejected', 'failed'].includes(
@@ -429,11 +497,49 @@ const mapProgramDetailsResponse = (
   return {
     id: programId,
     title: programTitle,
+    tagline: pickString(programRecord.tagline) ?? '',
     description:
       pickString(programRecord.description, programRecord.tagline) ??
       'Program details not available.',
     focusArea:
-      pickString(programRecord.category, programRecord.industry) ?? 'General',
+      pickString(
+        asObject(programRecord.category)?.name,
+        programRecord.category,
+        programRecord.industry,
+      ) ?? 'General',
+    experienceLevel:
+      pickString(
+        asObject(programRecord.experienceLevel)?.name,
+        programRecord.experienceLevel,
+      ) ?? 'Not provided',
+    createdAt: formatDate(pickString(programRecord.createdAt, programRecord.created_at)),
+    updatedAt: formatDate(pickString(programRecord.updatedAt, programRecord.updated_at)),
+    enrollmentStatus,
+    enrolledAt: formatDate(
+      pickString(enrollmentRecord?.enrolledAt, enrollmentRecord?.createdAt),
+    ),
+    trainerName: pickString(trainerRecord?.name) ?? 'Not provided',
+    priceLabel: formatMoney(
+      pickNumber(programRecord.price, latestPayment?.amount),
+      pickString(latestPayment?.currency, paymentSummary?.currency),
+    ),
+    paymentStatus: pickString(latestPayment?.status) ?? 'Not provided',
+    durationLabel: (() => {
+      const duration = pickNumber(programRecord.duration)
+      return duration === null
+        ? 'Not provided'
+        : `${duration} month${duration === 1 ? '' : 's'}`
+    })(),
+    numberOfSessions:
+      pickNumber(programRecord.numberOfSessions, programRecord.topicCount, topics) ??
+      topics.length,
+    maxParticipants: pickNumber(
+      programRecord.maxParticipant,
+      programRecord.maxParticipants,
+    ),
+    sectors: pickStringArray(programRecord.sectors),
+    skillsCapabilities: pickStringArray(programRecord.skillsCapabilities),
+    learningOutcomes: pickStringArray(programRecord.learningOutcomes),
     progress: Math.max(0, Math.min(100, Math.round(explicitProgress ?? computedProgress))),
     totalTopics,
     completedTopics,
@@ -753,6 +859,70 @@ export default function LearnerProgramPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+            <div>
+              <CardTitle>Program Overview</CardTitle>
+              {program.tagline ? (
+                <CardDescription className='mt-1'>{program.tagline}</CardDescription>
+              ) : null}
+            </div>
+            <Badge className='w-fit'>{program.enrollmentStatus}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className='space-y-6'>
+          <p className='text-sm leading-6 text-gray-700'>{program.description}</p>
+
+          <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-3 lg:grid-cols-4'>
+            <div><p className='text-gray-500'>Category</p><p className='font-medium'>{program.focusArea}</p></div>
+            <div><p className='text-gray-500'>Level</p><p className='font-medium'>{program.experienceLevel}</p></div>
+            <div><p className='text-gray-500'>Format</p><p className='font-medium'>{program.format}</p></div>
+            <div><p className='text-gray-500'>Duration</p><p className='font-medium'>{program.durationLabel}</p></div>
+            <div><p className='text-gray-500'>Sessions</p><p className='font-medium'>{program.numberOfSessions}</p></div>
+            <div><p className='text-gray-500'>Capacity</p><p className='font-medium'>{program.maxParticipants ?? 'Not provided'}</p></div>
+            <div><p className='text-gray-500'>Trainer</p><p className='font-medium'>{program.trainerName}</p></div>
+            <div><p className='text-gray-500'>Program created</p><p className='font-medium'>{program.createdAt}</p></div>
+            <div><p className='text-gray-500'>Last updated</p><p className='font-medium'>{program.updatedAt}</p></div>
+            <div><p className='text-gray-500'>Enrolled</p><p className='font-medium'>{program.enrolledAt}</p></div>
+            <div><p className='text-gray-500'>Price</p><p className='font-medium'>{program.priceLabel}</p></div>
+            <div><p className='text-gray-500'>Payment</p><p className='font-medium'>{program.paymentStatus}</p></div>
+          </div>
+
+          {program.sectors.length > 0 ? (
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Sectors</p>
+              <div className='flex flex-wrap gap-2'>
+                {program.sectors.map((sector) => <Badge key={sector} variant='outline'>{sector}</Badge>)}
+              </div>
+            </div>
+          ) : null}
+
+          {program.skillsCapabilities.length > 0 ? (
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Skills & Capabilities</p>
+              <div className='flex flex-wrap gap-2'>
+                {program.skillsCapabilities.map((skill) => <Badge key={skill} variant='secondary'>{skill}</Badge>)}
+              </div>
+            </div>
+          ) : null}
+
+          {program.learningOutcomes.length > 0 ? (
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Learning Outcomes</p>
+              <ul className='space-y-2 text-sm text-gray-700'>
+                {program.learningOutcomes.map((outcome) => (
+                  <li key={outcome} className='flex items-start gap-2'>
+                    <CheckCircle className='mt-0.5 h-4 w-4 shrink-0 text-green-600' />
+                    {outcome}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
       <div className='grid lg:grid-cols-3 gap-4 lg:gap-8'>
         <div className='lg:col-span-2'>
           <Card>
@@ -908,6 +1078,14 @@ export default function LearnerProgramPage() {
               <div className='flex items-center justify-between'>
                 <span className='text-gray-600'>Progress</span>
                 <span className='font-medium'>{program.progress}%</span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <span className='text-gray-600'>Enrollment</span>
+                <span className='font-medium'>{program.enrollmentStatus}</span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <span className='text-gray-600'>Payment</span>
+                <span className='font-medium'>{program.paymentStatus}</span>
               </div>
               <div className='pt-2'>
                 <Button variant='outline' className='w-full' asChild>

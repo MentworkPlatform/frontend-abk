@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Save, User, Briefcase, Target, Globe, Linkedin, DollarSign, Lock, Bell } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,29 +31,117 @@ import {
   getSkillsForSectors,
   getSkillsGroupedBySector,
 } from "@/lib/constants/onboarding";
+import { ApiError, apiClient } from "@/lib/api-client";
+import { getCurrentUserDetails } from "@/lib/current-user";
+import { useToast } from "@/hooks/use-toast";
+
+const asObject = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null;
+
+const pickString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+};
+
+const pickStringArray = (...values: unknown[]) => {
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      return value.filter(
+        (item): item is string => typeof item === "string" && Boolean(item.trim()),
+      );
+    }
+  }
+  return [];
+};
 
 export default function ProfilePage() {
+  const { toast } = useToast();
+  const [menteeId, setMenteeId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    goal: "Scale my startup and secure funding",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    industry: "technology",
-    businessStage: "growing",
-    selectedSectors: ["technology-it", "creative-arts"],
-    selectedSubSectorSkills: ["Software", "Web development"],
-    selectedSkillsCapabilities: [
-      "Leadership, People & Culture",
-      "Business Planning & Strategic Thinking",
-      "Branding, Marketing & Digital Presence",
-    ],
-    specificGoals:
-      "I want to improve my leadership skills and develop a solid business strategy for scaling.",
-    timeframe: "6-12-months",
+    goal: "",
+    name: "",
+    email: "",
+    industry: "",
+    businessStage: "",
+    selectedSectors: [] as string[],
+    selectedSubSectorSkills: [] as string[],
+    selectedSkillsCapabilities: [] as string[],
+    specificGoals: "",
+    timeframe: "",
     linkedinUrl: "",
     websiteUrl: "",
     goalBudget: "",
   });
+
+  useEffect(() => {
+    const fallbackUser = getCurrentUserDetails();
+    setMenteeId(fallbackUser.id);
+
+    setFormData((previous) => ({
+      ...previous,
+      name: fallbackUser.name ?? "",
+      email: fallbackUser.email ?? "",
+    }));
+
+    const loadProfile = async () => {
+      try {
+        const response = await apiClient.get<unknown>("/auth/me");
+        const root = asObject(response);
+        const data = asObject(root?.data);
+        const user = asObject(root?.user) ?? asObject(data?.user) ?? data ?? root;
+        const profile =
+          asObject(user?.profile) ??
+          asObject(user?.menteeProfile) ??
+          asObject(user?.mentee_profile) ??
+          asObject(data?.profile) ??
+          {};
+        const resolvedMenteeId = pickString(
+          user?.menteeId,
+          user?.id,
+          profile.menteeId,
+          profile.id,
+          data?.menteeId,
+          data?.id,
+        );
+
+        if (resolvedMenteeId) setMenteeId(resolvedMenteeId);
+
+        setFormData((previous) => ({
+          ...previous,
+          name: pickString(user?.name, user?.fullName, profile.name, profile.fullName) || previous.name,
+          email: pickString(user?.email, profile.email) || previous.email,
+          goal: pickString(profile.goal, profile.mainGoal, profile.professionalGoal),
+          industry: pickString(profile.industry),
+          businessStage: pickString(profile.businessStage, profile.business_stage),
+          selectedSectors: pickStringArray(profile.selectedSectors, profile.sectors),
+          selectedSubSectorSkills: pickStringArray(
+            profile.selectedSubSectorSkills,
+            profile.subSectorSkills,
+            profile.sub_sector_skills,
+          ),
+          selectedSkillsCapabilities: pickStringArray(
+            profile.selectedSkillsCapabilities,
+            profile.skillsCapabilities,
+            profile.skills_capabilities,
+          ),
+          specificGoals: pickString(profile.specificGoals, profile.specific_goals),
+          timeframe: pickString(profile.timeframe),
+          linkedinUrl: pickString(profile.linkedinUrl, profile.linkedin),
+          websiteUrl: pickString(profile.websiteUrl, profile.website),
+          goalBudget: pickString(profile.goalBudget, profile.goal_budget),
+        }));
+      } catch {
+        // The authenticated identity fallback above still supplies name and email.
+      }
+    };
+
+    void loadProfile();
+  }, []);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -91,24 +179,44 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!menteeId) {
+      toast({
+        title: "Unable to update profile",
+        description: "Your mentee account could not be resolved. Please sign in again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    // TODO: Add API call to save profile data
-    // const response = await fetch(API_URL + '/profile', {
-    //   method: 'PUT',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: 'Bearer ' + localStorage.getItem('token'),
-    //   },
-    //   body: JSON.stringify(formData),
-    // })
+    try {
+      await apiClient.put<unknown, typeof formData>(
+        `/mentees/${encodeURIComponent(menteeId)}`,
+        formData,
+      );
 
-    // Simulate API call
-    setTimeout(() => {
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been saved successfully.",
+      });
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unable to update your profile. Please try again.";
+
+      toast({
+        title: "Unable to update profile",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      // Show success message
-      alert("Profile updated successfully!");
-    }, 1000);
+    }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {

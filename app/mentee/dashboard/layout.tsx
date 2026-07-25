@@ -3,11 +3,26 @@
 import type React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Users, BarChart3 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DashboardSidebar, type NavItem } from "@/components/dashboard-sidebar";
 import MobileNav from "@/components/mobile-nav";
+import { getCurrentUserDetails } from "@/lib/current-user";
+import { apiClient } from "@/lib/api-client";
+
+const asObject = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null;
+
+const pickString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+};
 
 export default function DashboardLayout({
   children,
@@ -15,6 +30,56 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [currentUserName, setCurrentUserName] = useState("User");
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const currentUser = getCurrentUserDetails();
+
+    if (currentUser.name) {
+      setCurrentUserName(currentUser.name);
+    }
+
+    setCurrentUserEmail(currentUser.email);
+
+    const loadFullName = async () => {
+      try {
+        const response = await apiClient.get<unknown>("/auth/me");
+        const root = asObject(response);
+        const data = asObject(root?.data);
+        const user = asObject(root?.user) ?? asObject(data?.user) ?? data ?? root;
+        const profile = asObject(user?.profile) ?? asObject(data?.profile);
+        const fullName = pickString(
+          user?.fullName,
+          user?.full_name,
+          user?.name,
+          profile?.fullName,
+          profile?.full_name,
+          profile?.name,
+        );
+        const email = pickString(user?.email, profile?.email);
+
+        if (fullName) setCurrentUserName(fullName);
+        if (email) setCurrentUserEmail(email);
+      } catch {
+        // Keep the authenticated token/local-storage identity as a fallback.
+      }
+    };
+
+    void loadFullName();
+  }, []);
+
+  const userInitials = useMemo(() => {
+    const initials = currentUserName
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word[0]?.toUpperCase() ?? "")
+      .join("")
+      .slice(0, 2);
+
+    return initials || "U";
+  }, [currentUserName]);
+
   const navItems: NavItem[] = [
     {
       href: "/mentee/dashboard",
@@ -58,10 +123,13 @@ export default function DashboardLayout({
             src="/placeholder.svg?height=40&width=40"
             alt="User avatar"
           />
-          <AvatarFallback className="text-xs">JD</AvatarFallback>
+          <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="font-medium text-sm truncate">John Doe</p>
+          <p className="font-medium text-sm truncate">{currentUserName}</p>
+          {currentUserEmail && (
+            <p className="text-xs text-gray-500 truncate">{currentUserEmail}</p>
+          )}
         </div>
       </div>
     </div>
@@ -75,8 +143,8 @@ export default function DashboardLayout({
         </Link>
         <MobileNav
           userType="mentee"
-          userName="John Doe"
-          userRole="Free Plan"
+          userName={currentUserName}
+          userRole="Mentee"
           links={navLinks}
         />
       </div>

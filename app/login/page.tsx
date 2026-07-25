@@ -62,6 +62,10 @@ const resolveUserType = (payload: LoginResponse) => {
 
   const normalizedRole = role.toLowerCase()
 
+  if (normalizedRole.includes('superadmin') || normalizedRole.includes('super_admin')) {
+    return 'superadmin'
+  }
+
   if (normalizedRole.includes('trainer')) {
     return 'trainer'
   }
@@ -123,6 +127,9 @@ export default function LoginPage() {
       })
 
       switch (userType) {
+        case 'superadmin':
+          router.push('/superadmin/dashboard')
+          break
         case 'mentor':
           router.push('/mentor/dashboard')
           break

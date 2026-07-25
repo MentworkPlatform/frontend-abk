@@ -60,7 +60,10 @@ type ProgramStepOnePayload = {
   title: string
   description: string
   tagline: string
+  startDate: string
+  endDate: string
   learningOutcomes: string[]
+  prerequisites: string[]
 }
 
 type ProgramStepTwoPayload = {
@@ -792,6 +795,8 @@ export default function CreateProgram() {
     title: "",
     tagline: "",
     description: "",
+    startDate: "",
+    endDate: "",
     selectedSectors: [] as string[],
     selectedSubSectorSkills: [] as string[],
     selectedSkillsCapabilities: [] as string[],
@@ -1034,6 +1039,12 @@ export default function CreateProgram() {
           title: toStringValue(draftData.title) ?? "",
           tagline: toStringValue(draftData.tagline) ?? "",
           description: toStringValue(draftData.description) ?? "",
+          startDate:
+            toStringValue(draftData.startDate ?? draftData.start_date)?.slice(0, 10) ??
+            "",
+          endDate:
+            toStringValue(draftData.endDate ?? draftData.end_date)?.slice(0, 10) ??
+            "",
           selectedSectors: toStringArray(draftData.sectors),
           selectedSubSectorSkills: toStringArray(draftData.subSectorSkills),
           selectedSkillsCapabilities: toStringArray(draftData.skillsCapabilities),
@@ -1143,7 +1154,10 @@ export default function CreateProgram() {
     title: programData.title.trim(),
     description: programData.description.trim(),
     tagline: programData.tagline.trim(),
+    startDate: programData.startDate,
+    endDate: programData.endDate,
     learningOutcomes: sanitizeStringArray(programData.learningOutcomes),
+    prerequisites: sanitizeStringArray(programData.prerequisites),
   })
 
   const buildStepTwoPayload = (): ProgramStepTwoPayload => ({
@@ -1316,6 +1330,9 @@ export default function CreateProgram() {
     setIsSavingStep(true)
 
     try {
+      await persistProgramStep(buildStepOnePayload())
+      await persistProgramStep(buildStepTwoPayload())
+      await persistProgramStep(buildStepThreePayload())
       await persistProgramStep(buildStepFourPayload())
       toast({
         title: "Draft saved",
@@ -1347,6 +1364,9 @@ export default function CreateProgram() {
     setIsLoading(true)
 
     try {
+      await persistProgramStep(buildStepOnePayload())
+      await persistProgramStep(buildStepTwoPayload())
+      await persistProgramStep(buildStepThreePayload())
       await persistProgramStep(buildStepFourPayload())
       toast({
         title: "Program created",
@@ -1399,6 +1419,9 @@ export default function CreateProgram() {
     return (
       programData.title.trim() !== "" &&
       programData.description.trim() !== "" &&
+      programData.startDate !== "" &&
+      programData.endDate !== "" &&
+      programData.endDate >= programData.startDate &&
       programData.learningOutcomes.some((outcome) => outcome.trim() !== "")
     )
   }
@@ -1408,6 +1431,15 @@ export default function CreateProgram() {
     const errors: string[] = []
     if (programData.title.trim() === "") errors.push("Program Title is required")
     if (programData.description.trim() === "") errors.push("Program Description is required")
+    if (programData.startDate === "") errors.push("Start Date is required")
+    if (programData.endDate === "") errors.push("End Date is required")
+    if (
+      programData.startDate !== "" &&
+      programData.endDate !== "" &&
+      programData.endDate < programData.startDate
+    ) {
+      errors.push("End Date cannot be earlier than Start Date")
+    }
     if (!programData.learningOutcomes.some((outcome) => outcome.trim() !== "")) {
       errors.push("At least one Learning Outcome is required")
     }
@@ -1965,6 +1997,37 @@ function Step1BasicInfo({
               className="text-sm min-h-[72px] sm:min-h-[80px]"
             />
           </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date *</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={programData.startDate}
+                max={programData.endDate || undefined}
+                onChange={(e) =>
+                  setProgramData({ ...programData, startDate: e.target.value })
+                }
+                className="text-sm h-9 sm:h-10"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date *</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={programData.endDate}
+                min={programData.startDate || undefined}
+                onChange={(e) =>
+                  setProgramData({ ...programData, endDate: e.target.value })
+                }
+                className="text-sm h-9 sm:h-10"
+                required
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -2438,7 +2501,7 @@ function Step2Curriculum({
           disabled={!isValid || isSaving}
           className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]"
         >
-          {isSaving ? "Saving..." : "Next: Assign Mentors"}
+          {isSaving ? "Saving..." : "Next: Create Topics"}
           {!isSaving && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
       </div>

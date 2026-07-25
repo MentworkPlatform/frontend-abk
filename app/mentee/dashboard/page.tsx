@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { DashboardHeader } from '@/components/dashboard-header'
-import { ApiError } from '@/lib/api-client'
+import { ApiError, apiClient } from '@/lib/api-client'
 import { getCurrentUserDetails } from '@/lib/current-user'
 import { programApi } from '@/lib/programs'
 
@@ -285,14 +285,35 @@ export default function DashboardPage() {
   >([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const userName = useMemo(() => {
-    const currentUser = getCurrentUserDetails()
+  const [userName, setUserName] = useState('Learner')
 
-    return (
-      currentUser.name?.split(' ')[0] ??
-      currentUser.email?.split('@')[0] ??
-      'Learner'
-    )
+  useEffect(() => {
+    const currentUser = getCurrentUserDetails()
+    if (currentUser.name) setUserName(currentUser.name)
+
+    const loadFullName = async () => {
+      try {
+        const response = await apiClient.get<unknown>('/auth/me')
+        const root = asObject(response)
+        const data = asObject(root?.data)
+        const user = asObject(root?.user) ?? asObject(data?.user) ?? data ?? root
+        const profile = asObject(user?.profile) ?? asObject(data?.profile)
+        const fullName = pickString(
+          user?.fullName,
+          user?.full_name,
+          user?.name,
+          profile?.fullName,
+          profile?.full_name,
+          profile?.name,
+        )
+
+        if (fullName) setUserName(fullName)
+      } catch {
+        // Keep the authenticated token/local-storage name when /auth/me is unavailable.
+      }
+    }
+
+    void loadFullName()
   }, [])
 
   useEffect(() => {

@@ -820,6 +820,8 @@ const getMissingProgramDetailFields = (form: ProgramDetailsFormState) => {
     ["Price", form.price],
     ["Duration", form.duration],
     ["Number of sessions", form.numberOfSessions],
+    ["Start date", form.startDate],
+    ["End date", form.endDate],
   ] as const
 
   const missingFields = requiredFields
@@ -2163,6 +2165,15 @@ export default function ProgramManagementPage({
       return
     }
 
+    if (programDetailsForm.endDate < programDetailsForm.startDate) {
+      toast({
+        title: "Invalid program dates",
+        description: "End date cannot be earlier than start date.",
+        variant: "destructive",
+      })
+      return
+    }
+
     const maxParticipants = Number(programDetailsForm.maxParticipants)
     const price = Number(programDetailsForm.price)
     const duration = Number(programDetailsForm.duration)
@@ -2205,6 +2216,8 @@ export default function ProgramManagementPage({
         title: programDetailsForm.title.trim(),
         tagline: programDetailsForm.tagline.trim(),
         description: programDetailsForm.description.trim(),
+        startDate: programDetailsForm.startDate,
+        endDate: programDetailsForm.endDate,
         learningOutcomes,
         prerequisites,
       })
@@ -3268,11 +3281,12 @@ export default function ProgramManagementPage({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="program-start-date">Start Date</Label>
+                    <Label htmlFor="program-start-date">Start Date *</Label>
                     <Input
                       id="program-start-date"
                       type="date"
                       value={programDetailsForm.startDate}
+                      max={programDetailsForm.endDate || undefined}
                       disabled={!isEditingProgramDetails}
                       onChange={(event) =>
                         setProgramDetailsForm((previousForm) => ({
@@ -3280,14 +3294,16 @@ export default function ProgramManagementPage({
                           startDate: event.target.value,
                         }))
                       }
+                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="program-end-date">End Date</Label>
+                    <Label htmlFor="program-end-date">End Date *</Label>
                     <Input
                       id="program-end-date"
                       type="date"
                       value={programDetailsForm.endDate}
+                      min={programDetailsForm.startDate || undefined}
                       disabled={!isEditingProgramDetails}
                       onChange={(event) =>
                         setProgramDetailsForm((previousForm) => ({
@@ -3295,6 +3311,7 @@ export default function ProgramManagementPage({
                           endDate: event.target.value,
                         }))
                       }
+                      required
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">

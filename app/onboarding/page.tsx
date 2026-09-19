@@ -181,46 +181,46 @@ export default function OnboardingPage() {
   const totalSteps = 5;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] py-4 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8">
-      <div className="container max-w-4xl mx-auto p-0">
-        <div className="mb-4 sm:mb-6 md:mb-8">
-          <div className="flex items-center gap-2 mb-4 sm:mb-6 md:mb-8">
-            <Link href="/">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#0A0A0A] font-sans py-6 px-4 sm:py-10 sm:px-6 md:py-14 md:px-8">
+      <div className="max-w-3xl mx-auto p-0">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8">
+            <Link href="/" aria-label="Mentwork home">
               <img
                 src="/images/mentwork-logo.png"
                 alt="Mentwork"
-                className="h-8"
+                className="h-8 w-auto"
               />
             </Link>
           </div>
 
           <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight pr-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#0A0A0A] leading-tight pr-2">
               {step === 1 && "Let's understand your goals"}
               {step === 2 && "Programs designed for people with your goals"}
               {step === 3 && "Save your progress"}
               {step === 4 && "Create your account"}
               {step === 5 && "What's next?"}
             </h1>
-            <div className="text-sm font-medium text-gray-600 shrink-0">
+            <div className="text-xs sm:text-sm font-bold text-[#6B6B6B] bg-[#F2F1EE] px-3 py-1 rounded-full border border-[#E7E5E1] shrink-0">
               Step {step} of {totalSteps}
             </div>
           </div>
 
-          <div className="w-full bg-gray-200 h-2 rounded-full mb-4 sm:mb-6 md:mb-8">
+          <div className="w-full bg-[#E7E5E1] h-2 rounded-full overflow-hidden mb-6 sm:mb-8">
             <div
-              className="bg-[#FFD500] h-2 rounded-full transition-all duration-300"
+              className="bg-[#F5C400] h-full rounded-full transition-all duration-300"
               style={{ width: `${(step / totalSteps) * 100}%` }}
             ></div>
           </div>
         </div>
 
-        <Card className="border-none shadow-lg rounded-xl overflow-hidden">
-          <CardContent className="p-4 sm:p-6 md:p-8">
+        <Card className="border border-[#E7E5E1] shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-3xl bg-white overflow-hidden">
+          <CardContent className="p-5 sm:p-8 md:p-10">
             {/* Step 1: Intent Snapshot */}
             {step === 1 && (
               <div className="space-y-4 sm:space-y-6">
-                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                <p className="text-[#6B6B6B] text-sm sm:text-base mb-4 sm:mb-6">
                   Help us match you with the right programs (takes 30 seconds)
                 </p>
 
@@ -240,37 +240,37 @@ export default function OnboardingPage() {
                         <div
                           key={goal}
                           onClick={() => toggleGoal(goal)}
-                          className={`p-2.5 border rounded-md cursor-pointer transition-all ${
+                          className={`p-3.5 rounded-xl cursor-pointer transition-all ${
                             formData.goals.includes(goal)
-                              ? "border-[#FFD500] bg-yellow-50"
-                              : "border-gray-200 hover:border-gray-300"
+                              ? "border-2 border-[#0A0A0A] bg-[#FAF9F6] text-[#0A0A0A] shadow-xs"
+                              : "border border-[#E7E5E1] hover:border-[#D8D5CF] bg-white text-[#4B4B4B]"
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{goal}</span>
+                            <span className="text-sm font-semibold">{goal}</span>
                             {formData.goals.includes(goal) && (
-                              <CheckCircle2 className="h-4 w-4 text-[#FFD500]" />
+                              <CheckCircle2 className="h-4 w-4 text-[#0A0A0A]" />
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
                     {formData.goals.length > 0 && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[#6B6B6B]">
                         {formData.goals.length} of 2 selected
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <Label className="text-sm sm:text-base font-semibold">
+                    <Label className="text-sm sm:text-base font-bold text-[#0A0A0A]">
                       What timeframe are you looking at?
                     </Label>
                     <Select
                       value={formData.timeframe}
                       onValueChange={(value) => updateFormData("timeframe", value)}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full h-12 rounded-xl border-[#D8D5CF] bg-white">
                         <SelectValue placeholder="Select timeframe" />
                       </SelectTrigger>
                       <SelectContent>
@@ -284,7 +284,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <Label className="text-sm sm:text-base font-semibold">
+                    <Label className="text-sm sm:text-base font-bold text-[#0A0A0A]">
                       Which area best describes your interest?
                     </Label>
                     <MultiSelect
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <Label className="text-sm sm:text-base font-semibold">
+                    <Label className="text-sm sm:text-base font-bold text-[#0A0A0A]">
                       Which stage feels closest to you?
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -309,13 +309,13 @@ export default function OnboardingPage() {
                         <div
                           key={stage}
                           onClick={() => updateFormData("stage", stage)}
-                          className={`p-2.5 border rounded-md cursor-pointer transition-all ${
+                          className={`p-3.5 rounded-xl cursor-pointer transition-all ${
                             formData.stage === stage
-                              ? "border-[#FFD500] bg-yellow-50"
-                              : "border-gray-200 hover:border-gray-300"
+                              ? "border-2 border-[#0A0A0A] bg-[#FAF9F6] text-[#0A0A0A] shadow-xs font-semibold"
+                              : "border border-[#E7E5E1] hover:border-[#D8D5CF] bg-white text-[#4B4B4B]"
                           }`}
                         >
-                          <span className="text-sm font-medium">{stage}</span>
+                          <span className="text-sm font-semibold">{stage}</span>
                         </div>
                       ))}
                     </div>
@@ -335,59 +335,58 @@ export default function OnboardingPage() {
                   {relevantPrograms.map((program) => (
                     <Card
                       key={program.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer border-2 hover:border-[#FFD500] active:border-[#FFD500]"
+                      className="hover:shadow-md transition-all cursor-pointer border border-[#E7E5E1] hover:border-[#0A0A0A] rounded-2xl bg-white"
                       onClick={() => handleProgramClick(program.id)}
                     >
-                      <CardHeader className="pb-2 sm:pb-3">
+                      <CardHeader className="p-4 sm:p-5 pb-2 sm:pb-3">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <CardTitle className="text-base sm:text-lg leading-tight break-words">
+                          <CardTitle className="text-base sm:text-lg font-bold text-[#0A0A0A] leading-tight break-words">
                             {program.title}
                           </CardTitle>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 text-[#6B6B6B] hover:text-[#0A0A0A]"
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Handle save/favorite
                             }}
                           >
                             <Heart className="h-4 w-4" />
                           </Button>
                         </div>
-                        <CardDescription className="text-xs sm:text-sm min-h-[2.5rem] sm:min-h-[3rem] line-clamp-2">
+                        <CardDescription className="text-xs sm:text-sm text-[#6B6B6B] min-h-[2.5rem] sm:min-h-[3rem] line-clamp-2">
                           {program.outcome}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                      <CardContent className="p-4 sm:p-5 pt-0 space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-[#6B6B6B]">
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
                             {program.duration}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <div className="flex items-center gap-1 font-semibold text-[#0A0A0A]">
+                            <Star className="h-4 w-4 fill-[#F5C400] text-[#F5C400]" />
                             {program.rating}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-[#E7E5E1] text-[#4B4B4B]">
                             {program.stage}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-[#E7E5E1] text-[#4B4B4B]">
                             {program.format}
                           </Badge>
                         </div>
-                        <div className="pt-2 border-t">
-                          <p className="text-xs text-gray-500">
+                        <div className="pt-2 border-t border-[#E7E5E1]">
+                          <p className="text-xs font-bold text-[#0A0A0A]">
                             By {program.facilitator.name}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-[#6B6B6B]">
                             {program.facilitator.credibility}
                           </p>
                         </div>
                         <Button
-                          className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] mt-3"
+                          className="w-full bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] mt-3 h-11 transition-all"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleProgramClick(program.id);
@@ -401,10 +400,10 @@ export default function OnboardingPage() {
                   ))}
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t border-[#E7E5E1]">
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full rounded-xl border-[#E7E5E1] text-[#0A0A0A] hover:bg-[#FAF9F6] h-11 font-semibold"
                     onClick={() => router.push("/programs")}
                   >
                     Explore All Programs
@@ -420,52 +419,52 @@ export default function OnboardingPage() {
               
               return (
                 <div className="space-y-4 sm:space-y-6">
-                  <Card className="border-2 border-[#FFD500]">
-                    <CardHeader className="pb-2 sm:pb-6">
-                      <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-4">
-                        <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-[#FFD500] flex-shrink-0 mt-0.5 sm:mt-1" />
+                  <Card className="border border-[#E7E5E1] rounded-2xl bg-[#FAF9F6] shadow-xs overflow-hidden">
+                    <CardHeader className="p-5 sm:p-6 pb-2 sm:pb-4">
+                      <div className="flex items-start gap-3 mb-2">
+                        <BookOpen className="h-6 w-6 text-[#0A0A0A] flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg sm:text-xl mb-1 sm:mb-2 leading-tight break-words">{program.title}</CardTitle>
-                          <CardDescription className="text-sm sm:text-base mb-0 sm:mb-4 line-clamp-3">
+                          <CardTitle className="text-lg sm:text-xl font-bold text-[#0A0A0A] mb-1 leading-tight break-words">{program.title}</CardTitle>
+                          <CardDescription className="text-sm text-[#6B6B6B] line-clamp-3">
                             {program.outcome}
                           </CardDescription>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3 sm:space-y-4">
+                    <CardContent className="p-5 sm:p-6 pt-0 space-y-3 sm:space-y-4">
                       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{program.duration}</span>
+                        <div className="flex items-center gap-2 text-sm text-[#4B4B4B]">
+                          <Clock className="h-4 w-4 text-[#6B6B6B]" />
+                          <span>{program.duration}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-gray-700">{program.rating} ({program.reviews} reviews)</span>
+                        <div className="flex items-center gap-2 text-sm text-[#0A0A0A] font-semibold">
+                          <Star className="h-4 w-4 fill-[#F5C400] text-[#F5C400]" />
+                          <span>{program.rating} ({program.reviews} reviews)</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs border-[#E7E5E1] text-[#4B4B4B]">
                           {program.stage}
                         </Badge>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs border-[#E7E5E1] text-[#4B4B4B]">
                           {program.format}
                         </Badge>
                       </div>
                       
-                      <div className="pt-3 border-t">
-                        <p className="text-sm font-medium text-gray-700 mb-1">
+                      <div className="pt-3 border-t border-[#E7E5E1]">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#9B9B9B] mb-1">
                           Facilitator
                         </p>
-                        <p className="text-sm text-gray-600">{program.facilitator.name}</p>
-                        <p className="text-xs text-gray-500">{program.facilitator.credibility}</p>
+                        <p className="text-sm font-bold text-[#0A0A0A]">{program.facilitator.name}</p>
+                        <p className="text-xs text-[#6B6B6B]">{program.facilitator.credibility}</p>
                       </div>
                     </CardContent>
                   </Card>
 
                   <div className="space-y-2 sm:space-y-3">
                     <Button
-                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000] h-12 sm:h-14 text-sm sm:text-base"
+                      className="w-full bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] h-12 sm:h-14 text-sm sm:text-base shadow-xs"
                       onClick={() => {
                         setNeedsAccount(true);
                         nextStep();
@@ -474,7 +473,7 @@ export default function OnboardingPage() {
                       Create Account to Continue
                       <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2 shrink-0" />
                     </Button>
-                    <p className="text-xs text-center text-gray-500">
+                    <p className="text-xs text-center text-[#6B6B6B]">
                       Create an account to view full program details and enroll
                     </p>
                   </div>
@@ -486,47 +485,50 @@ export default function OnboardingPage() {
             {step === 4 && (
               <div className="space-y-4 sm:space-y-6">
                 <div className="text-center mb-4 sm:mb-6">
-                  <p className="text-gray-600 text-sm sm:text-base">
+                  <p className="text-[#6B6B6B] text-sm sm:text-base">
                     Create an account to save your progress
                   </p>
                 </div>
 
-                <form onSubmit={handleCreateAccount} className="space-y-3 sm:space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => updateFormData("name", e.target.value)}
-                        placeholder="Enter your full name"
-                        required
-                      />
-                    </div>
+                <form onSubmit={handleCreateAccount} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-[11px] font-bold text-[#4B4B4B] uppercase tracking-wider">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => updateFormData("name", e.target.value)}
+                      placeholder="Enter your full name"
+                      className="h-12 rounded-xl text-sm border-[#D8D5CF] focus-visible:ring-[#0A0A0A] bg-white"
+                      required
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-[11px] font-bold text-[#4B4B4B] uppercase tracking-wider">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
                       onChange={(e) => updateFormData("email", e.target.value)}
-                        placeholder="Enter your email address"
-                        required
-                      />
-                    </div>
+                      placeholder="Enter your email address"
+                      className="h-12 rounded-xl text-sm border-[#D8D5CF] focus-visible:ring-[#0A0A0A] bg-white"
+                      required
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-[11px] font-bold text-[#4B4B4B] uppercase tracking-wider">Password</Label>
                     <Input
                       id="password"
                       type="password"
                       value={formData.password}
                       onChange={(e) => updateFormData("password", e.target.value)}
                       placeholder="Create a password (min. 8 characters)"
+                      className="h-12 rounded-xl text-sm border-[#D8D5CF] focus-visible:ring-[#0A0A0A] bg-white"
                       required
                       minLength={8}
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[#9B9B9B]">
                       Must be at least 8 characters long
                     </p>
                   </div>
@@ -534,11 +536,11 @@ export default function OnboardingPage() {
                   <div className="flex flex-col gap-3 pt-4">
                     <Button
                       type="submit"
-                      className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      className="w-full bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] h-12 shadow-xs"
                     >
                       Create Account & Continue
                     </Button>
-                    </div>
+                  </div>
                 </form>
               </div>
             )}
@@ -546,77 +548,65 @@ export default function OnboardingPage() {
             {/* Step 5: Clear Next Step */}
             {step === 5 && (
               <div className="space-y-4 sm:space-y-6 text-center">
-                <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-green-500 mb-2 sm:mb-4" />
-                <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">You're all set!</h2>
-                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                  Here's what you can do next
+                <CheckCircle2 className="h-14 w-14 mx-auto text-[#5B7B6E] mb-2 sm:mb-4" />
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#0A0A0A] mb-1">You&apos;re all set!</h2>
+                <p className="text-[#6B6B6B] text-sm sm:text-base mb-4 sm:mb-6">
+                  Here&apos;s what you can do next
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2 sm:pb-6">
-                      <CardTitle className="text-base sm:text-lg">Join Next Session</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Enroll in the program you're interested in
-                      </p>
-                      <Button
-                        className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                        onClick={() => router.push(`/programs/${selectedProgram}`)}
-                      >
-                        View Program
-                      </Button>
-                    </CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-left">
+                  <Card className="border border-[#E7E5E1] rounded-2xl bg-white shadow-xs p-5">
+                    <h3 className="text-base font-bold text-[#0A0A0A] mb-1">Join Next Session</h3>
+                    <p className="text-xs text-[#6B6B6B] mb-4">
+                      Enroll in the program you&apos;re interested in
+                    </p>
+                    <Button
+                      className="w-full bg-[#0A0A0A] text-white font-bold rounded-xl hover:bg-[#2B2B2B] h-11 text-xs"
+                      onClick={() => router.push(`/programs/${selectedProgram}`)}
+                    >
+                      View Program
+                    </Button>
                   </Card>
 
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2 sm:pb-6">
-                      <CardTitle className="text-base sm:text-lg">Explore Similar Programs</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Discover more programs matching your goals
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => router.push("/programs")}
-                      >
-                        Browse Programs
-                      </Button>
-                    </CardContent>
+                  <Card className="border border-[#E7E5E1] rounded-2xl bg-white shadow-xs p-5">
+                    <h3 className="text-base font-bold text-[#0A0A0A] mb-1">Explore Programs</h3>
+                    <p className="text-xs text-[#6B6B6B] mb-4">
+                      Discover more programs matching your goals
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#E7E5E1] rounded-xl hover:bg-[#FAF9F6] text-[#0A0A0A] font-bold h-11 text-xs"
+                      onClick={() => router.push("/programs")}
+                    >
+                      Browse Programs
+                    </Button>
                   </Card>
 
-                  <Card className="hover:shadow-md transition-shadow border-2 border-[#FFD500] bg-yellow-50/50">
-                    <CardHeader className="pb-2 sm:pb-6">
-                      <CardTitle className="text-base sm:text-lg">Improve Recommendations</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Add more details to get better matches
-                      </p>
-                      <Button
-                        className="w-full bg-[#FFD500] text-black hover:bg-[#e6c000]"
-                        onClick={() => router.push("/mentee/dashboard/profile")}
-                      >
-                        Complete Profile
-                      </Button>
-                    </CardContent>
+                  <Card className="border border-[#E7E5E1] rounded-2xl bg-[#FAF9F6] shadow-xs p-5">
+                    <h3 className="text-base font-bold text-[#0A0A0A] mb-1">Improve Matches</h3>
+                    <p className="text-xs text-[#6B6B6B] mb-4">
+                      Add more details to get better recommendations
+                    </p>
+                    <Button
+                      className="w-full bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] h-11 text-xs"
+                      onClick={() => router.push("/mentee/dashboard/profile")}
+                    >
+                      Complete Profile
+                    </Button>
                   </Card>
-                  </div>
+                </div>
 
-                <div className="pt-4 sm:pt-6 border-t">
+                <div className="pt-4 sm:pt-6 border-t border-[#E7E5E1]">
                   <div className="flex flex-col-reverse sm:flex-row gap-3">
                     <Button
                       variant="outline"
-                      className="w-full sm:w-[20%] flex items-center justify-center gap-2 shrink-0"
+                      className="w-full sm:w-[25%] rounded-xl border-[#E7E5E1] text-[#0A0A0A] hover:bg-[#FAF9F6] h-12 font-semibold flex items-center justify-center gap-2 shrink-0"
                       onClick={() => setStep(4)}
                     >
                       <ArrowLeft className="h-4 w-4" /> Back
                     </Button>
                     <Button
-                      className="w-full sm:flex-1 bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                      className="w-full sm:flex-1 bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] h-12 shadow-xs"
                       onClick={() => router.push("/mentee/dashboard")}
                     >
                       Go to Dashboard
@@ -628,53 +618,51 @@ export default function OnboardingPage() {
 
             {/* Navigation Buttons */}
             {step < 5 && (
-            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
-              {step > 1 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    // If on step 4 and came from skip, go back to step 2
-                    if (step === 4 && !selectedProgram) {
-                      setStep(2);
-                    } else {
-                      prevStep();
-                    }
-                  }}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-              ) : (
-                <div className="hidden sm:block" />
-              )}
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8">
+                {step > 1 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (step === 4 && !selectedProgram) {
+                        setStep(2);
+                      } else {
+                        prevStep();
+                      }
+                    }}
+                    className="w-full sm:w-auto rounded-xl border-[#E7E5E1] text-[#0A0A0A] hover:bg-[#FAF9F6] h-12 px-5 font-semibold flex items-center justify-center gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </Button>
+                ) : (
+                  <div className="hidden sm:block" />
+                )}
 
                 {step === 1 && (
-                <Button
-                  type="button"
-                  onClick={nextStep}
+                  <Button
+                    type="button"
+                    onClick={nextStep}
                     disabled={formData.goals.length === 0 || !formData.timeframe || formData.area.length === 0 || !formData.stage}
-                  className="w-full sm:w-auto bg-[#FFD500] text-black hover:bg-[#e6c000] flex items-center justify-center gap-2"
-                >
+                    className="w-full sm:w-auto bg-[#F5C400] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#E5B700] h-12 px-6 shadow-xs flex items-center justify-center gap-2"
+                  >
                     See Programs <ArrowRight className="h-4 w-4" />
-                </Button>
+                  </Button>
                 )}
 
                 {step === 2 && (
-                <Button
-                  type="button"
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={() => {
-                      // Skip to account creation step
                       setNeedsAccount(true);
                       setStep(4);
                     }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2"
-                >
+                    className="w-full sm:w-auto rounded-xl border-[#E7E5E1] text-[#0A0A0A] hover:bg-[#FAF9F6] h-12 px-5 font-semibold flex items-center justify-center gap-2"
+                  >
                     Skip for now
-                </Button>
-              )}
-            </div>
+                  </Button>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

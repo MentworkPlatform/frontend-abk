@@ -415,16 +415,20 @@ export default function CreateProgram() {
               ].map(({ step, label }, i) => (
                 <div key={step} className="flex items-center gap-2 sm:flex-1 sm:gap-1.5">
                   <div
-                    className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-xs font-medium sm:h-8 sm:w-8 sm:text-sm ${
-                      currentStep >= step ? "bg-[#FFD500] text-black" : "bg-gray-200 text-gray-600"
+                    className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold sm:h-8 sm:w-8 sm:text-sm ${
+                      currentStep > step
+                        ? "bg-[#5B7B6E] text-white"
+                        : currentStep === step
+                        ? "bg-[#0A0A0A] text-white"
+                        : "bg-[#E7E5E1] text-[#2B2B2B]/60"
                     }`}
                   >
                     {currentStep > step ? <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : step}
                   </div>
-                  <span className={`text-xs sm:text-sm truncate ${currentStep >= step ? "font-medium" : "text-muted-foreground"}`}>
+                  <span className={`text-xs sm:text-sm truncate ${currentStep >= step ? "font-bold text-[#0A0A0A]" : "text-[#2B2B2B]/50 font-medium"}`}>
                     {label}
                   </span>
-                  {i < 3 && <div className="hidden flex-1 h-px bg-gray-200 mx-1 sm:block min-w-[8px]" />}
+                  {i < 3 && <div className="hidden flex-1 h-px bg-[#E7E5E1] mx-1 sm:block min-w-[8px]" />}
                 </div>
               ))}
             </div>
@@ -693,7 +697,7 @@ function Step1BasicInfo({
       )}
 
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
           Next: Who is this for?
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -878,11 +882,11 @@ function Step2WhoIsThisFor({
       )}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10 rounded-xl border-[#E7E5E1] font-semibold">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
           Next: Build Curriculum
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -944,7 +948,7 @@ function Step2Curriculum({
                 Choose a template to get started or build from scratch.
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                <Button onClick={onShowTemplateSelector} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+                <Button onClick={onShowTemplateSelector} className="w-full sm:w-auto min-h-10 bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Browse Templates
                 </Button>
@@ -983,11 +987,11 @@ function Step2Curriculum({
       </Card>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10 rounded-xl border-[#E7E5E1] font-semibold">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+        <Button onClick={onNext} disabled={!isValid} className="w-full sm:w-auto min-h-10 bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
           Next: Assign Mentors
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -1128,8 +1132,8 @@ function Step3AssignMentors({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Assigned Mentors</CardTitle>
-            <Button onClick={onShowMentorBrowser} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+            <CardTitle className="text-lg font-bold text-[#0A0A0A]">Assigned Mentors</CardTitle>
+            <Button onClick={onShowMentorBrowser} className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
               <Search className="h-4 w-4 mr-2" />
               Browse Mentors
             </Button>
@@ -1137,13 +1141,13 @@ function Step3AssignMentors({
         </CardHeader>
         <CardContent>
           {mentorAssignments.length === 0 ? (
-            <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground mb-2">No mentors assigned yet</p>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="text-center py-8 border-2 border-dashed border-[#E7E5E1] rounded-2xl bg-[#FAF9F6]">
+              <Users className="h-8 w-8 text-[#2B2B2B]/40 mx-auto mb-2" />
+              <p className="font-bold text-[#0A0A0A] mb-1">No mentors assigned yet</p>
+              <p className="text-sm text-[#2B2B2B]/60 mb-4">
                 Browse our platform's expert mentors and assign them to specific topics
               </p>
-              <Button onClick={onShowMentorBrowser} className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
+              <Button onClick={onShowMentorBrowser} className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
                 <Search className="h-4 w-4 mr-2" />
                 Browse Platform Mentors
               </Button>
@@ -1261,13 +1265,13 @@ function Step3AssignMentors({
       </Card>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
-        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10">
+        <Button variant="outline" onClick={onPrev} className="w-full sm:w-auto min-h-10 rounded-xl border-[#E7E5E1] font-semibold">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
         <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:space-x-2">
-          <Button variant="outline" className="w-full sm:w-auto min-h-10">Save as Draft</Button>
-          <Button onClick={onSubmit} disabled={isLoading} className="w-full sm:w-auto min-h-10 bg-[#FFD500] text-black hover:bg-[#e6c000]">
+          <Button variant="outline" className="w-full sm:w-auto min-h-10 rounded-xl border-[#E7E5E1] font-semibold">Save as Draft</Button>
+          <Button onClick={onSubmit} disabled={isLoading} className="w-full sm:w-auto min-h-10 bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs">
             {isLoading ? "Creating Program..." : "Create Program"}
             {!isLoading && <Check className="h-4 w-4 ml-2" />}
           </Button>
@@ -1475,7 +1479,7 @@ function MentorBrowserModal({
                               size="sm"
                               onClick={() => onSelectMentor(mentor)}
                               disabled={isAlreadyAssigned}
-                              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+                              className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs"
                             >
                               {isAlreadyAssigned ? "Already Assigned" : "Assign Topics"}
                             </Button>
@@ -1709,13 +1713,13 @@ function MentorAssignmentModal({
 
           {/* Actions */}
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="rounded-xl border-[#E7E5E1] font-semibold">
               Cancel
             </Button>
             <Button
               onClick={handleAssign}
               disabled={selectedTopics.length === 0}
-              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs"
             >
               Assign Topics & Send Invitation
             </Button>

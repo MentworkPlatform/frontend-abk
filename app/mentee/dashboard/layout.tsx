@@ -68,10 +68,10 @@ export default function DashboardLayout({
   );
 
   const customMobileHeader = (
-    <div className="fixed top-0 left-0 right-0 z-30 w-full border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 md:hidden lg:hidden">
-      <div className="flex items-center justify-between px-4 py-2.5">
-        <Link href="/mentee/dashboard">
-          <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8" />
+    <div className="fixed top-0 left-0 right-0 z-30 w-full border-b border-[#E7E5E1] bg-white/85 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 md:hidden lg:hidden">
+      <div className="flex items-center justify-between px-4 py-3">
+        <Link href="/mentee/dashboard" aria-label="Mentwork home">
+          <img src="/images/mentwork-logo.png" alt="Mentwork" className="h-8 w-auto" />
         </Link>
         <MobileNav
           userType="mentee"
@@ -84,7 +84,7 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-[#FAF9F6]">
       <DashboardSidebar
         navItems={navItems}
         logoContent={logoContent}
@@ -99,8 +99,8 @@ export default function DashboardLayout({
       />
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 overflow-hidden h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] lg:h-screen bg-gray-50">
-        <div className="w-full min-w-0 h-full overflow-y-auto px-3 py-4 pt-16 sm:px-6 sm:py-6 md:p-0">{children}</div>
+      <main className="flex-1 min-w-0 overflow-hidden h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] lg:h-screen bg-[#FAF9F6]">
+        <div className="w-full min-w-0 h-full overflow-y-auto px-4 py-4 pt-16 sm:px-6 sm:py-6 md:p-0">{children}</div>
       </main>
     </div>
   );

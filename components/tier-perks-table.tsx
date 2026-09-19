@@ -115,7 +115,7 @@ export function TierPerksTable({ currentTier }: TierPerksTableProps) {
             <TableRow key={perk.name}>
               <TableCell className="font-medium">{perk.name}</TableCell>
               {tiers.map((tier) => {
-                const value = perk.values[tier]
+                const value = (perk.values as any)[tier]
                 const isAvailable = typeof value === "boolean" ? value : true
                 const tierIndex = tiers.indexOf(tier)
                 const isCurrentOrPast = tierIndex <= currentTierIndex

@@ -37,7 +37,7 @@ export function ReferralSection({
     })
   }
   
-  const handleSendInvite = (e) => {
+  const handleSendInvite = (e: React.FormEvent) => {
     e.preventDefault()
     // In a real app, you would send the invitation email here
     toast({
@@ -131,5 +131,25 @@ export function ReferralSection({
         <div className="pt-2">
           <h3 className="text-lg font-medium mb-4">Your Referral Stats</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-\
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold">{referralStats.invitesSent}</div>
+              <div className="text-xs text-muted-foreground">Invites Sent</div>
+            </div>
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold">{referralStats.accepted}</div>
+              <div className="text-xs text-muted-foreground">Accepted</div>
+            </div>
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold">{referralStats.pending}</div>
+              <div className="text-xs text-muted-foreground">Pending</div>
+            </div>
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold">${referralStats.earnings}</div>
+              <div className="text-xs text-muted-foreground">Earnings</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

@@ -8,34 +8,40 @@ import {
   Plus,
   Search,
   Filter,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  Calendar,
   DollarSign,
-  CheckCircle,
-  XCircle,
-  Clock,
   User,
   Star,
-  MessageSquare,
+  CheckCircle,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+interface ProgramMentor {
+  id: string
+  name: string
+  email: string
+  phone: string
+  avatar: string
+  expertise: string[]
+  rating: number
+  totalSessions: number
+  status: "accepted" | "pending" | "rejected"
+  appliedDate: string
+  acceptedDate?: string
+  rejectedDate?: string
+  rejectionReason?: string
+  assignedSessions: number
+  completedSessions: number
+  upcomingSessions: number
+  hourlyRate: number
+  totalEarnings: number
+  lastPaidDate?: string
+  pendingPayment: number
+}
 
 export default function ProgramMentorsPage() {
   const params = useParams()
@@ -45,20 +51,16 @@ export default function ProgramMentorsPage() {
     id: programId,
     title: "Digital Marketing Bootcamp",
     status: "active",
-    startDate: "2024-02-15",
-    endDate: "2024-05-15",
-    totalSessions: 12,
-    completedSessions: 8,
   })
 
-  const [mentors, setMentors] = useState([
+  const [mentors, setMentors] = useState<ProgramMentor[]>([
     {
       id: "1",
-      name: "Sarah Johnson",
-      email: "sarah@example.com",
-      phone: "+1 (555) 123-4567",
+      name: "Tunde Adeyemi",
+      email: "tunde@example.com",
+      phone: "+234 801 234 5678",
       avatar: "/placeholder.svg?height=40&width=40",
-      expertise: ["Digital Marketing", "SEO", "Content Strategy"],
+      expertise: ["SEO", "Content Strategy"],
       rating: 4.9,
       totalSessions: 45,
       status: "accepted",
@@ -70,7 +72,7 @@ export default function ProgramMentorsPage() {
       hourlyRate: 150,
       totalEarnings: 450,
       lastPaidDate: "2024-01-20",
-      pendingPayment: 150,
+      pendingPayment: 22000,
     },
     {
       id: "2",
@@ -78,7 +80,7 @@ export default function ProgramMentorsPage() {
       email: "michael@example.com",
       phone: "+1 (555) 234-5678",
       avatar: "/placeholder.svg?height=40&width=40",
-      expertise: ["Social Media", "Analytics", "Paid Advertising"],
+      expertise: ["Social Media", "Paid Ads"],
       rating: 4.8,
       totalSessions: 32,
       status: "accepted",
@@ -90,7 +92,7 @@ export default function ProgramMentorsPage() {
       hourlyRate: 120,
       totalEarnings: 480,
       lastPaidDate: "2024-01-18",
-      pendingPayment: 120,
+      pendingPayment: 20000,
     },
     {
       id: "3",
@@ -98,35 +100,15 @@ export default function ProgramMentorsPage() {
       email: "emily@example.com",
       phone: "+1 (555) 345-6789",
       avatar: "/placeholder.svg?height=40&width=40",
-      expertise: ["Email Marketing", "Automation", "CRM"],
+      expertise: ["Influencer Marketing"],
       rating: 4.7,
-      totalSessions: 28,
+      totalSessions: 18,
       status: "pending",
       appliedDate: "2024-01-15",
       assignedSessions: 0,
       completedSessions: 0,
       upcomingSessions: 0,
-      hourlyRate: 130,
-      totalEarnings: 0,
-      pendingPayment: 0,
-    },
-    {
-      id: "4",
-      name: "David Wilson",
-      email: "david@example.com",
-      phone: "+1 (555) 456-7890",
-      avatar: "/placeholder.svg?height=40&width=40",
-      expertise: ["E-commerce", "Conversion Optimization"],
-      rating: 4.6,
-      totalSessions: 22,
-      status: "rejected",
-      appliedDate: "2024-01-12",
-      rejectedDate: "2024-01-14",
-      rejectionReason: "Schedule conflict with existing commitments",
-      assignedSessions: 0,
-      completedSessions: 0,
-      upcomingSessions: 0,
-      hourlyRate: 140,
+      hourlyRate: 100,
       totalEarnings: 0,
       pendingPayment: 0,
     },
@@ -135,29 +117,33 @@ export default function ProgramMentorsPage() {
   const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
 
+  const totalOwed = mentors
+    .filter((m) => m.status === "accepted")
+    .reduce((sum, m) => sum + m.pendingPayment, 0)
+
   const handleAcceptMentor = (mentorId: string) => {
-    setMentors(
-      mentors.map((mentor) =>
+    setMentors((prev) =>
+      prev.map((mentor) =>
         mentor.id === mentorId
-          ? { ...mentor, status: "accepted", acceptedDate: new Date().toISOString().split("T")[0] }
+          ? { ...mentor, status: "accepted" as const, acceptedDate: new Date().toISOString().split("T")[0] }
           : mentor,
       ),
     )
   }
 
   const handleRejectMentor = (mentorId: string) => {
-    setMentors(
-      mentors.map((mentor) =>
+    setMentors((prev) =>
+      prev.map((mentor) =>
         mentor.id === mentorId
-          ? { ...mentor, status: "rejected", rejectedDate: new Date().toISOString().split("T")[0] }
+          ? { ...mentor, status: "rejected" as const, rejectedDate: new Date().toISOString().split("T")[0] }
           : mentor,
       ),
     )
   }
 
   const handleProcessPayment = (mentorId: string) => {
-    setMentors(
-      mentors.map((mentor) =>
+    setMentors((prev) =>
+      prev.map((mentor) =>
         mentor.id === mentorId
           ? {
               ...mentor,
@@ -168,7 +154,6 @@ export default function ProgramMentorsPage() {
           : mentor,
       ),
     )
-    alert("Payment processed successfully!")
   }
 
   const filteredMentors = mentors.filter((mentor) => {
@@ -180,334 +165,145 @@ export default function ProgramMentorsPage() {
     return matchesFilter && matchesSearch
   })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "accepted":
-        return "default"
-      case "pending":
-        return "secondary"
-      case "rejected":
-        return "destructive"
-      default:
-        return "outline"
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "accepted":
-        return <CheckCircle className="h-4 w-4" />
-      case "pending":
-        return <Clock className="h-4 w-4" />
-      case "rejected":
-        return <XCircle className="h-4 w-4" />
-      default:
-        return <User className="h-4 w-4" />
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-white text-[#0A0A0A] font-sans pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={`/trainer/dashboard/programs/${programId}`}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Program
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold">Program Mentors</h1>
-                <p className="text-gray-500">{program.title}</p>
-              </div>
-            </div>
-            <Button className="bg-[#FFD500] text-black hover:bg-[#e6c000]">
-              <Plus className="h-4 w-4 mr-2" />
-              Invite Mentors
+      <header className="sticky top-0 z-50 border-b border-[#E7E5E1] bg-white/95 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild className="text-xs font-semibold text-[#6B6B6B] hover:text-[#0A0A0A]">
+              <Link href={`/trainer/dashboard/programs/${programId}`}>
+                <ArrowLeft className="h-4 w-4 mr-1.5" />
+                Back to Programme
+              </Link>
             </Button>
+          </div>
+          <div>
+            <span className="text-xs font-black text-[#0A0A0A]">mentwork</span>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Total Mentors</p>
-                  <p className="text-2xl font-bold">{mentors.length}</p>
-                </div>
-                <User className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+        {/* Title */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#0A0A0A]">
+              Mentors &amp; payments
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6B6B6B] mt-1">{program.title}</p>
+          </div>
+        </div>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Accepted</p>
-                  <p className="text-2xl font-bold">{mentors.filter((m) => m.status === "accepted").length}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Pending</p>
-                  <p className="text-2xl font-bold">{mentors.filter((m) => m.status === "pending").length}</p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Total Payments</p>
-                  <p className="text-2xl font-bold">
-                    ${mentors.reduce((sum, mentor) => sum + mentor.totalEarnings, 0).toLocaleString()}
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Owed this cycle banner (Gallery style) */}
+        <div className="rounded-2xl bg-[#F2F1EE] border border-[#E7E5E1] p-5 flex items-center justify-between shadow-sm">
+          <div>
+            <p className="text-xs text-[#6B6B6B] font-medium">Owed this cycle</p>
+            <p className="text-2xl font-black text-[#0A0A0A] mt-0.5">₦{totalOwed.toLocaleString()}</p>
+          </div>
+          <Badge variant="yellow" className="text-xs px-3 py-1">
+            {mentors.filter((m) => m.status === "accepted").length} Active Mentors
+          </Badge>
         </div>
 
         {/* Filters and Search */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search mentors..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-[#9B9B9B] h-4 w-4" />
+            <Input
+              placeholder="Search mentors by name or skill..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-11 rounded-xl text-xs sm:text-sm"
+            />
+          </div>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-full sm:w-40 h-11 rounded-xl text-xs sm:text-sm font-semibold">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="accepted">Accepted</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Mentors List */}
-        <Tabs defaultValue="list" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="list">List View</TabsTrigger>
-            <TabsTrigger value="payments">Payment Management</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="list">
-            <div className="space-y-4">
-              {filteredMentors.map((mentor) => (
-                <Card key={mentor.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
-                          <AvatarFallback>
-                            {mentor.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-2">
-                          <div>
-                            <h3 className="text-lg font-medium">{mentor.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <Mail className="h-4 w-4" />
-                                {mentor.email}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Phone className="h-4 w-4" />
-                                {mentor.phone}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-500" />
-                              <span className="text-sm font-medium">{mentor.rating}</span>
-                            </div>
-                            <span className="text-sm text-gray-500">•</span>
-                            <span className="text-sm text-gray-500">{mentor.totalSessions} total sessions</span>
-                            <span className="text-sm text-gray-500">•</span>
-                            <span className="text-sm text-gray-500">${mentor.hourlyRate}/hour</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {mentor.expertise.map((skill) => (
-                              <Badge key={skill} variant="secondary" className="text-xs">
-                                {skill}
-                              </Badge>
-                            ))}
-                          </div>
-                          {mentor.status === "accepted" && (
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <span className="text-gray-500">Assigned:</span>
-                                <span className="ml-1 font-medium">{mentor.assignedSessions} sessions</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500">Completed:</span>
-                                <span className="ml-1 font-medium">{mentor.completedSessions} sessions</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500">Upcoming:</span>
-                                <span className="ml-1 font-medium">{mentor.upcomingSessions} sessions</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={getStatusColor(mentor.status)} className="flex items-center gap-1">
-                          {getStatusIcon(mentor.status)}
-                          {mentor.status}
-                        </Badge>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <MessageSquare className="h-4 w-4 mr-2" />
-                              Send Message
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Calendar className="h-4 w-4 mr-2" />
-                              Schedule Session
-                            </DropdownMenuItem>
-                            {mentor.status === "pending" && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleAcceptMentor(mentor.id)}>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Accept Application
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRejectMentor(mentor.id)}>
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Reject Application
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {mentor.status === "accepted" && mentor.pendingPayment > 0 && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleProcessPayment(mentor.id)}>
-                                  <DollarSign className="h-4 w-4 mr-2" />
-                                  Process Payment (${mentor.pendingPayment})
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Management</CardTitle>
-                <CardDescription>Track and process mentor payments</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mentors
-                    .filter((m) => m.status === "accepted")
-                    .map((mentor) => (
-                      <div key={mentor.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
-                            <AvatarFallback>
-                              {mentor.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-medium">{mentor.name}</h4>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>Rate: ${mentor.hourlyRate}/hour</span>
-                              <span>•</span>
-                              <span>Completed: {mentor.completedSessions} sessions</span>
-                              {mentor.lastPaidDate && (
-                                <>
-                                  <span>•</span>
-                                  <span>Last paid: {new Date(mentor.lastPaidDate).toLocaleDateString()}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">Total Earnings</p>
-                            <p className="font-medium">${mentor.totalEarnings}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">Pending Payment</p>
-                            <p className="font-medium text-green-600">${mentor.pendingPayment}</p>
-                          </div>
-                          {mentor.pendingPayment > 0 && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleProcessPayment(mentor.id)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <DollarSign className="h-4 w-4 mr-2" />
-                              Pay ${mentor.pendingPayment}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+        <div className="space-y-4">
+          {filteredMentors.map((mentor) => (
+            <div
+              key={mentor.id}
+              className="rounded-2xl border border-[#E7E5E1] bg-white p-5 shadow-sm hover:border-[#D8D5CF] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            >
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[#2B2B2B] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  {mentor.name.slice(0, 2).toUpperCase()}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-extrabold text-[#0A0A0A]">{mentor.name}</h3>
+                    {mentor.status === "accepted" && <Badge variant="sage">Accepted</Badge>}
+                    {mentor.status === "pending" && <Badge variant="slate">Pending</Badge>}
+                    {mentor.status === "rejected" && <Badge variant="rust">Rejected</Badge>}
+                  </div>
+                  <p className="text-xs text-[#6B6B6B] mt-0.5">{mentor.email}</p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {mentor.expertise.map((exp) => (
+                      <span key={exp} className="text-[10px] bg-[#F2F1EE] text-[#0A0A0A] px-2 py-0.5 rounded-full font-medium">
+                        {exp}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Side */}
+              <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-[#E7E5E1]">
+                {mentor.status === "accepted" ? (
+                  <>
+                    <span className="text-xs font-bold text-[#6B6B6B]">
+                      ₦{mentor.pendingPayment.toLocaleString()} owed
+                    </span>
+                    {mentor.pendingPayment > 0 ? (
+                      <Button
+                        onClick={() => handleProcessPayment(mentor.id)}
+                        size="sm"
+                        className="bg-[#F5C400] text-[#0A0A0A] font-bold rounded-full text-xs px-4 h-9 hover:bg-[#e0b300]"
+                      >
+                        Issue payment
+                      </Button>
+                    ) : (
+                      <Badge variant="sage-subtle" className="text-xs">Paid</Badge>
+                    )}
+                  </>
+                ) : mentor.status === "pending" ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleAcceptMentor(mentor.id)}
+                      size="sm"
+                      className="bg-[#5B7B6E] text-white font-bold rounded-xl text-xs h-9 hover:bg-[#4a6459]"
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      onClick={() => handleRejectMentor(mentor.id)}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl text-xs font-bold text-[#B0674A] border-[#E7E5E1] h-9"
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                ) : (
+                  <span className="text-xs text-[#9B9B9B]">Application Rejected</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   )
 }

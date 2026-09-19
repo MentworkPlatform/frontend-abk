@@ -16,6 +16,7 @@ import {
   Globe,
   Target,
   Share2,
+  Sparkles,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -300,134 +301,108 @@ export default function ProgramDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section - Dark Background */}
-      <section className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 text-white relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-20 w-64 h-64 bg-yellow-400 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container mx-auto px-6 py-12 relative z-10">
-          {/* Back button and category */}
-          <div className="flex items-center gap-3 mb-8">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => router.back()}
-              className="text-white hover:bg-white/10 gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <Badge className="bg-[#FFD500] text-black font-medium hover:bg-[#FFD500]">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#0A0A0A] font-sans pb-24 lg:pb-12">
+      {/* Top Breadcrumb & Navigation Bar */}
+      <div className="border-b border-[#E7E5E1] bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-[#2B2B2B] hover:text-[#0A0A0A] hover:bg-[#FAF9F6] font-semibold gap-2 rounded-xl"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to programmes
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-[#E7E5E1] text-[#0A0A0A] font-bold">
               {program.category}
             </Badge>
-          </div>
-
-          {/* Title and Description */}
-          <div className="max-w-4xl mb-8">
-            {!viewAsMentor && program.freeSessionsIncluded > 0 && (
-              <div className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full mb-4">
-                <span className="text-sm font-medium">
-                  Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing
-                </span>
-              </div>
-            )}
-            <h1 className="text-5xl font-bold mb-6 leading-tight">
-              {program.title}
-            </h1>
-            <p className="text-xl text-gray-200 leading-relaxed">
-              {program.tagline || program.description}
-            </p>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="mb-12">
-            <div className="flex flex-wrap gap-4 mb-3">
-              <Button 
-                size="lg"
-                className="bg-[#FFD500] text-black hover:bg-[#e6c000] font-semibold text-lg px-8"
-                onClick={handleEnroll}
-              >
-                {viewAsMentor ? `Express Interest • ${program.mentorCompensation}` : `Enroll Now • ₦${program.price.toLocaleString()}`}
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="border-white bg-white text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8"
-                onClick={handleShare}
-              >
-                <Share2 className="h-5 w-5 mr-2" />
-                Share
-              </Button>
-            </div>
-            {!viewAsMentor && (
-              <p className="text-gray-300 text-sm">
-                One-time payment • Lifetime access • {program.freeSessionsIncluded > 0 && 'Free trial included'}
-              </p>
-            )}
-          </div>
-
-          {/* Info Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Clock className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Duration</p>
-                <p className="text-lg font-bold text-white">{program.duration}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Target className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Level</p>
-                <p className="text-lg font-bold text-white">{program.level}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Award className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Price</p>
-                <p className="text-lg font-bold text-white">₦{program.price.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 text-center">
-                <Star className="h-8 w-8 mx-auto mb-3 text-[#FFD500]" />
-                <p className="text-xs text-gray-300 uppercase tracking-wide mb-1">Rating</p>
-                <p className="text-lg font-bold text-white">{program.rating}</p>
-              </CardContent>
-            </Card>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="border-[#E7E5E1] hover:border-[#0A0A0A] text-[#0A0A0A] font-semibold rounded-xl text-xs"
+            >
+              <Share2 className="h-3.5 w-3.5 mr-1.5" />
+              Share
+            </Button>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Main Content Section */}
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content - Left Column */}
-          <div className="lg:col-span-2 space-y-8">
+      {/* Programme Header Area */}
+      <div className="border-b border-[#E7E5E1] bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="max-w-4xl space-y-4">
+            {!viewAsMentor && program.freeSessionsIncluded > 0 && (
+              <div className="inline-flex items-center gap-2 bg-[#5B7B6E]/10 text-[#5B7B6E] px-3.5 py-1.5 rounded-full text-xs font-bold border border-[#5B7B6E]/20">
+                <Sparkles className="h-3.5 w-3.5 text-[#5B7B6E]" />
+                <span>Try {program.freeSessionsIncluded} session{program.freeSessionsIncluded > 1 ? 's' : ''} free before committing</span>
+              </div>
+            )}
 
-            {/* About This Program */}
-            <section>
-              <h2 className="text-3xl font-bold mb-6">About This Program</h2>
-              <p className="text-gray-700 text-lg leading-relaxed mb-8">{program.longDescription}</p>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0A0A0A] leading-tight">
+              {program.title}
+            </h1>
+
+            <p className="text-sm sm:text-base text-[#2B2B2B]/80 leading-relaxed max-w-3xl">
+              {program.tagline || program.description}
+            </p>
+
+            {/* Meta badges row */}
+            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-[#2B2B2B]/70 pt-2 font-medium">
+              <div className="flex items-center gap-1.5 font-bold text-[#0A0A0A]">
+                <Star className="h-4 w-4 fill-[#F5C400] text-[#F5C400]" />
+                <span>{program.rating}</span>
+                <span className="font-normal text-[#2B2B2B]/60">({program.reviews.toLocaleString()} reviews)</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-[#2B2B2B]/60" />
+                <span>{program.duration} ({program.totalHours} hours)</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1.5">
+                <Target className="h-4 w-4 text-[#2B2B2B]/60" />
+                <span>{program.level}</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-[#2B2B2B]/60" />
+                <span>{program.students.toLocaleString()} enrolled</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area - 2 Columns on Desktop */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          {/* Main Left Column (7 cols on lg, 8 on xl) */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-10">
+
+            {/* About Section */}
+            <section className="bg-white rounded-3xl border border-[#E7E5E1] p-6 sm:p-8 shadow-xs">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0A0A0A] mb-4">About This Programme</h2>
+              <p className="text-sm sm:text-base text-[#2B2B2B]/80 leading-relaxed mb-8">
+                {program.longDescription}
+              </p>
 
               {/* What You'll Learn */}
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-6">
+              <div className="border-t border-[#E7E5E1] pt-6 mb-8">
+                <h3 className="text-lg sm:text-xl font-bold text-[#0A0A0A] mb-4">
                   {viewAsMentor ? "What You'll Be Teaching" : "What You'll Learn"}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {program.learningOutcomes.map((outcome, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                      <span className="text-gray-700">{outcome}</span>
+                    <div key={index} className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-[#5B7B6E]/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle className="h-3.5 w-3.5 text-[#5B7B6E]" />
+                      </div>
+                      <span className="text-xs sm:text-sm text-[#2B2B2B]/80 font-medium leading-relaxed">{outcome}</span>
                     </div>
                   ))}
                 </div>
@@ -435,218 +410,238 @@ export default function ProgramDetailPage() {
 
               {/* Mentor Compensation (Mentor View Only) */}
               {viewAsMentor && (
-                <div className="border-t border-gray-200 pt-8">
-                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-                    <h3 className="text-xl font-bold mb-2">💰 Mentor Compensation</h3>
-                    <p className="text-3xl font-bold text-gray-900 mb-2">{program.mentorCompensation}</p>
-                    <p className="text-gray-600">
-                      {program.sessions} sessions total • Paid per session upon completion
+                <div className="border-t border-[#E7E5E1] pt-6">
+                  <div className="bg-[#FAF9F6] border-2 border-[#0A0A0A] rounded-2xl p-5">
+                    <span className="text-xs font-bold text-[#2B2B2B]/70 uppercase tracking-wider block mb-1">Mentor Compensation</span>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-[#0A0A0A] mb-1">{program.mentorCompensation}</p>
+                    <p className="text-xs text-[#2B2B2B]/70">
+                      {program.sessions} sessions total • Direct milestone compensation
                     </p>
                   </div>
                 </div>
               )}
 
               {/* Prerequisites */}
-              <div className="border-t border-gray-200 pt-8">
-                <h3 className="text-2xl font-bold mb-6">Prerequisites:</h3>
-                <div className="grid grid-cols-1 gap-3">
+              <div className="border-t border-[#E7E5E1] pt-6">
+                <h3 className="text-lg sm:text-xl font-bold text-[#0A0A0A] mb-4">Prerequisites</h3>
+                <div className="grid grid-cols-1 gap-2.5">
                   {program.prerequisites.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{item}</span>
-                </div>
+                    <div key={index} className="flex items-start gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A] mt-2 shrink-0" />
+                      <span className="text-xs sm:text-sm text-[#2B2B2B]/80">{item}</span>
+                    </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* Tabs for detailed content */}
-            <Tabs defaultValue="curriculum" className="w-full">
-              <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-                <TabsTrigger 
-                  value="curriculum"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD500] data-[state=active]:bg-transparent"
-                >
-                  Curriculum
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="reviews"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD500] data-[state=active]:bg-transparent"
-                >
-                  Reviews
-                </TabsTrigger>
-              </TabsList>
+            {/* Curriculum & Reviews Tabs */}
+            <section className="bg-white rounded-3xl border border-[#E7E5E1] p-6 sm:p-8 shadow-xs">
+              <Tabs defaultValue="curriculum" className="w-full">
+                <TabsList className="w-full justify-start border-b border-[#E7E5E1] rounded-none h-auto p-0 bg-transparent space-x-6">
+                  <TabsTrigger 
+                    value="curriculum"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:text-[#0A0A0A] pb-3 font-bold text-sm bg-transparent"
+                  >
+                    Curriculum ({program.modules} Modules)
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="reviews"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:text-[#0A0A0A] pb-3 font-bold text-sm bg-transparent"
+                  >
+                    Student Reviews ({program.reviews.toLocaleString()})
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="curriculum" className="space-y-4 mt-6">
-                <div className="mb-6">
-                  <p className="text-gray-600 text-lg">
-                    {program.modules} modules • {program.totalHours} hours total length
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                {program.curriculum.map((module, index) => (
-                    <div key={module.id} className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-bold text-lg mb-1">
-                            Module {index + 1}: {module.title}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {module.lessons} lessons • {module.duration}
-                          </p>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-gray-400">
-                          <Play className="h-5 w-5" />
-                        </Button>
-                      </div>
-                      <ul className="space-y-2 mt-4">
-                        {module.topics.map((topic, topicIndex) => (
-                          <li key={topicIndex} className="flex items-center gap-3 text-sm text-gray-700">
-                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                            <span>{topic}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                          ))}
-                        </div>
-              </TabsContent>
-
-              <TabsContent value="reviews" className="mt-6">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Star className="h-6 w-6 fill-[#FFD500] text-[#FFD500]" />
-                    <span className="font-bold text-3xl">{program.rating}</span>
+                <TabsContent value="curriculum" className="space-y-4 mt-6">
+                  <div className="mb-4">
+                    <p className="text-xs sm:text-sm text-[#2B2B2B]/70">
+                      Structured into {program.modules} modules covering {program.totalHours} total learning hours
+                    </p>
                   </div>
-                  <p className="text-gray-600">Based on {program.reviews.toLocaleString()} reviews</p>
-                </div>
 
-                <div className="space-y-6">
-                  {program.reviewList.map((review) => (
-                    <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
-                        <div className="flex items-start gap-4">
-                        <Avatar className="h-12 w-12">
+                  <div className="space-y-3">
+                    {program.curriculum.map((module, index) => (
+                      <div key={module.id} className="border border-[#E7E5E1] rounded-2xl p-5 hover:border-[#0A0A0A] transition-colors bg-[#FAF9F6]">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-sm sm:text-base text-[#0A0A0A]">
+                              Module {index + 1}: {module.title}
+                            </h4>
+                            <p className="text-xs text-[#2B2B2B]/60 mt-0.5">
+                              {module.lessons} lessons • {module.duration}
+                            </p>
+                          </div>
+                        </div>
+                        <ul className="space-y-1.5 mt-3 pt-3 border-t border-[#E7E5E1]">
+                          {module.topics.map((topic, topicIndex) => (
+                            <li key={topicIndex} className="flex items-center gap-2 text-xs text-[#2B2B2B]/80">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A]/40 shrink-0" />
+                              <span>{topic}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="reviews" className="mt-6">
+                  <div className="mb-6 flex items-center gap-4 p-4 rounded-2xl bg-[#FAF9F6] border border-[#E7E5E1]">
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-7 w-7 fill-[#F5C400] text-[#F5C400]" />
+                      <span className="font-extrabold text-3xl text-[#0A0A0A]">{program.rating}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#0A0A0A]">Overall Rating</p>
+                      <p className="text-xs text-[#2B2B2B]/60">Based on {program.reviews.toLocaleString()} student reviews</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {program.reviewList.map((review) => (
+                      <div key={review.id} className="border border-[#E7E5E1] rounded-2xl p-5 bg-white">
+                        <div className="flex items-start gap-3.5">
+                          <Avatar className="h-10 w-10 border border-[#E7E5E1]">
                             <AvatarImage src={review.avatar || "/placeholder.svg"} alt={review.student} />
-                            <AvatarFallback>
-                              {review.student
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                            <AvatarFallback className="font-bold text-xs bg-[#FAF9F6]">
+                              {review.student.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-bold">{review.student}</h4>
-                              <span className="text-sm text-gray-500">{review.date}</span>
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-bold text-sm text-[#0A0A0A]">{review.student}</h4>
+                              <span className="text-xs text-[#2B2B2B]/50">{review.date}</span>
                             </div>
-                          <div className="flex items-center gap-1 mb-3">
+                            <div className="flex items-center gap-1 mb-2">
                               {[...Array(5)].map((_, i) => (
                                 <Star
                                   key={i}
-                                  className={`h-4 w-4 ${
-                                    i < review.rating ? "fill-[#FFD500] text-[#FFD500]" : "text-gray-300"
+                                  className={`h-3 w-3 ${
+                                    i < review.rating ? "fill-[#F5C400] text-[#F5C400]" : "text-gray-200"
                                   }`}
                                 />
                               ))}
                             </div>
-                          <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                            <p className="text-xs sm:text-sm text-[#2B2B2B]/80 leading-relaxed">{review.comment}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </section>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Trainer Card */}
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Trainer</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center mb-6">
-                  <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage src={program.trainer.image || "/placeholder.svg"} alt={program.trainer.name} />
-                    <AvatarFallback className="text-2xl">
-                      {program.trainer.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-bold text-xl mb-1">{program.trainer.name}</h3>
-                  <p className="text-gray-600 mb-4">{program.trainer.title}</p>
-                  
-                  {/* Stats */}
-                  <div className="flex items-center justify-center gap-4 text-xs text-gray-600 mb-4 w-full">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3.5 w-3.5 fill-[#FFD500] text-[#FFD500]" />
-                      <span className="font-medium">{program.trainer.rating}</span>
+          {/* Right Persistent Column (5 cols on lg, 4 on xl) */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+            {/* Primary Enrollment / Purchase Card */}
+            <Card className="rounded-3xl border-2 border-[#0A0A0A] bg-white overflow-hidden shadow-md">
+              <CardContent className="p-6 sm:p-7 space-y-6">
+                {/* Price Display */}
+                <div>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-3xl sm:text-4xl font-black text-[#0A0A0A]">
+                      {program.price === 0 ? "Free" : `₦${program.price.toLocaleString()}`}
+                    </span>
+                    {program.originalPrice && program.originalPrice > program.price && (
+                      <span className="text-base text-[#2B2B2B]/40 line-through font-semibold">
+                        ₦{program.originalPrice.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {!viewAsMentor && (
+                    <p className="text-xs text-[#2B2B2B]/60 mt-1 font-medium">
+                      One-time enrollment fee • Lifetime curriculum access
+                    </p>
+                  )}
+                </div>
+
+                {/* Primary Action Button (The single dominant yellow CTA) */}
+                <Button 
+                  size="lg"
+                  className="w-full bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold text-base h-13 rounded-xl shadow-xs transition-transform active:scale-[0.99]"
+                  onClick={handleEnroll}
+                >
+                  {viewAsMentor
+                    ? `Express Interest • ${program.mentorCompensation}`
+                    : `Enroll Now • ${program.price === 0 ? "Free" : `₦${program.price.toLocaleString()}`}`}
+                </Button>
+
+                {/* Free session banner if applicable */}
+                {!viewAsMentor && program.freeSessionsIncluded > 0 && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full border-[#5B7B6E] text-[#5B7B6E] hover:bg-[#5B7B6E]/10 font-bold rounded-xl h-11 text-xs"
+                  >
+                    <Link href={`/programs/${programId}/join?type=free`}>
+                      Claim Free Session Trial
+                    </Link>
+                  </Button>
+                )}
+
+                {/* Highlights checklist */}
+                <div className="border-t border-[#E7E5E1] pt-5 space-y-3">
+                  <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider block">This programme includes:</span>
+                  <div className="space-y-2 text-xs text-[#2B2B2B]/80 font-medium">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-[#0A0A0A] shrink-0" />
+                      <span>{program.duration} ({program.totalHours} hours live & practical)</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3.5 w-3.5" />
-                      <span>{program.trainer.totalStudents.toLocaleString()}</span>
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-[#0A0A0A] shrink-0" />
+                      <span>{program.modules} modular topics with templates</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      <span>{program.trainer.totalCourses}</span>
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-[#0A0A0A] shrink-0" />
+                      <span>Verified Mentwork Certificate of Completion</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-[#0A0A0A] shrink-0" />
+                      <span>Cohort peer group & mentor office hours</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Bio */}
-                <div className="text-left mb-4">
-                  <p className="text-sm text-gray-700 leading-relaxed">{program.trainer.bio}</p>
-                </div>
-
-                {/* Expertise */}
-                <div className="text-left">
-                  <h4 className="font-bold text-sm mb-3">Expertise</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {program.trainer.expertise.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="text-xs px-2 py-1">
-                        {skill}
-                      </Badge>
-                    ))}
+                {/* Trainer mini badge */}
+                <div className="border-t border-[#E7E5E1] pt-5 flex items-center gap-3">
+                  <Avatar className="h-11 w-11 border border-[#E7E5E1] shrink-0">
+                    <AvatarImage src={program.trainer.image || "/placeholder.svg"} alt={program.trainer.name} />
+                    <AvatarFallback className="text-xs font-bold bg-[#FAF9F6]">
+                      {program.trainer.name.split(" ").map((n) => n[0]).join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-xs text-[#2B2B2B]/60">Instructed by</p>
+                    <p className="text-sm font-bold text-[#0A0A0A] truncate">{program.trainer.name}</p>
+                    <p className="text-[11px] text-[#2B2B2B]/70 truncate">{program.trainer.title}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Mentors Card */}
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="text-lg uppercase tracking-wide text-gray-600">Program Mentors</CardTitle>
+            <Card className="rounded-3xl border border-[#E7E5E1] bg-white shadow-xs">
+              <CardHeader className="pb-3 border-b border-[#E7E5E1]">
+                <CardTitle className="text-xs uppercase tracking-wider font-bold text-[#2B2B2B]/70">Cohort Mentors</CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
+              <CardContent className="p-5 space-y-4">
                 {program.mentors.map((mentor) => (
-                  <div key={mentor.id} className="flex gap-4">
-                    <Avatar className="h-16 w-16 flex-shrink-0">
+                  <div key={mentor.id} className="flex gap-3 items-start">
+                    <Avatar className="h-10 w-10 border border-[#E7E5E1] shrink-0">
                       <AvatarImage src={mentor.image} alt={mentor.name} />
-                      <AvatarFallback>
-                        {mentor.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                      <AvatarFallback className="text-xs font-bold bg-[#FAF9F6]">
+                        {mentor.name.split(" ").map((n) => n[0]).join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-base mb-0.5">{mentor.name}</h4>
-                      <p className="text-xs text-gray-600 mb-2">{mentor.title}</p>
-                      <p className="text-xs text-gray-700 mb-2 line-clamp-2">{mentor.bio}</p>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-[#FFD500] text-[#FFD500]" />
-                          <span className="text-xs font-medium">{mentor.rating}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {mentor.expertise.slice(0, 3).map((skill) => (
-                          <Badge key={skill} variant="secondary" className="text-xs px-2 py-0.5">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-xs sm:text-sm text-[#0A0A0A]">{mentor.name}</h4>
+                      <p className="text-[11px] text-[#2B2B2B]/60 truncate">{mentor.title}</p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {mentor.expertise.slice(0, 2).map((skill) => (
+                          <Badge key={skill} variant="outline" className="text-[10px] px-1.5 py-0 border-[#E7E5E1] font-semibold text-[#2B2B2B]">
                             {skill}
                           </Badge>
                         ))}
@@ -658,6 +653,23 @@ export default function ProgramDetailPage() {
             </Card>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Sticky Bottom Bar (ensures CTA remains accessible on mobile) */}
+      <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#E7E5E1] p-3.5 z-40 flex items-center justify-between gap-4 lg:hidden shadow-lg">
+        <div>
+          <span className="text-xs text-[#2B2B2B]/60 block font-medium">Programme fee</span>
+          <span className="text-xl font-black text-[#0A0A0A]">
+            {program.price === 0 ? "Free" : `₦${program.price.toLocaleString()}`}
+          </span>
+        </div>
+        <Button
+          size="lg"
+          className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl text-sm px-6 h-11 shadow-xs"
+          onClick={handleEnroll}
+        >
+          {viewAsMentor ? "Express Interest" : "Enroll Now"}
+        </Button>
       </div>
 
       {/* Mentor Interest Modal */}
@@ -701,12 +713,12 @@ export default function ProgramDetailPage() {
               </p>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowMentorModal(false)}>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowMentorModal(false)} className="rounded-xl border-[#E7E5E1] font-semibold">
               Cancel
             </Button>
             <Button 
-              className="bg-[#FFD500] text-black hover:bg-[#e6c000]"
+              className="bg-[#F5C400] text-[#0A0A0A] hover:bg-[#E5B700] font-bold rounded-xl shadow-xs"
               onClick={handleMentorInterest}
             >
               Submit Interest

@@ -6,6 +6,105 @@
   .text-balance {
     text-wrap: balance;
   }
+  /* Typography scale */
+  .text-display {
+    font-size: 2.25rem;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  @media (min-width: 640px) {
+    .text-display {
+      font-size: 3.5rem;
+    }
+  }
+  .text-page-heading {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  @media (min-width: 640px) {
+    .text-page-heading {
+      font-size: 2rem;
+    }
+  }
+  .text-section-heading {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  @media (min-width: 640px) {
+    .text-section-heading {
+      font-size: 1.5rem;
+    }
+  }
+  .text-card-heading {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 700;
+  }
+  @media (min-width: 640px) {
+    .text-card-heading {
+      font-size: 1.125rem;
+    }
+  }
+  .text-body {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  @media (min-width: 640px) {
+    .text-body {
+      font-size: 1rem;
+    }
+  }
+  .text-body-secondary {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    font-weight: 400;
+    color: #6B6B6B;
+  }
+  @media (min-width: 640px) {
+    .text-body-secondary {
+      font-size: 0.875rem;
+    }
+  }
+  .text-label {
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .text-helper {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #6B6B6B;
+  }
+  .text-caption {
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    color: #9B9B9B;
+  }
+
+  /* Semantic surface & border utilities */
+  .bg-surface-1 {
+    background-color: #FFFFFF;
+  }
+  .bg-surface-2 {
+    background-color: #F2F1EE;
+  }
+  .bg-surface-muted {
+    background-color: #EDECE8;
+  }
+  .border-subtle {
+    border-color: #E7E5E1;
+  }
+  .border-strong {
+    border-color: #D8D5CF;
+  }
 }
 
 @layer base {
@@ -36,7 +135,15 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    --surface-2: #F2F1EE;
+    --border-strong: #D8D5CF;
+    --mentwork-black: #0A0A0A;
+    --mentwork-dark: #2B2B2B;
+    --mentwork-yellow: #F5C400;
+    --mentwork-sage: #5B7B6E;
+    --mentwork-rust: #B0674A;
+    --mentwork-slate: #6E7BA8;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;

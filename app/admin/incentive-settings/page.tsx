@@ -54,11 +54,11 @@ export default function IncentiveSettings() {
   const [isEditing, setIsEditing] = useState(false)
   const { toast } = useToast()
 
-  const handleInputChange = (tier, field, value) => {
+  const handleInputChange = (tier: string, field: string, value: any) => {
     setTierCriteria({
       ...tierCriteria,
       [tier]: {
-        ...tierCriteria[tier],
+        ...(tierCriteria as any)[tier],
         [field]: field === "schoolProgramAccess" ? value : Number(value),
       },
     })
